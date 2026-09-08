@@ -229,11 +229,21 @@ body.nav-open { overflow: hidden; }
   color: var(--violet-hi);
 }
 .hero__trans {
-  margin: 0 0 2rem;
+  margin: 0 0 1.4rem;
   font-size: .85rem;
   letter-spacing: .04em;
   color: var(--muted);
   font-style: italic;
+}
+
+.hero__tag {
+  max-width: 22ch;
+  margin: 0 auto 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgba(168, 85, 247, .3);
+  font-size: .95rem;
+  line-height: 1.5;
+  color: var(--lilac);
 }
 
 .hero__cta {
@@ -350,6 +360,21 @@ body.nav-open { overflow: hidden; }
   font-size: 1.05rem;
   color: var(--lilac);
   margin: 0 0 1.5rem;
+}
+
+/* release date badge, sits under the Two Lost Souls heading */
+.release-date {
+  display: inline-block;
+  margin: -.75rem 0 1.75rem;
+  padding: .4rem 1rem;
+  background: rgba(168, 85, 247, .12);
+  border: 1px solid var(--violet-dim);
+  border-radius: 999px;
+  font-family: var(--f-display);
+  font-size: .85rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--violet-hi);
 }
 
 /* ---------------- Release ---------------- */

@@ -41,8 +41,9 @@ These are placeholders. Search the project for `TODO` to find them all.
 
 | Where | What to change |
 | --- | --- |
-| `public/index.html` — Music section | The three streaming buttons all point at `#`. Swap in your Spotify / Apple Music / YouTube links. |
-| `public/index.html` — Booking section | Replace `bookings@example.com`, the phone number, and the Facebook link. |
+| `public/index.html` — Music section | The three streaming buttons all point at `#`. Swap in your Spotify / Apple Music / YouTube (or pre-save) links. |
+| `public/index.html` — Music section | **Check the release date.** It currently reads *20 September 2026*, worked out from the Facebook post of 3 September that said "only 17 days until". Correct it if that is wrong. |
+| `public/index.html` — Booking section | Replace `bookings@example.com` and the phone number. The Facebook link is already set. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 
 ### Adding a gig
