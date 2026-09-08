@@ -1,7 +1,8 @@
 # The Lost Boyz
 
 The official site for **The Lost Boyz** — a two-piece rock band: Darren Endean and
-Andrew Boraston. Mobile-first, static, and deployed on Cloudflare Workers.
+Andrew Boraston. Mobile-first, static, and hosted on Cloudflare Pages at
+<https://the-lost-boyz.pages.dev>.
 
 ---
 
@@ -12,26 +13,33 @@ npm install
 npm run dev
 ```
 
-That serves the site at <http://localhost:8788> using the same Workers runtime
-Cloudflare uses in production.
+That serves the site at <http://localhost:8788> using the same runtime Cloudflare
+uses in production.
 
 ## Deploying
+
+The Pages project is connected to this GitHub repository, so **pushing to `main`
+deploys the site**. You do not normally need to run anything.
+
+To push a deploy by hand instead:
 
 ```bash
 npm run deploy
 ```
 
-The first deploy will ask you to log in to Cloudflare in a browser. After that it
-publishes to `the-lost-boyz.<your-subdomain>.workers.dev`.
+### The one setting that matters
 
-To put it on a real domain, add the domain to your Cloudflare account and then add
-a routes block to `wrangler.jsonc`:
+The site lives in `public/`, not at the repository root. That is set by
+`pages_build_output_dir` in `wrangler.jsonc`. If that is wrong or missing, Pages
+publishes the repository root instead and every page 404s, because there is no
+`index.html` up there.
 
-```jsonc
-"routes": [
-  { "pattern": "thelostboyz.co.uk", "custom_domain": true }
-]
-```
+Note that once this repo has a Wrangler config, **that file is the source of
+truth** — the matching fields in the Cloudflare dashboard are ignored, so change
+the build output directory here rather than there.
+
+To put the site on a real domain, add it under the Pages project's *Custom
+domains* tab in the Cloudflare dashboard.
 
 ---
 
@@ -69,7 +77,7 @@ soonest-first and hides anything already in the past, so you can just keep addin
 to the bottom and never have to tidy up. With an empty list the section shows a
 "no dates in the diary" message instead.
 
-Redeploy with `npm run deploy` after editing.
+Commit and push after editing — Pages redeploys on its own.
 
 ---
 
@@ -104,7 +112,7 @@ public/            everything served to the browser
 scripts/
   build-images.mjs image pipeline (npm run images)
 source-images/     the original full-size photos
-wrangler.jsonc     Cloudflare config
+wrangler.jsonc     Cloudflare Pages config (sets the build output directory)
 ```
 
 There is no build step and no framework — the HTML in `public/` is what ships.

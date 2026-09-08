@@ -4,8 +4,8 @@
   "private": true,
   "description": "Official website for The Lost Boyz — a two-piece rock band.",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "wrangler pages dev",
+    "deploy": "wrangler pages deploy",
     "images": "node scripts/build-images.mjs"
   },
   "devDependencies": {
