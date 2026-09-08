@@ -1,0 +1,15 @@
+{
+  "name": "the-lost-boyz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official website for The Lost Boyz — a two-piece rock band.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "images": "node scripts/build-images.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5",
+    "wrangler": "^4.129.1"
+  }
+}

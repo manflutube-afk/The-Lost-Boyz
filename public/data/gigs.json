@@ -1,0 +1,11 @@
+{
+  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Dates in the past disappear from the site automatically, and the list sorts itself soonest-first, so you can just add to the bottom.",
+  "_example": {
+    "date": "2026-10-17",
+    "venue": "The Dolphin Inn",
+    "town": "Penzance",
+    "time": "9pm",
+    "ticketUrl": "https://example.com/tickets"
+  },
+  "gigs": []
+}
