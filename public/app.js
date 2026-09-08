@@ -1160,17 +1160,27 @@
 
       card.append(date, body);
 
-      if (g.ticketUrl) {
+      /*
+       * A gig can point at a page on this site (infoUrl) or straight out to
+       * a ticket seller or Facebook event (ticketUrl). The internal one wins
+       * as the main button and opens in the same tab, the way a link within
+       * a site should; anything external opens in a new one.
+       *
+       * Not every gig sells tickets either, so the label is settable — a free
+       * pub night should not have a button promising something to buy.
+       */
+      if (g.infoUrl) {
+        var info = document.createElement('a');
+        info.className = 'btn gig__cta';
+        info.href = g.infoUrl;
+        info.textContent = g.linkLabel || 'More info';
+        card.appendChild(info);
+      } else if (g.ticketUrl) {
         var a = document.createElement('a');
         a.className = 'btn gig__cta';
         a.href = g.ticketUrl;
         a.rel = 'noopener';
         a.target = '_blank';
-        /*
-         * Not every gig sells tickets. A free night at a pub with a Facebook
-         * event behind it wants "Event details", not a Tickets button that
-         * promises something to buy.
-         */
         a.textContent = g.linkLabel || 'Tickets';
         card.appendChild(a);
       }

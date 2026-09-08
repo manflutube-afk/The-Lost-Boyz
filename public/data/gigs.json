@@ -7,7 +7,8 @@
     "time": "9pm",
     "note": "optional - a line about what makes the night different",
     "linkLabel": "optional - button text, defaults to \"Tickets\"",
-    "ticketUrl": "https://example.com/tickets"
+    "ticketUrl": "https://example.com/tickets",
+    "infoUrl": "optional - a page on this site with the full details; wins over ticketUrl"
   },
   "gigs": [
     {
@@ -16,8 +17,9 @@
       "town": "Lerryn",
       "time": "7pm",
       "note": "Paul's Big Shave — a charity night for Brake, with the boyz playing live",
-      "linkLabel": "Event details",
-      "ticketUrl": "https://www.facebook.com/events/2224289328305855/"
+      "linkLabel": "More info",
+      "ticketUrl": "https://www.facebook.com/events/2224289328305855/",
+      "infoUrl": "/pauls-big-shave"
     }
   ]
 }

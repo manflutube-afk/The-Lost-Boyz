@@ -242,6 +242,18 @@ Edit `public/data/gigs.json` and add entries to the `gigs` list:
 }
 ```
 
+Optional extras: `note` for a line about what makes the night different,
+`linkLabel` for the button text, and `infoUrl` pointing at a page on this site
+with the full story. `infoUrl` wins over `ticketUrl` and opens in the same tab,
+the way an internal link should; `ticketUrl` opens in a new one.
+
+**A gig with its own page.** `pauls-big-shave.html` is the pattern: a single
+event page with the date, venue, what is on and links out. It carries `Event`
+structured data, which is what puts a gig into Google's event listings, so copy
+that block and change the details rather than starting from scratch. Add the new
+page to `sitemap.xml` too. These pages are deliberately **not** in the main nav —
+they are reached from the gig on the home page, and the nav is full enough.
+
 Only `date` (as `YYYY-MM-DD`) and `venue` are required. The site sorts the list
 soonest-first and hides anything already in the past, so you can just keep adding
 to the bottom and never have to tidy up. With an empty list the section shows a
