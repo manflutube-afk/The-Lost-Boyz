@@ -50,7 +50,7 @@ These are placeholders. Search the project for `TODO` to find them all.
 
 | Where | What to change |
 | --- | --- |
-| `public/index.html` — Music section | The three streaming buttons all point at `#`. Swap in your Spotify / Apple Music / YouTube (or pre-save) links. |
+| `public/index.html` — Music section | Streaming shows a "Coming soon to Spotify / Apple Music / YouTube" strip, since the single is not out yet. When it is, swap that block for the real links — the markup to use is in a comment right above it. |
 | `public/index.html` — Music section | **Check the release date.** It currently reads *20 September 2026*, worked out from the Facebook post of 3 September that said "only 17 days until". Correct it if that is wrong. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 

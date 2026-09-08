@@ -461,6 +461,43 @@ body.nav-open { overflow: hidden; }
   margin-bottom: 2rem;
 }
 
+/*
+ * Where the streaming links will go once the single is out. Deliberately
+ * not buttons: a button that looks live but goes nowhere is worse than
+ * saying plainly that it is not out yet.
+ */
+.soon { margin-bottom: 2rem; }
+
+.soon__label {
+  margin: 0 0 .6rem;
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+.soon__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: .5rem 1rem;
+  border: 1px dashed var(--violet-dim);
+  border-radius: 999px;
+  background: rgba(168, 85, 247, .07);
+  color: var(--muted);
+  font-family: var(--f-display);
+  font-size: .88rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 .credits { margin: 0; display: grid; gap: .6rem; }
 .credits > div {
   display: grid;
@@ -1319,9 +1356,6 @@ body.nav-open { overflow: hidden; }
   opacity: .8;
 }
 .ftr__c { margin: 0; font-size: .82rem; color: var(--muted); }
-
-/* placeholder links the band still needs to fill in */
-.is-todo { position: relative; }
 
 /* ============================================================
    Larger screens
