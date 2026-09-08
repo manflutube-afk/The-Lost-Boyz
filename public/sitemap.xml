@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  If the site moves to a custom domain, update the URLs here, the Sitemap
-  line in robots.txt, and the canonical tags in index.html and reelz.html.
+  These URLs use the live domain, thelostboyz.uk. If that ever changes,
+  update the Sitemap line in robots.txt and the canonical tags, og:url and
+  JSON-LD in index.html, reelz.html and sponsors.html to match.
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://the-lost-boyz.pages.dev/</loc>
+    <loc>https://thelostboyz.uk/</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://the-lost-boyz.pages.dev/reelz</loc>
+    <loc>https://thelostboyz.uk/reelz</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://thelostboyz.uk/sponsors</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

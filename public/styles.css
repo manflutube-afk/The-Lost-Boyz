@@ -601,11 +601,12 @@ body.nav-open { overflow: hidden; }
   margin: 0;
 }
 
-/* the purple frame around each reel */
-.reel__frame {
-  display: block;
+/* the purple frame — holds either the placeholder or the loaded player */
+.reel__shell {
+  position: relative;
   width: 100%;
-  margin: 0 auto;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
   background: #000;
   border: 2px solid var(--violet);
   border-radius: var(--radius);
@@ -614,12 +615,68 @@ body.nav-open { overflow: hidden; }
     0 10px 34px rgba(124, 47, 212, .32);
   transition: border-color .25s, box-shadow .25s;
 }
-.reel:hover .reel__frame,
-.reel__frame:focus-within {
+.reel:hover .reel__shell,
+.reel__shell:focus-within,
+.reel.is-loaded .reel__shell {
   border-color: var(--violet-hi);
   box-shadow:
     0 0 0 1px rgba(200, 144, 255, .45),
     0 12px 40px rgba(124, 47, 212, .5);
+}
+
+.reel__frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* shown until the player is injected */
+.reel__ph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.1rem;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(88, 28, 135, .5), transparent 70%),
+    linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 0;
+  cursor: pointer;
+}
+.reel.is-loaded .reel__ph { display: none; }
+
+.reel__mark { width: 84px; height: auto; opacity: .45; }
+
+.reel__playbtn {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(236, 231, 221, .85);
+  border-radius: 50%;
+  background: rgba(7, 4, 12, .3);
+  transition: background .25s, scale .25s;
+}
+.reel__playbtn::before {
+  content: "";
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 17px solid var(--bone);
+}
+.reel__ph:hover .reel__playbtn,
+.reel__ph:focus-visible .reel__playbtn {
+  background: rgba(168, 85, 247, .5);
+  scale: 1.08;
 }
 
 .reel__cap {
@@ -630,6 +687,241 @@ body.nav-open { overflow: hidden; }
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--lilac);
+}
+
+/* ---------------- Sponsors ---------------- */
+
+.h3 {
+  margin: 3rem 0 1.25rem;
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: clamp(1.35rem, 5.5vw, 1.85rem);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+.sponsor-cta { margin: 0 0 1rem; }
+
+.plans { display: grid; gap: 1rem; }
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.6rem 1.4rem;
+  background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.plan--featured {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 1px rgba(168, 85, 247, .25), 0 12px 36px rgba(124, 47, 212, .28);
+}
+
+.plan__flag {
+  position: absolute;
+  top: -.7rem;
+  left: 1.4rem;
+  padding: .25rem .7rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--violet) 0%, #7c2fd4 100%);
+  color: #fff;
+  font-family: var(--f-display);
+  font-size: .68rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.plan__name {
+  margin: 0 0 .2rem;
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+.plan__price {
+  margin: 0 0 1rem;
+  font-family: var(--f-display);
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--violet-hi);
+}
+.plan__price span {
+  font-size: .95rem;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.plan__list {
+  flex: 1;
+  margin: 0 0 1.4rem;
+  padding: 0;
+  list-style: none;
+}
+.plan__list li {
+  position: relative;
+  padding: .35rem 0 .35rem 1.4rem;
+  font-size: .95rem;
+  color: var(--text);
+}
+.plan__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: .95em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--violet);
+}
+
+.plan__btn { width: 100%; }
+
+.sponsors { display: grid; gap: 1rem; }
+
+.sponsors__msg {
+  padding: 1.75rem;
+  text-align: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.sponsor {
+  padding: 1.35rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.sponsor__logo {
+  width: auto;
+  max-width: 160px;
+  max-height: 70px;
+  margin: 0 auto .8rem;
+  object-fit: contain;
+}
+.sponsor__name {
+  margin: 0 0 .2rem;
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+.sponsor__name a { color: inherit; text-decoration: none; }
+.sponsor__name a:hover { color: var(--violet-hi); }
+.sponsor__tier {
+  margin: 0 0 .5rem;
+  font-family: var(--f-display);
+  font-size: .7rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+.sponsor__blurb { margin: 0; font-size: .92rem; color: var(--text); }
+
+/* ---------------- Sponsor form dialog ---------------- */
+
+.modal {
+  width: min(92vw, 520px);
+  max-height: 88vh;
+  padding: 0;
+  border: 1px solid var(--violet-dim);
+  border-radius: var(--radius);
+  background: var(--ink-2);
+  color: var(--text);
+  overflow: auto;
+}
+.modal::backdrop { background: rgba(4, 2, 10, .78); backdrop-filter: blur(3px); }
+
+.modal__inner { position: relative; padding: 1.75rem 1.4rem 1.5rem; }
+
+.modal__close {
+  position: absolute;
+  top: .5rem;
+  right: .65rem;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 1.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.modal__close:hover { color: var(--bone); }
+
+.modal__title {
+  margin: 0 0 .3rem;
+  font-family: var(--f-display);
+  font-size: 1.6rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+.modal__intro { margin: 0 0 1.4rem; font-size: .95rem; color: var(--muted); }
+
+.field { margin-bottom: 1rem; }
+.field label {
+  display: block;
+  margin-bottom: .35rem;
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--lilac);
+}
+.field__opt { color: var(--muted); letter-spacing: .06em; }
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: .7rem .85rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--bone);
+  font-family: var(--f-body);
+  font-size: 16px; /* keeps iOS from zooming the page on focus */
+}
+.field textarea { resize: vertical; }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, .2);
+}
+
+.modal__err {
+  margin: 0 0 1rem;
+  padding: .7rem .85rem;
+  border-radius: 10px;
+  background: rgba(190, 40, 60, .14);
+  border: 1px solid rgba(230, 90, 110, .5);
+  color: #ffc9d2;
+  font-size: .9rem;
+}
+
+.modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1.25rem;
+}
+.modal__actions .btn { flex: 1; }
+
+.modal__note {
+  margin: 1rem 0 0;
+  font-size: .8rem;
+  color: var(--muted);
+  text-align: center;
 }
 
 /* ---------------- Gigs ---------------- */
@@ -798,6 +1090,9 @@ body.nav-open { overflow: hidden; }
     gap: 1.75rem;
   }
 
+  .plans { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+  .sponsors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+
   .gig { grid-template-columns: auto 1fr auto; }
   .gig__cta { grid-column: auto; grid-row: 1 / span 2; margin-top: 0; }
 }
@@ -814,14 +1109,15 @@ body.nav-open { overflow: hidden; }
     background: none;
     border: 0;
     flex-direction: row;
-    gap: 1.75rem;
+    gap: 1.1rem;
     transform: none;
     visibility: visible;
   }
   .nav a {
     padding: .35rem 0;
-    font-size: .92rem;
-    letter-spacing: .12em;
+    font-size: .88rem;
+    letter-spacing: .08em;
+    white-space: nowrap;
     border-bottom: 2px solid transparent;
   }
   .nav a:hover { border-bottom-color: var(--violet); }

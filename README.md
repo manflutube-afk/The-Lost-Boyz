@@ -2,7 +2,8 @@
 
 The official site for **The Lost Boyz** — a two-piece rock band: Darren Endean and
 Andrew Boraston. Mobile-first, static, and hosted on Cloudflare Pages at
-<https://the-lost-boyz.pages.dev>.
+<https://thelostboyz.uk> (currently served from `the-lost-boyz.pages.dev`
+until the domain is pointed at it).
 
 ---
 
@@ -80,6 +81,50 @@ The embeds are deliberately kept off the home page: Facebook's player is slow an
 sets its own cookies, so the home page shows only a thumbnail and the videos load
 on `/reelz`.
 
+**How playback works.** On a phone the reels play as you scroll onto them, muted,
+the way they do on Facebook. Only ever one player exists at a time: scrolling to
+the next reel throws the previous one away and builds the next. That is not just
+tidiness — the player sits in a cross-origin iframe that the page cannot control,
+so removing it is the only way to stop a video. It also keeps the data cost down,
+because each Facebook player is a heavy thing to download.
+
+Autoplay is switched off, leaving a tap-to-play tile, when any of these are true:
+the screen is 700px or wider, the visitor has "reduce motion" turned on, or their
+browser reports data saver. On a desktop the reels are always tap-to-play.
+
+### Adding a sponsor
+
+The Sponsors page is at `/sponsors`. Add businesses in `public/data/sponsors.json`:
+
+```json
+{
+  "sponsors": [
+    {
+      "name": "Corner Cafe",
+      "url": "https://cornercafeparmarket.uk",
+      "blurb": "Breakfast, lunch and the best flat white in town.",
+      "tier": "Featured",
+      "logo": "/images/sponsors/corner-cafe.webp"
+    }
+  ]
+}
+```
+
+Only `name` is required. Put any sponsor logos in `public/images/sponsors/`.
+
+**Where the enquiries go.** The "Become a sponsor" form currently opens the
+visitor's own email app with everything filled in, addressed to `SPONSOR_EMAIL`
+at the top of `app.js`. That needs no accounts or API keys, but it does rely on
+the visitor having email set up on their device.
+
+To collect enquiries properly instead, set `SPONSOR_ENDPOINT` in `app.js` to a
+URL that accepts a JSON `POST`, and the form will send there and show an error if
+it fails. Nothing else needs changing.
+
+**The prices are not confirmed.** Only the £10 a month tier came from the band.
+The £25 monthly and £50 one-off tiers in `sponsors.html` are placeholders — get
+them signed off before the site goes live.
+
 ### Adding a gig
 
 Edit `public/data/gigs.json` and add entries to the `gigs` list:
@@ -111,25 +156,25 @@ Commit and push after editing — Pages redeploys on its own.
 
 The site is set up for search engines:
 
-- `public/sitemap.xml` lists both pages, and `public/robots.txt` points crawlers
-  at it
-- Both pages have a canonical URL, an `og:url`, and a single `<h1>` (on the home
+- `public/sitemap.xml` lists all three pages, and `public/robots.txt` points
+  crawlers at it
+- Every page has a canonical URL, an `og:url`, and a single `<h1>` (on the home
   page the `<h1>` is visually hidden, because the logo image carries the name)
 - `index.html` carries `MusicGroup` structured data — the members, the Facebook
   page, and the *Two Lost Souls* release with its two tracks — so search engines
-  can identify the band rather than guessing. `reelz.html` carries
-  `CollectionPage` data with a breadcrumb back to the home page
+  can identify the band rather than guessing. `reelz.html` and `sponsors.html`
+  carry page data with a breadcrumb back to the home page
 - Every image has descriptive alt text
 
-### If you move to a custom domain
+### If the domain ever changes
 
 Four places hold the site address, and all four need updating together:
 
-1. `public/sitemap.xml` — both `<loc>` entries
+1. `public/sitemap.xml` — all three `<loc>` entries
 2. `public/robots.txt` — the `Sitemap:` line
 3. `public/index.html` — the canonical link, `og:url`, and the URLs inside the
    JSON-LD block at the bottom
-4. `public/reelz.html` — the same three things
+4. `public/reelz.html` and `public/sponsors.html` — the same three things
 
 Then submit the sitemap once in [Google Search Console](https://search.google.com/search-console).
 
@@ -164,11 +209,14 @@ footer.
 public/            everything served to the browser
   index.html       the main site — one page, anchored sections
   reelz.html       the Reelz page, served at /reelz
+  sponsors.html    the Sponsors page, served at /sponsors
   404.html         not-found page
   styles.css       mobile-first, breakpoints at 700px and 900px
-  app.js           nav drawer, sticky header, reel and gig rendering
+  app.js           nav drawer, reels, sponsors, the sponsor form, gigs
   data/gigs.json   live dates — the one file you edit regularly
   data/reels.json  Facebook reel links for the Reelz page
+  data/sponsors.json  businesses listed on the Sponsors page
+  sitemap.xml      / robots.txt for search engines
   images/          generated; don't edit by hand
 scripts/
   build-images.mjs image pipeline (npm run images)

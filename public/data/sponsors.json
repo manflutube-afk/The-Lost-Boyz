@@ -1,0 +1,11 @@
+{
+  "_readme": "Businesses sponsoring the band, shown on /sponsors. 'name' is the only required field. Add 'url' to link to their website, 'blurb' for a line about what they do, 'tier' to label them (Supporter, Featured, One-off), and 'logo' with a path to an image in /images if you have their logo.",
+  "_example": {
+    "name": "Corner Cafe",
+    "url": "https://cornercafeparmarket.uk",
+    "blurb": "Breakfast, lunch and the best flat white in town.",
+    "tier": "Featured",
+    "logo": "/images/sponsors/corner-cafe.webp"
+  },
+  "sponsors": []
+}

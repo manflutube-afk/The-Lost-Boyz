@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://the-lost-boyz.pages.dev/sitemap.xml
+Sitemap: https://thelostboyz.uk/sitemap.xml

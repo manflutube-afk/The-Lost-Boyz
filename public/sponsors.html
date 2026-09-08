@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sponsors — The Lost Boyz</title>
+<meta name="description" content="Sponsor The Lost Boyz. Local businesses helping with gigs, travel and equipment — and getting seen doing it.">
+<meta name="theme-color" content="#07040c">
+<link rel="canonical" href="https://thelostboyz.uk/sponsors">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://thelostboyz.uk/sponsors">
+<meta property="og:site_name" content="The Lost Boyz">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Sponsors — The Lost Boyz">
+<meta property="og:description" content="Sponsor The Lost Boyz. Local businesses helping with gigs, travel and equipment — and getting seen doing it.">
+<meta property="og:image" content="https://thelostboyz.uk/images/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/images/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<link rel="manifest" href="/site.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr is-stuck" id="hdr">
+  <a class="hdr__brand" href="/" aria-label="The Lost Boyz — home">
+    <img src="/images/logo-96.webp" alt="" width="44" height="33" class="hdr__mark">
+    <span>The Lost Boyz</span>
+  </a>
+  <button class="hdr__toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="nav" id="nav" aria-label="Main">
+    <a href="/#music">Music</a>
+    <a href="/#band">The Boyz</a>
+    <a href="/reelz">Reelz</a>
+    <a href="/#live">Live</a>
+    <a href="/#gallery">Gallery</a>
+    <a href="/sponsors" aria-current="page">Sponsors</a>
+    <a href="/#booking">Booking</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="sec sec--page">
+    <div class="wrap">
+      <p class="eyebrow">Behind the boyz</p>
+      <h1 class="h2">Sponsors</h1>
+      <p class="lead">Gigs cost money before they make any — diesel, strings, skins, a van that starts.
+        These businesses help us keep the show on the road, and we make sure people know it.</p>
+
+      <p class="sponsor-cta">
+        <button class="btn btn--solid" type="button" data-sponsor-open>Become a sponsor</button>
+      </p>
+
+      <!-- ===== Plans =====
+           TODO: confirm these prices and what each one includes with the band.
+           Only the £10 a month tier came from them; the other two are
+           sensible placeholders to be signed off before launch. -->
+      <h2 class="h3">Ways to sponsor</h2>
+      <div class="plans">
+        <article class="plan">
+          <h3 class="plan__name">Supporter</h3>
+          <p class="plan__price">£10<span>/month</span></p>
+          <ul class="plan__list">
+            <li>Your business named on this page</li>
+            <li>A link to your website</li>
+            <li>A shout-out on our socials</li>
+          </ul>
+          <button class="btn plan__btn" type="button" data-sponsor-open data-plan="Supporter — £10/month">Choose Supporter</button>
+        </article>
+
+        <article class="plan plan--featured">
+          <span class="plan__flag">Most popular</span>
+          <h3 class="plan__name">Featured</h3>
+          <p class="plan__price">£25<span>/month</span></p>
+          <ul class="plan__list">
+            <li>Your logo on this page</li>
+            <li>A line about what you do, and a link</li>
+            <li>Named from the stage at our gigs</li>
+            <li>A shout-out on our socials</li>
+          </ul>
+          <button class="btn btn--solid plan__btn" type="button" data-sponsor-open data-plan="Featured — £25/month">Choose Featured</button>
+        </article>
+
+        <article class="plan">
+          <h3 class="plan__name">One-off</h3>
+          <p class="plan__price">From £50</p>
+          <ul class="plan__list">
+            <li>A one-off contribution to kit or travel</li>
+            <li>Your business credited on this page</li>
+            <li>No ongoing commitment</li>
+          </ul>
+          <button class="btn plan__btn" type="button" data-sponsor-open data-plan="One-off — from £50">Choose One-off</button>
+        </article>
+      </div>
+
+      <!-- ===== Current sponsors ===== -->
+      <h2 class="h3">Our sponsors</h2>
+      <!-- Sponsors come from /data/sponsors.json — add businesses in there. -->
+      <div id="sponsors" class="sponsors" aria-live="polite">
+        <p class="sponsors__msg">Loading sponsors…</p>
+      </div>
+
+      <p class="backlink"><a class="btn" href="/">Back to the site</a></p>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Sponsor enquiry form ===== -->
+<dialog class="modal" id="sponsorDialog" aria-labelledby="sponsorTitle">
+  <form class="modal__inner" id="sponsorForm" method="dialog" novalidate>
+    <button class="modal__close" type="button" id="sponsorClose" aria-label="Close">&times;</button>
+
+    <h2 class="modal__title" id="sponsorTitle">Become a sponsor</h2>
+    <p class="modal__intro">Tell us a bit about your business and we will come straight back to you.</p>
+
+    <div class="field">
+      <label for="spPlan">Which plan?</label>
+      <select id="spPlan" name="plan" required>
+        <option value="Supporter — £10/month">Supporter — £10/month</option>
+        <option value="Featured — £25/month">Featured — £25/month</option>
+        <option value="One-off — from £50">One-off — from £50</option>
+        <option value="Not sure yet">Not sure yet — let&rsquo;s chat</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="spBusiness">Business name</label>
+      <input id="spBusiness" name="business" type="text" autocomplete="organization" required>
+    </div>
+
+    <div class="field">
+      <label for="spName">Your name</label>
+      <input id="spName" name="name" type="text" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label for="spEmail">Email</label>
+      <input id="spEmail" name="email" type="email" autocomplete="email" required>
+    </div>
+
+    <div class="field">
+      <label for="spPhone">Phone <span class="field__opt">(optional)</span></label>
+      <input id="spPhone" name="phone" type="tel" autocomplete="tel">
+    </div>
+
+    <div class="field">
+      <label for="spMessage">Anything else? <span class="field__opt">(optional)</span></label>
+      <textarea id="spMessage" name="message" rows="3"></textarea>
+    </div>
+
+    <p class="modal__err" id="sponsorErr" role="alert" hidden></p>
+
+    <div class="modal__actions">
+      <button class="btn" type="button" id="sponsorCancel">Cancel</button>
+      <button class="btn btn--solid" type="submit">Send enquiry</button>
+    </div>
+
+    <p class="modal__note">Your details go straight to the band by email. Nothing is stored on this website.</p>
+  </form>
+</dialog>
+
+<footer class="ftr">
+  <div class="wrap">
+    <img src="/images/logo-160.webp" width="96" height="73" alt="" class="ftr__mark" loading="lazy">
+    <p class="ftr__c">&copy; <span id="year">2026</span> The Lost Boyz. All rights reserved.</p>
+  </div>
+</footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Sponsors — The Lost Boyz",
+  "url": "https://thelostboyz.uk/sponsors",
+  "description": "Sponsor The Lost Boyz. Local businesses helping with gigs, travel and equipment.",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "The Lost Boyz",
+    "url": "https://thelostboyz.uk/"
+  },
+  "about": { "@id": "https://thelostboyz.uk/#band" },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://thelostboyz.uk/" },
+      { "@type": "ListItem", "position": 2, "name": "Sponsors", "item": "https://thelostboyz.uk/sponsors" }
+    ]
+  }
+}
+</script>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
