@@ -183,6 +183,7 @@
     var FB_VERSION = 'v21.0';
 
     var anyStarted = false;
+    var autoStarting = {};  // id -> true while the scroll handler is starting it
     var players = {};    // tile id -> Facebook player instance
     var reelCfg = {};    // tile id -> { url, width } so a tile can be rebuilt
     var spent = {};      // tile id -> true once it has played to the end
@@ -200,6 +201,33 @@
       // inline playback: fullscreen would trap the visitor on a phone
       v.dataset.allowfullscreen = 'false';
       return v;
+    };
+
+    /*
+     * The SDK builds its own iframe, and gives it allow="encrypted-media" —
+     * no autoplay. The default permissions policy for autoplay is "self", so
+     * a cross-origin frame without allow="autoplay" is refused outright, no
+     * matter how muted it is. That is why scrolling never started anything on
+     * a phone while a desktop, which is far more forgiving, looked fine.
+     *
+     * A frame's permissions are fixed when it loads, so the attribute has to
+     * go on and the frame has to load again for it to count.
+     */
+    var grantAutoplay = function (shell) {
+      var patch = function () {
+        var f = shell.querySelector('iframe');
+        if (!f || f.dataset.autoplayGranted) { return; }
+        f.dataset.autoplayGranted = '1';
+
+        if ((f.getAttribute('allow') || '').indexOf('autoplay') !== -1) { return; }
+
+        f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+        f.setAttribute('allowfullscreen', 'false');
+        f.src = f.src; // eslint-disable-line no-self-assign -- forces the reload
+      };
+
+      new MutationObserver(patch).observe(shell, { childList: true, subtree: true });
+      patch();
     };
 
     /*
@@ -259,17 +287,23 @@
       if (!p || id !== activeId || spent[id]) { return; }
 
       attempt = attempt || 1;
+      autoStarting[id] = true;
 
       try {
         p.mute();
         p.play();
-      } catch (e) { return; }
+      } catch (e) { delete autoStarting[id]; return; }
 
       setTimeout(function () {
-        if (id !== activeId || spent[id] || attempt >= 4) { return; }
+        // Give up quietly, and stop treating it as ours — so if the visitor
+        // presses play on it later, it plays with sound.
+        if (id !== activeId || spent[id] || attempt >= 4) {
+          delete autoStarting[id];
+          return;
+        }
 
         var pos = 0;
-        try { pos = p.getCurrentPosition() || 0; } catch (e) { return; }
+        try { pos = p.getCurrentPosition() || 0; } catch (e) { delete autoStarting[id]; return; }
 
         // still sitting at the start, so it never really began
         if (pos <= 0.05) { startMuted(id, attempt + 1); }
@@ -311,15 +345,24 @@
     var wirePlayer = function (id, instance) {
       players[id] = instance;
 
-      // Mute every player the moment it exists, so it is already silent well
-      // before anything tries to start it.
-      try { instance.mute(); } catch (e) { /* not ready; startMuted retries */ }
 
       // Whenever anything starts — a tap, or the scroll handler — everything
       // else stops. This is what keeps them from clashing on a desktop.
       try {
         instance.subscribe('startedPlaying', function () {
           anyStarted = true;
+
+          /*
+           * Only a reel the scroll handler started stays muted, and only
+           * because browsers insist on it. Anything a visitor pressed play
+           * on themselves gets its sound — which is every reel on a desktop,
+           * where nothing autoplays at all.
+           */
+          if (!autoStarting[id]) {
+            try { instance.unmute(); } catch (e) { /* leave it as it is */ }
+          }
+          delete autoStarting[id];
+
           activeId = id;
           pauseAllBut(id);
         });
@@ -414,6 +457,7 @@
       shells.forEach(function (shell, i) {
         var id = tileIds[i];
         reelCfg[id] = { url: reels[i].url, width: width };
+        grantAutoplay(shell);
         shell.appendChild(makeVideoDiv(id));
       });
 
