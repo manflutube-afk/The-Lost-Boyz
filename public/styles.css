@@ -641,8 +641,7 @@ body.nav-open { overflow: hidden; }
   transition: border-color .25s, box-shadow .25s;
 }
 .reel:hover .reel__shell,
-.reel__shell:focus-within,
-.reel.is-loaded .reel__shell {
+.reel__shell:focus-within {
   border-color: var(--violet-hi);
   box-shadow:
     0 0 0 1px rgba(200, 144, 255, .45),
@@ -658,50 +657,18 @@ body.nav-open { overflow: hidden; }
   border: 0;
 }
 
-/* shown until the player is injected */
-.reel__ph {
+/*
+ * A faint holding pattern behind the player. Facebook's iframe paints its
+ * own thumbnail once it loads, so this is only ever seen for a moment while
+ * that happens — but without it the tile is a black rectangle.
+ */
+.reel__shell::before {
+  content: "";
   position: absolute;
   inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 1.1rem;
-  width: 100%;
-  height: 100%;
-  padding: 0;
   background:
-    radial-gradient(ellipse at 50% 45%, rgba(88, 28, 135, .5), transparent 70%),
+    radial-gradient(ellipse at 50% 45%, rgba(88, 28, 135, .45), transparent 70%),
     linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
-  border: 0;
-  cursor: pointer;
-}
-.reel.is-loaded .reel__ph { display: none; }
-
-.reel__mark { width: 84px; height: auto; opacity: .45; }
-
-.reel__playbtn {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border: 2px solid rgba(236, 231, 221, .85);
-  border-radius: 50%;
-  background: rgba(7, 4, 12, .3);
-  transition: background .25s, scale .25s;
-}
-.reel__playbtn::before {
-  content: "";
-  width: 0;
-  height: 0;
-  margin-left: 4px;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 17px solid var(--bone);
-}
-.reel__ph:hover .reel__playbtn,
-.reel__ph:focus-visible .reel__playbtn {
-  background: rgba(168, 85, 247, .5);
-  scale: 1.08;
 }
 
 .reel__cap {

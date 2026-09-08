@@ -81,16 +81,23 @@ The embeds are deliberately kept off the home page: Facebook's player is slow an
 sets its own cookies, so the home page shows only a thumbnail and the videos load
 on `/reelz`.
 
-**How playback works.** On a phone the reels play as you scroll onto them, muted,
-the way they do on Facebook. Only ever one player exists at a time: scrolling to
-the next reel throws the previous one away and builds the next. That is not just
-tidiness — the player sits in a cross-origin iframe that the page cannot control,
-so removing it is the only way to stop a video. It also keeps the data cost down,
-because each Facebook player is a heavy thing to download.
+**How playback works.** Every tile loads its Facebook player, and the player
+draws the reel's own thumbnail and play button. Tap or click one to play it.
 
-Autoplay is switched off, leaving a tap-to-play tile, when any of these are true:
-the screen is 700px or wider, the visitor has "reduce motion" turned on, or their
-browser reports data saver. On a desktop the reels are always tap-to-play.
+That is why the players are loaded rather than something lighter: **there is no
+public way to fetch a reel's poster image on its own.** Facebook's oEmbed needs
+an app token, so the player is the only thing that knows what the video looks
+like. A cheaper placeholder means no thumbnails at all — which is exactly what
+happened in an earlier version, where every tile was a black rectangle until it
+was clicked. `loading="lazy"` keeps the tiles further down the page from loading
+until they are needed.
+
+**There is no autoplay, and this is a Facebook limitation, not an oversight.**
+Facebook's embedded player ignores the `autoplay` parameter outside
+facebook.com. Both spellings were tested on a phone-sized viewport, and the
+video just sits on its poster frame. Scroll-autoplay of the sort Instagram and
+TikTok do needs the actual video files, self-hosted, with a native `<video muted
+playsinline>` element — a few lines of code once the files exist.
 
 ### Adding a sponsor
 

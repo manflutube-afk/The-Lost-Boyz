@@ -159,11 +159,21 @@
   /* ---------- reels ---------- */
 
   /*
-   * Facebook's video plugin renders at whatever width you pass in the URL, so
-   * the iframe is built after the tile has been measured rather than being
-   * stretched with CSS. Reels are 9:16, hence the height.
+   * Facebook's plugin renders at whatever width the URL asks for, so the
+   * iframes are built after the tiles are in the page and can be measured.
+   *
+   * Every tile loads its player. The player is the only thing that knows what
+   * the video looks like: it draws the reel's own thumbnail and play button.
+   * There is no public way to fetch a reel's poster image on its own, so a
+   * lighter placeholder would mean no thumbnails at all. loading="lazy" keeps
+   * the ones further down the page from loading until they are near.
+   *
+   * There is deliberately no autoplay here. Facebook's embedded player
+   * ignores the autoplay parameter outside facebook.com -- tested both
+   * spellings, on a phone-sized viewport, and the video simply sits on its
+   * poster. Real scroll-autoplay needs the video files themselves.
    */
-  function buildReel(url, width, autoplay) {
+  function buildReel(url, width) {
     var height = Math.round(width * 16 / 9);
     var src = 'https://www.facebook.com/plugins/video.php'
       + '?href=' + encodeURIComponent(url)
@@ -171,9 +181,6 @@
       // The plugin defaults this to false. Without it, tapping play on a
       // phone does nothing, because the player wants to go fullscreen.
       + '&allowfullscreen=true'
-      // Facebook always starts autoplayed video muted; browsers block it
-      // otherwise. Visitors unmute with the player's own control.
-      + '&autoplay=' + (autoplay ? 'true' : 'false')
       + '&width=' + width
       + '&height=' + height;
 
@@ -203,131 +210,44 @@
       reelBox.replaceChildren(p);
     };
 
-    /*
-     * Only one reel is ever loaded at a time. Each Facebook player is a heavy
-     * thing to pull down, so tiles start as a placeholder and the player is
-     * injected when that tile becomes the one being looked at, then thrown
-     * away again when it is not. That is also what stops the video: the
-     * player is in a cross-origin iframe, so removing it is the only pause
-     * button available to us.
-     */
-    var playing = null;
-    var ratios = new Map();
-
-    var loadTile = function (tile, autoplay) {
-      if (tile.dataset.loaded === '1') { return; }
-      var shell = tile.querySelector('.reel__shell');
-      var width = Math.max(220, Math.min(Math.round(shell.clientWidth) || 320, 480));
-      shell.appendChild(buildReel(tile.dataset.url, width, autoplay));
-      tile.dataset.loaded = '1';
-      tile.classList.add('is-loaded');
-    };
-
-    var unloadTile = function (tile) {
-      if (tile.dataset.loaded !== '1') { return; }
-      var frame = tile.querySelector('.reel__frame');
-      if (frame) { frame.remove(); }
-      tile.dataset.loaded = '0';
-      tile.classList.remove('is-loaded');
-    };
-
-    var playTile = function (tile, autoplay) {
-      if (playing && playing !== tile) { unloadTile(playing); }
-      playing = tile;
-      if (tile) { loadTile(tile, autoplay); }
-    };
-
-    // Autoplay-on-scroll is a phone behaviour, and only when the visitor has
-    // not asked us to go easy on motion or on their data allowance.
-    var wantsAutoplay = function () {
-      if (window.matchMedia('(min-width: 700px)').matches) { return false; }
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return false; }
-      var conn = navigator.connection;
-      if (conn && conn.saveData) { return false; }
-      return true;
-    };
-
-    var onIntersect = function (entries) {
-      entries.forEach(function (e) { ratios.set(e.target, e.intersectionRatio); });
-
-      var best = null;
-      var bestRatio = 0;
-      ratios.forEach(function (r, el) {
-        if (r > bestRatio) { bestRatio = r; best = el; }
-      });
-
-      // Needs to be properly on screen before it takes over.
-      if (bestRatio < 0.6) { best = null; }
-      if (best === playing) { return; }
-      playTile(best, true);
-    };
-
-    var buildTile = function (reel) {
-      var fig = document.createElement('figure');
-      fig.className = 'reel';
-      fig.dataset.url = reel.url;
-      fig.dataset.loaded = '0';
-
-      var shell = document.createElement('div');
-      shell.className = 'reel__shell';
-
-      // Tapping the placeholder plays it, which is the whole interaction on
-      // desktop and the fallback when autoplay is off.
-      var ph = document.createElement('button');
-      ph.type = 'button';
-      ph.className = 'reel__ph';
-      ph.setAttribute('aria-label', 'Play ' + (reel.title || 'this reel'));
-
-      var mark = document.createElement('img');
-      mark.src = '/images/logo-160.webp';
-      mark.alt = '';
-      mark.width = 96;
-      mark.height = 73;
-      mark.loading = 'lazy';
-      mark.className = 'reel__mark';
-
-      var play = document.createElement('span');
-      play.className = 'reel__playbtn';
-      play.setAttribute('aria-hidden', 'true');
-
-      ph.append(mark, play);
-      ph.addEventListener('click', function () { playTile(fig, true); });
-
-      shell.appendChild(ph);
-      fig.appendChild(shell);
-
-      if (reel.title) {
-        var cap = document.createElement('figcaption');
-        cap.className = 'reel__cap';
-        cap.textContent = reel.title;
-        fig.appendChild(cap);
-      }
-
-      return fig;
-    };
-
     var renderReels = function (reels) {
       reels = reels.filter(function (r) { return r && r.url; });
 
       if (!reels.length) {
-        reelMessage('No reels up yet — check back soon.');
+        reelMessage('No reels up yet -- check back soon.');
         return;
       }
 
+      // First pass: put the tiles in, so a shell has a real width to measure.
       var frag = document.createDocumentFragment();
-      var tiles = reels.map(function (reel) {
-        var tile = buildTile(reel);
-        frag.appendChild(tile);
-        return tile;
+      var shells = [];
+
+      reels.forEach(function (reel) {
+        var fig = document.createElement('figure');
+        fig.className = 'reel';
+
+        var shell = document.createElement('div');
+        shell.className = 'reel__shell';
+        fig.appendChild(shell);
+        shells.push(shell);
+
+        if (reel.title) {
+          var cap = document.createElement('figcaption');
+          cap.className = 'reel__cap';
+          cap.textContent = reel.title;
+          fig.appendChild(cap);
+        }
+
+        frag.appendChild(fig);
       });
+
       reelBox.replaceChildren(frag);
 
-      if (wantsAutoplay() && 'IntersectionObserver' in window) {
-        var observer = new IntersectionObserver(onIntersect, {
-          threshold: [0, 0.25, 0.5, 0.6, 0.75, 1]
-        });
-        tiles.forEach(function (t) { observer.observe(t); });
-      }
+      // Second pass: measure once, then drop a player into every shell.
+      var width = Math.max(220, Math.min(Math.round(shells[0].clientWidth) || 320, 480));
+      shells.forEach(function (shell, i) {
+        shell.appendChild(buildReel(reels[i].url, width));
+      });
     };
 
     fetch('/data/reels.json', { cache: 'no-cache' })
@@ -339,9 +259,10 @@
         renderReels(Array.isArray(data) ? data : (data.reels || []));
       })
       .catch(function () {
-        reelMessage('Reels are not loading right now — you can watch them on our Facebook page.');
+        reelMessage('Reels are not loading right now -- you can watch them on our Facebook page.');
       });
   }
+
 
   /* ---------- sponsors ---------- */
 
