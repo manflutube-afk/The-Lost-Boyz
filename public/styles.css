@@ -886,11 +886,21 @@ body.nav-open { overflow: hidden; }
   border-radius: var(--radius);
   text-align: center;
 }
+/*
+ * Logos get a white plate. Almost every business logo is drawn for white
+ * paper — Inkspires' has dark navy lettering that would disappear straight
+ * into the card's dark panel — so rather than hoping each one suits a dark
+ * background, they all sit on their own.
+ */
 .sponsor__logo {
+  display: block;
   width: auto;
-  max-width: 160px;
-  max-height: 70px;
-  margin: 0 auto .8rem;
+  max-width: 170px;
+  max-height: 112px;
+  margin: 0 auto .9rem;
+  padding: .55rem .7rem;
+  background: #fff;
+  border-radius: 10px;
   object-fit: contain;
 }
 .sponsor__name {

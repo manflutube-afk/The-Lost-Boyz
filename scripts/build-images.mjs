@@ -169,13 +169,16 @@ if (existsSync(SPONSOR_SRC)) {
   for (const file of files) {
     const name = file.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     await sharp(`${SPONSOR_SRC}/${file}`)
-      .resize({
-        width: 320,
-        height: 160,
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .webp({ quality: 88, alphaQuality: 90 })
+      /*
+       * Flattened onto white, and the card gives every logo a white plate to
+       * sit on. Business logos are drawn for white paper — this one has dark
+       * navy lettering, which would vanish against the card's dark panel.
+       * Keying the white out is not an option for the same reason.
+       */
+      .flatten({ background: '#ffffff' })
+      // never enlarge: blowing a small logo up just makes it mushy
+      .resize({ width: 320, height: 160, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 90 })
       .toFile(`${SPONSOR_OUT}/${name}.webp`);
     console.log(`sponsor logo: ${file} -> sponsors/${name}.webp`);
   }
