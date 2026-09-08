@@ -826,6 +826,63 @@ body.nav-open { overflow: hidden; }
 }
 .sponsor__blurb { margin: 0; font-size: .92rem; color: var(--text); }
 
+/* ---------------- Charities ---------------- */
+
+.charities {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.charities__msg {
+  padding: 1.75rem;
+  text-align: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.charity {
+  padding: 1.5rem 1.4rem;
+  background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.charity__name {
+  margin: 0 0 .2rem;
+  font-family: var(--f-display);
+  font-size: 1.4rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+.charity__name a { color: inherit; text-decoration: none; }
+.charity__name a:hover { color: var(--violet-hi); }
+
+.charity__sub {
+  margin: 0 0 .8rem;
+  font-size: .82rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--violet-hi);
+}
+
+.charity__blurb { margin: 0 0 .9rem; color: var(--text); }
+
+.charity__facts {
+  margin: 0 0 1.2rem;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.charity__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+}
+
 /* ---------------- Sponsor form dialog ---------------- */
 
 .modal {
@@ -1287,6 +1344,7 @@ body.nav-open { overflow: hidden; }
 
   .plans { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
   .sponsors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
+  .charities { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
 
   .gig { grid-template-columns: auto 1fr auto; }
   .gig__cta { grid-column: auto; grid-row: 1 / span 2; margin-top: 0; }

@@ -171,6 +171,53 @@ plan cards and in the enquiry form's dropdown, so change both.
 The sponsors themselves are listed **above** the sponsorship plans, so visitors
 see who is already backing the band before they are asked for anything.
 
+### Adding a charity or a fundraiser
+
+The Charities page is at `/charities`. Edit `public/data/charities.json`, which
+holds two separate lists:
+
+- **`charities`** — the organisations themselves. Brake is in there already.
+- **`fundraisers`** — individual appeals to point people at: a Facebook
+  fundraiser, a JustGiving page, someone doing a sponsored walk.
+
+```json
+{
+  "charities": [
+    {
+      "name": "Brake",
+      "tagline": "The road safety charity",
+      "blurb": "A sentence or two about them.",
+      "url": "https://www.brake.org.uk/",
+      "donateUrl": "https://www.brake.org.uk/donate",
+      "charityNo": "1093244",
+      "helpline": "0808 8000 401"
+    }
+  ],
+  "fundraisers": [
+    {
+      "name": "Sam's London Marathon run",
+      "who": "Sam Trewin",
+      "forCharity": "Brake",
+      "blurb": "Running the marathon in April.",
+      "url": "https://www.facebook.com/donate/000000000/"
+    }
+  ]
+}
+```
+
+Only `name` and `url` are required in either list. With `fundraisers` empty, that
+section shows a short holding message instead.
+
+**Every donation link goes straight to the charity's own page**, and the intro
+on the page says so plainly. Keep it that way. Collecting money on the band's
+behalf is a different thing entirely: it brings in the Fundraising Regulator's
+code and rules about handling other people's donations, and none of that is
+worth taking on to save a click.
+
+Charity numbers are worth filling in where you have them — they let people check
+a charity on the Charity Commission register, which is the sort of thing that
+makes a donations page trustworthy rather than suspicious.
+
 ### Adding a gig
 
 Edit `public/data/gigs.json` and add entries to the `gigs` list:

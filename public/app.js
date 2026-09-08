@@ -652,6 +652,122 @@
       });
   }
 
+  /* ---------- charities and fundraisers ---------- */
+
+  var charityBox = document.getElementById('charities');
+  var fundraiserBox = document.getElementById('fundraisers');
+
+  if (charityBox || fundraiserBox) {
+    var charityMsg = function (box, text) {
+      if (!box) { return; }
+      var p = document.createElement('p');
+      p.className = 'charities__msg';
+      p.textContent = text;
+      box.replaceChildren(p);
+    };
+
+    var outLink = function (href, text, solid) {
+      var a = document.createElement('a');
+      a.className = 'btn' + (solid ? ' btn--solid' : '');
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = text;
+      return a;
+    };
+
+    var charityCard = function (item, isFundraiser) {
+      var card = document.createElement('article');
+      card.className = 'charity';
+
+      var h = document.createElement('h3');
+      h.className = 'charity__name';
+      if (item.url) {
+        var a = document.createElement('a');
+        a.href = item.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = item.name;
+        h.appendChild(a);
+      } else {
+        h.textContent = item.name;
+      }
+      card.appendChild(h);
+
+      // charities carry a tagline; a fundraiser says who is doing it, and for whom
+      var sub = isFundraiser
+        ? [item.who, item.forCharity ? 'for ' + item.forCharity : ''].filter(Boolean).join(' · ')
+        : (item.tagline || '');
+
+      if (sub) {
+        var s = document.createElement('p');
+        s.className = 'charity__sub';
+        s.textContent = sub;
+        card.appendChild(s);
+      }
+
+      if (item.blurb) {
+        var b = document.createElement('p');
+        b.className = 'charity__blurb';
+        b.textContent = item.blurb;
+        card.appendChild(b);
+      }
+
+      var facts = [];
+      if (item.charityNo) { facts.push('Registered charity ' + item.charityNo); }
+      if (item.helpline) { facts.push('Helpline ' + item.helpline); }
+      if (facts.length) {
+        var f = document.createElement('p');
+        f.className = 'charity__facts';
+        f.textContent = facts.join(' · ');
+        card.appendChild(f);
+      }
+
+      var actions = document.createElement('div');
+      actions.className = 'charity__actions';
+
+      /*
+       * Donation links go straight to the charity's own page. The band never
+       * handle the money, and the page says so — anything else would need to
+       * be registered with the Fundraising Regulator.
+       */
+      if (item.donateUrl) { actions.appendChild(outLink(item.donateUrl, 'Donate', true)); }
+      if (item.url) {
+        actions.appendChild(outLink(item.url, isFundraiser ? 'Support this' : 'Visit site', !item.donateUrl));
+      }
+      if (actions.childNodes.length) { card.appendChild(actions); }
+
+      return card;
+    };
+
+    var renderCharityList = function (box, list, isFundraiser, emptyText) {
+      if (!box) { return; }
+
+      list = (list || []).filter(function (c) { return c && c.name; });
+      if (!list.length) { charityMsg(box, emptyText); return; }
+
+      var frag = document.createDocumentFragment();
+      list.forEach(function (item) { frag.appendChild(charityCard(item, isFundraiser)); });
+      box.replaceChildren(frag);
+    };
+
+    fetch('/data/charities.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        renderCharityList(charityBox, data.charities, false,
+          'Nothing listed here just yet.');
+        renderCharityList(fundraiserBox, data.fundraisers, true,
+          'No fundraisers on the go at the moment — if you are running one for these causes, get in touch and we will put it up here.');
+      })
+      .catch(function () {
+        charityMsg(charityBox, 'That is not loading right now. Please try again shortly.');
+        charityMsg(fundraiserBox, 'That is not loading right now. Please try again shortly.');
+      });
+  }
+
   /* ---------- sponsor enquiry form ---------- */
 
   var dialog = document.getElementById('sponsorDialog');

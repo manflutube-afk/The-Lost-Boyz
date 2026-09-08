@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reelz — The Lost Boyz</title>
-<meta name="description" content="Live video from The Lost Boyz — straight off the stage.">
+<title>Charities — The Lost Boyz</title>
+<meta name="description" content="The charities The Lost Boyz support, and the fundraisers they are backing.">
 <meta name="theme-color" content="#07040c">
-<link rel="canonical" href="https://thelostboyz.uk/reelz">
+<link rel="canonical" href="https://thelostboyz.uk/charities">
 
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://thelostboyz.uk/reelz">
+<meta property="og:url" content="https://thelostboyz.uk/charities">
 <meta property="og:site_name" content="The Lost Boyz">
 <meta property="og:locale" content="en_GB">
-<meta property="og:title" content="Reelz — The Lost Boyz">
-<meta property="og:description" content="Live video from The Lost Boyz — straight off the stage.">
+<meta property="og:title" content="Charities — The Lost Boyz">
+<meta property="og:description" content="The charities The Lost Boyz support, and the fundraisers they are backing.">
 <meta property="og:image" content="https://thelostboyz.uk/images/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -40,25 +40,36 @@
   <nav class="nav" id="nav" aria-label="Main">
     <a href="/#music">Music</a>
     <a href="/#band">The Boyz</a>
-    <a href="/reelz" aria-current="page">Reelz</a>
+    <a href="/reelz">Reelz</a>
     <a href="/#live">Live</a>
     <a href="/#gallery">Gallery</a>
     <a href="/sponsors">Sponsors</a>
-    <a href="/charities">Charities</a>
+    <a href="/charities" aria-current="page">Charities</a>
     <a href="/#booking">Booking</a>
   </nav>
 </header>
 
 <main id="main">
-  <section class="sec sec--page" id="top">
+  <section class="sec sec--page">
     <div class="wrap">
-      <p class="eyebrow">Straight off the stage</p>
-      <h1 class="h2">Reelz</h1>
-      <p class="lead">Live video from the boyz. Scroll through them on your phone, or tap any one to play it.</p>
+      <p class="eyebrow">Giving something back</p>
+      <h1 class="h2">Charities we support</h1>
 
-      <!-- Videos come from /data/reels.json — paste a Facebook reel URL in there. -->
-      <div id="reels" class="reels" aria-live="polite">
-        <p class="reels__msg">Loading reels…</p>
+      <!-- TODO: the band may want their own words here about why these
+           charities matter to them. Leave this general line until they do. -->
+      <p class="lead">These are the causes close to us. If you can spare anything at all,
+        it goes straight to them — we do not handle any of it.</p>
+
+      <!-- Charities come from /data/charities.json -->
+      <h2 class="h3 h3--first">The charities</h2>
+      <div id="charities" class="charities" aria-live="polite">
+        <p class="charities__msg">Loading…</p>
+      </div>
+
+      <h2 class="h3">Fundraisers we are backing</h2>
+      <p class="lead">People doing something daft, difficult or brilliant to raise money for these causes.</p>
+      <div id="fundraisers" class="charities" aria-live="polite">
+        <p class="charities__msg">Loading…</p>
       </div>
 
       <p class="backlink"><a class="btn" href="/">Back to the site</a></p>
@@ -76,10 +87,10 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  "name": "Reelz — The Lost Boyz",
-  "url": "https://thelostboyz.uk/reelz",
-  "description": "Live video from The Lost Boyz — straight off the stage.",
+  "@type": "WebPage",
+  "name": "Charities — The Lost Boyz",
+  "url": "https://thelostboyz.uk/charities",
+  "description": "The charities The Lost Boyz support, and the fundraisers they are backing.",
   "isPartOf": {
     "@type": "WebSite",
     "name": "The Lost Boyz",
@@ -90,7 +101,7 @@
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://thelostboyz.uk/" },
-      { "@type": "ListItem", "position": 2, "name": "Reelz", "item": "https://thelostboyz.uk/reelz" }
+      { "@type": "ListItem", "position": 2, "name": "Charities", "item": "https://thelostboyz.uk/charities" }
     ]
   }
 }

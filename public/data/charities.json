@@ -1,0 +1,31 @@
+{
+  "_readme": "Charities the band supports, and fundraisers they are backing. 'charities' are the organisations themselves; 'fundraisers' are individual appeals — a Facebook fundraiser, a JustGiving page, a sponsored walk — that you want to point people at. Only 'name' and 'url' are required in either list. Leave 'fundraisers' empty and that section shows a short holding message instead.",
+  "_exampleCharity": {
+    "name": "Example Charity",
+    "tagline": "What they do in a few words",
+    "blurb": "A sentence or two about the charity and why the band support them.",
+    "url": "https://example.org",
+    "donateUrl": "https://example.org/donate",
+    "charityNo": "1234567",
+    "helpline": "0800 000 000"
+  },
+  "_exampleFundraiser": {
+    "name": "Sam's London Marathon run",
+    "who": "Sam Trewin",
+    "forCharity": "Brake",
+    "blurb": "Running the marathon in April and raising money for Brake.",
+    "url": "https://www.facebook.com/donate/000000000/"
+  },
+  "charities": [
+    {
+      "name": "Brake",
+      "tagline": "The road safety charity",
+      "blurb": "Brake runs a free helpline for people bereaved or seriously injured in road crashes, works with schools and employers on road safety, and campaigns for safer roads.",
+      "url": "https://www.brake.org.uk/",
+      "donateUrl": "https://www.brake.org.uk/donate",
+      "charityNo": "1093244",
+      "helpline": "0808 8000 401"
+    }
+  ],
+  "fundraisers": []
+}
