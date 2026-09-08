@@ -43,7 +43,13 @@ body {
   font-family: var(--f-body);
   font-size: 1rem;
   line-height: 1.65;
-  overflow-x: hidden;
+  /*
+   * "clip" rather than "hidden". Both stop the page sliding sideways, but
+   * overflow-x: hidden turns the body into a scroll container, which quietly
+   * breaks position: sticky for anything inside it — the album art on the
+   * desktop layout relies on that. clip has no such side effect.
+   */
+  overflow-x: clip;
 }
 
 img { max-width: 100%; height: auto; display: block; }
@@ -1063,7 +1069,17 @@ body.nav-open { overflow: hidden; }
   display: flex;
   gap: .75rem;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  /*
+   * "proximity", not "mandatory". With mandatory snapping, the sideways
+   * drift in an ordinary vertical thumb-swipe past the gallery was enough to
+   * capture the scroll and yank the strip to the nearest tile — the page
+   * appeared to wobble left and right. Proximity only snaps when a swipe was
+   * genuinely heading somewhere.
+   */
+  scroll-snap-type: x proximity;
+  /* and keep that sideways scroll inside the strip rather than letting it
+     chain out to the page or the browser's back gesture */
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   margin-inline: calc(var(--pad) * -1);
@@ -1099,8 +1115,10 @@ body.nav-open { overflow: hidden; }
 /* ---------------- Photo viewer ---------------- */
 
 .lb {
-  width: 100vw;
-  max-width: 100vw;
+  /* 100vw includes the scrollbar gutter and overflows by a few pixels;
+     percentages of the dialog's own containing block do not */
+  width: 100%;
+  max-width: 100%;
   height: 100dvh;
   max-height: 100dvh;
   padding: 0;
