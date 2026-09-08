@@ -282,6 +282,19 @@
      * try again a few times if it did not. The SDK reports a player ready
      * slightly before it will reliably act on play().
      */
+    /*
+     * Hand a reel back with its sound on. Whenever we stop trying to start
+     * something ourselves, it has to be left unmuted, or the visitor presses
+     * play later and gets a silent video — which is exactly what our own
+     * mute() caused.
+     */
+    var giveUp = function (id) {
+      delete autoStarting[id];
+      var p = players[id];
+      if (!p) { return; }
+      try { p.unmute(); } catch (e) { /* nothing sensible left to do */ }
+    };
+
     var startMuted = function (id, attempt) {
       var p = players[id];
       if (!p || id !== activeId || spent[id]) { return; }
@@ -289,25 +302,43 @@
       attempt = attempt || 1;
       autoStarting[id] = true;
 
-      try {
-        p.mute();
-        p.play();
-      } catch (e) { delete autoStarting[id]; return; }
+      /*
+       * mute() travels to the player by postMessage, so it is not in force
+       * the moment the call returns. Playing on the very next line looks to
+       * the browser like an unmuted video starting itself with no tap behind
+       * it, which is the thing it blocks. So wait until the player confirms
+       * it is actually muted, and only then play.
+       */
+      try { p.mute(); } catch (e) { giveUp(id); return; }
 
-      setTimeout(function () {
-        // Give up quietly, and stop treating it as ours — so if the visitor
-        // presses play on it later, it plays with sound.
-        if (id !== activeId || spent[id] || attempt >= 4) {
-          delete autoStarting[id];
+      var waited = 0;
+
+      var playWhenMuted = function () {
+        if (id !== activeId || spent[id]) { giveUp(id); return; }
+
+        var muted = false;
+        try { muted = p.isMuted(); } catch (e) { muted = false; }
+
+        if (!muted && waited < 1200) {
+          waited += 100;
+          setTimeout(playWhenMuted, 100);
           return;
         }
 
-        var pos = 0;
-        try { pos = p.getCurrentPosition() || 0; } catch (e) { delete autoStarting[id]; return; }
+        try { p.play(); } catch (e) { giveUp(id); return; }
 
-        // still sitting at the start, so it never really began
-        if (pos <= 0.05) { startMuted(id, attempt + 1); }
-      }, 700);
+        setTimeout(function () {
+          if (id !== activeId || spent[id] || attempt >= 4) { giveUp(id); return; }
+
+          var pos = 0;
+          try { pos = p.getCurrentPosition() || 0; } catch (e) { giveUp(id); return; }
+
+          // still sitting at the start, so it never really began
+          if (pos <= 0.05) { startMuted(id, attempt + 1); }
+        }, 800);
+      };
+
+      playWhenMuted();
     };
 
     var watchScroll = function () {
