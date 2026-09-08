@@ -103,6 +103,35 @@ await sharp(cutoutPng).resize({ width: 480 }).png({ compressionLevel: 9, palette
 
 console.log('logo: cut out and resized');
 
+/*
+ * The disc artwork already comes with a transparent background, so it only
+ * needs trimming and resizing. It spins on the home page, so it has to stay
+ * a true circle on a clear background — no JPEG fallback for this one.
+ */
+const DISC = `${SRC}/lostcd.png`;
+if (existsSync(DISC)) {
+  const disc = await sharp(DISC).trim({ threshold: 2 }).png().toBuffer();
+
+  // Pad to a centred square. Trimming leaves slightly uneven margins, and an
+  // off-centre disc visibly wobbles once it starts spinning.
+  const square = (w) => sharp(disc).resize({
+    width: w,
+    height: w,
+    fit: 'contain',
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  });
+
+  for (const w of [320, 480, 640, 800]) {
+    await square(w).webp({ quality: 80, alphaQuality: 90, effort: 6 })
+      .toFile(`${OUT}/lostcd-${w}.webp`);
+  }
+  await square(640).png({ compressionLevel: 9, palette: true })
+    .toFile(`${OUT}/lostcd-640.png`);
+  console.log('lostcd: trimmed and resized');
+} else {
+  console.warn('skipping lostcd: source-images/lostcd.png not found');
+}
+
 // favicons / PWA icons — keep the black backing so the icon reads on any OS
 await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
   .toFile(`${OUT}/icon-512.png`);

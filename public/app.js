@@ -76,6 +76,86 @@
   var year = document.getElementById('year');
   if (year) { year.textContent = new Date().getFullYear(); }
 
+  /* ---------- the disc spins in ---------- */
+
+  /*
+   * When the single first scrolls into view the page is held still for a
+   * moment while the disc spins up and settles the right way up, then
+   * scrolling carries on.
+   *
+   * Holding someone's scroll is a rude thing to get wrong, so this is built
+   * to fail open: a timer releases the page whether or not the animation
+   * ever finishes, any key or click lets the visitor straight out, and the
+   * whole thing is skipped for anyone who prefers reduced motion. Scroll
+   * events are cancelled rather than the body being frozen, so the page
+   * never shifts underneath them.
+   */
+  var disc = document.getElementById('disc');
+
+  if (disc && 'IntersectionObserver' in window) {
+    var SPIN_MS = 1600;
+    var FAILSAFE_MS = 2400;
+    var SCROLL_KEYS = [' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'End', 'Home'];
+
+    var held = false;
+    var failsafe = null;
+
+    var swallow = function (e) { e.preventDefault(); };
+
+    var onKey = function (e) {
+      if (SCROLL_KEYS.indexOf(e.key) !== -1) { e.preventDefault(); }
+      releaseScroll();
+    };
+
+    function holdScroll() {
+      if (held) { return; }
+      held = true;
+      document.addEventListener('wheel', swallow, { passive: false });
+      document.addEventListener('touchmove', swallow, { passive: false });
+      document.addEventListener('keydown', onKey);
+      document.addEventListener('click', releaseScroll);
+      failsafe = setTimeout(releaseScroll, FAILSAFE_MS);
+    }
+
+    function releaseScroll() {
+      if (!held) { return; }
+      held = false;
+      clearTimeout(failsafe);
+      document.removeEventListener('wheel', swallow);
+      document.removeEventListener('touchmove', swallow);
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('click', releaseScroll);
+    }
+
+    var spinDisc = function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) { return; }
+
+      var go = function () {
+        disc.classList.add('is-spinning');
+        holdScroll();
+        disc.addEventListener('animationend', releaseScroll, { once: true });
+        // belt and braces, in case animationend never arrives
+        setTimeout(releaseScroll, SPIN_MS + 120);
+      };
+
+      // the disc is lazy-loaded, so wait for the pixels before spinning them
+      if (disc.complete && disc.naturalWidth) { go(); }
+      else { disc.addEventListener('load', go, { once: true }); }
+    };
+
+    var discObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting && e.intersectionRatio >= 0.35) {
+          discObserver.disconnect();
+          spinDisc();
+        }
+      });
+    }, { threshold: [0.35] });
+
+    discObserver.observe(disc);
+  }
+
   /* ---------- reels ---------- */
 
   /*

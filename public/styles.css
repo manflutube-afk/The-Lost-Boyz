@@ -394,11 +394,36 @@ body.nav-open { overflow: hidden; }
 
 .release { display: grid; gap: 2rem; }
 
-.release__art img {
+.release__art { display: block; }
+
+/*
+ * The disc is a transparent cut-out, so it gets a soft glow rather than a
+ * card border. It spins in once when it first scrolls into view.
+ */
+.disc {
   width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, .6);
+  max-width: 420px;
+  margin-inline: auto;
+  transform-origin: 50% 50%;
+  filter:
+    drop-shadow(0 14px 34px rgba(0, 0, 0, .65))
+    drop-shadow(0 0 26px rgba(168, 85, 247, .35));
+}
+
+.disc.is-spinning {
+  animation: disc-spin 1.6s cubic-bezier(.12, .7, .2, 1) both;
+  will-change: transform;
+}
+
+@keyframes disc-spin {
+  0%   { transform: rotate(-900deg) scale(.94); opacity: .5; }
+  55%  { opacity: 1; }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* Never animate, and never hold the page still, if motion is unwelcome. */
+@media (prefers-reduced-motion: reduce) {
+  .disc.is-spinning { animation: none; }
 }
 
 .tracks {

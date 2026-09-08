@@ -195,11 +195,34 @@ If you add or replace a photo in `source-images/`, regenerate them with:
 npm run images
 ```
 
-The band logo gets special treatment in that script: the artwork is light
+Two images get special treatment in that script.
+
+`lostcd.png` — the disc on the home page — already has a transparent
+background, so it is only trimmed and then padded out to a **centred square**.
+That padding matters: trimming leaves slightly uneven margins, and an off-centre
+disc visibly wobbles once it starts spinning.
+
+The band logo gets special treatment too: the artwork is light
 line-work on a solid black square, so the script uses the image's own brightness
 as an alpha channel. That knocks the black out and leaves a transparent logo that
 sits cleanly on photos, so the same file works in the header, the hero and the
 footer.
+
+### The spinning disc
+
+When the single first scrolls into view, the page is held still for about a
+second and a half while the disc spins up and settles the right way up, then
+scrolling carries on.
+
+Holding someone's scroll is a rude thing to get wrong, so it is built to fail
+open. A timer releases the page whether or not the animation finishes, any key
+press or click lets the visitor straight out, and the whole thing is skipped for
+anyone whose system asks for reduced motion. It cancels scroll events rather
+than freezing the page body, so nothing shifts underneath the reader. It also
+only ever happens once per visit.
+
+If you want it gone, remove the `is-spinning` handling in `app.js` — the disc
+still displays perfectly well without it.
 
 ---
 
