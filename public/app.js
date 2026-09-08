@@ -328,7 +328,9 @@
         try { p.play(); } catch (e) { giveUp(id); return; }
 
         setTimeout(function () {
-          if (id !== activeId || spent[id] || attempt >= 4) { giveUp(id); return; }
+          // Two tries, not four. Every attempt is time the reel sits muted, and
+        // a tap landing in that window is what made tapped reels silent.
+        if (id !== activeId || spent[id] || attempt >= 2) { giveUp(id); return; }
 
           var pos = 0;
           try { pos = p.getCurrentPosition() || 0; } catch (e) { giveUp(id); return; }
