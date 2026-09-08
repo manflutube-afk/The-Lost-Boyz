@@ -27,5 +27,13 @@
       "helpline": "0808 8000 401"
     }
   ],
-  "fundraisers": []
+  "fundraisers": [
+    {
+      "name": "Memorial Beard — Brave the Shave",
+      "who": "Paul Walker",
+      "forCharity": "Brake",
+      "blurb": "Paul grew a beard for a year from the anniversary of Kyle's death, and is shaving it off for donations to Brake — in thanks for the support they gave the family.",
+      "url": "https://www.gofundme.com/f/memorial-beard-brave-the-shave"
+    }
+  ]
 }

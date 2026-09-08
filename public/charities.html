@@ -60,15 +60,18 @@
       <p class="lead">These are the causes close to us. If you can spare anything at all,
         it goes straight to them — we do not handle any of it.</p>
 
-      <!-- Charities come from /data/charities.json -->
-      <h2 class="h3 h3--first">The charities</h2>
-      <div id="charities" class="charities" aria-live="polite">
+      <!-- Both lists come from /data/charities.json. The people doing the
+           fundraising go first: they are the ones who need the clicks. -->
+      <h2 class="h3 h3--first">Support these people</h2>
+      <p class="lead">They are the ones out there raising money for the charities below.
+        If you can give anything, give it here.</p>
+      <div id="fundraisers" class="charities" aria-live="polite">
         <p class="charities__msg">Loading…</p>
       </div>
 
-      <h2 class="h3">Fundraisers we are backing</h2>
-      <p class="lead">People doing something daft, difficult or brilliant to raise money for these causes.</p>
-      <div id="fundraisers" class="charities" aria-live="polite">
+      <h2 class="h3">The charities</h2>
+      <p class="lead">And these are the causes they are raising it for.</p>
+      <div id="charities" class="charities" aria-live="polite">
         <p class="charities__msg">Loading…</p>
       </div>
 
