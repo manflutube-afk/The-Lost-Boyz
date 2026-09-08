@@ -486,6 +486,13 @@ body.nav-open { overflow: hidden; }
   list-style: none;
 }
 
+/* the services not linked yet, said plainly rather than as dead buttons */
+.soon__after {
+  margin: -1.25rem 0 0;
+  font-size: .88rem;
+  color: var(--muted);
+}
+
 .chip {
   padding: .5rem 1rem;
   border: 1px dashed var(--violet-dim);
