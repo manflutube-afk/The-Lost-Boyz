@@ -6,8 +6,12 @@
 <title>The Lost Boyz — Classic Rock Duo</title>
 <meta name="description" content="The Lost Boyz — Darren Endean and Andrew Boraston. A classic rock duo coming to a venue near you in 2026. Debut single 'Two Lost Souls' out 20 September 2026.">
 <meta name="theme-color" content="#07040c">
+<link rel="canonical" href="https://the-lost-boyz.pages.dev/">
 
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://the-lost-boyz.pages.dev/">
+<meta property="og:site_name" content="The Lost Boyz">
+<meta property="og:locale" content="en_GB">
 <meta property="og:title" content="The Lost Boyz">
 <meta property="og:description" content="A classic rock duo coming to a venue near you in 2026. Debut single 'Two Lost Souls' out 20 September 2026.">
 <meta property="og:image" content="/images/og.jpg">
@@ -55,6 +59,8 @@
   </picture>
 
   <div class="hero__inner">
+    <!-- The logo carries the name visually; this gives the page a real H1. -->
+    <h1 class="sr-only">The Lost Boyz — classic rock duo</h1>
     <picture>
       <source type="image/webp"
               srcset="/images/logo-320.webp 320w, /images/logo-480.webp 480w, /images/logo-640.webp 640w"
@@ -259,6 +265,40 @@
     <p class="ftr__c">&copy; <span id="year">2026</span> The Lost Boyz. All rights reserved.</p>
   </div>
 </footer>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MusicGroup",
+  "@id": "https://the-lost-boyz.pages.dev/#band",
+  "name": "The Lost Boyz",
+  "url": "https://the-lost-boyz.pages.dev/",
+  "genre": "Classic rock",
+  "description": "A classic rock duo. Darren Endean on guitars and vocals, Andrew Boraston on drums and vocals.",
+  "logo": "https://the-lost-boyz.pages.dev/images/icon-512.png",
+  "image": "https://the-lost-boyz.pages.dev/images/og.jpg",
+  "slogan": "Yn agan kolonnow bys vykken",
+  "sameAs": [
+    "https://www.facebook.com/profile.php?id=61584241187858"
+  ],
+  "member": [
+    { "@type": "Person", "name": "Darren Endean" },
+    { "@type": "Person", "name": "Andrew Boraston" }
+  ],
+  "album": {
+    "@type": "MusicAlbum",
+    "name": "Two Lost Souls",
+    "albumProductionType": "https://schema.org/StudioAlbum",
+    "datePublished": "2026-09-20",
+    "image": "https://the-lost-boyz.pages.dev/images/cover-800.jpg",
+    "byArtist": { "@id": "https://the-lost-boyz.pages.dev/#band" },
+    "track": [
+      { "@type": "MusicRecording", "name": "Two Lost Souls" },
+      { "@type": "MusicRecording", "name": "Two Lost Souls (Extended Version)" }
+    ]
+  }
+}
+</script>
 
 <script src="/app.js" defer></script>
 </body>

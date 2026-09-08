@@ -88,6 +88,9 @@
     var src = 'https://www.facebook.com/plugins/video.php'
       + '?href=' + encodeURIComponent(url)
       + '&show_text=false'
+      // The plugin defaults this to false. Without it, tapping play on a
+      // phone does nothing, because the player wants to go fullscreen.
+      + '&allowfullscreen=true'
       + '&width=' + width
       + '&height=' + height;
 
@@ -99,7 +102,9 @@
     frame.loading = 'lazy';
     frame.scrolling = 'no';
     frame.frameBorder = '0';
-    frame.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+    // Naming `allow` at all replaces the default permissions policy, so
+    // fullscreen has to be listed here too or the iframe is denied it.
+    frame.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write';
     frame.allowFullscreen = true;
     frame.title = 'The Lost Boyz reel';
     return frame;

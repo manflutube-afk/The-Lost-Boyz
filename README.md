@@ -107,6 +107,39 @@ Commit and push after editing — Pages redeploys on its own.
 
 ---
 
+## SEO
+
+The site is set up for search engines:
+
+- `public/sitemap.xml` lists both pages, and `public/robots.txt` points crawlers
+  at it
+- Both pages have a canonical URL, an `og:url`, and a single `<h1>` (on the home
+  page the `<h1>` is visually hidden, because the logo image carries the name)
+- `index.html` carries `MusicGroup` structured data — the members, the Facebook
+  page, and the *Two Lost Souls* release with its two tracks — so search engines
+  can identify the band rather than guessing. `reelz.html` carries
+  `CollectionPage` data with a breadcrumb back to the home page
+- Every image has descriptive alt text
+
+### If you move to a custom domain
+
+Four places hold the site address, and all four need updating together:
+
+1. `public/sitemap.xml` — both `<loc>` entries
+2. `public/robots.txt` — the `Sitemap:` line
+3. `public/index.html` — the canonical link, `og:url`, and the URLs inside the
+   JSON-LD block at the bottom
+4. `public/reelz.html` — the same three things
+
+Then submit the sitemap once in [Google Search Console](https://search.google.com/search-console).
+
+### A limitation worth knowing
+
+The reels are embedded from Facebook, which means **the videos do no SEO work for
+this site** — Google attributes them to Facebook, not to you. Self-hosting the
+video files would fix that and let the pages carry `VideoObject` markup, which is
+what gets a video into Google's video results.
+
 ## Photos
 
 Originals live in `source-images/`. The versions the site actually serves are
