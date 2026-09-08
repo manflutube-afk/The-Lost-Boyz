@@ -52,7 +52,6 @@ These are placeholders. Search the project for `TODO` to find them all.
 | --- | --- |
 | `public/index.html` — Music section | The three streaming buttons all point at `#`. Swap in your Spotify / Apple Music / YouTube (or pre-save) links. |
 | `public/index.html` — Music section | **Check the release date.** It currently reads *20 September 2026*, worked out from the Facebook post of 3 September that said "only 17 days until". Correct it if that is wrong. |
-| `public/index.html` — Booking section | Replace `bookings@example.com` and the phone number. The Facebook link is already set. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 
 ### Adding a reel
@@ -222,6 +221,20 @@ this site** — Google attributes them to Facebook, not to you. Self-hosting the
 video files would fix that and let the pages carry `VideoObject` markup, which is
 what gets a video into Google's video results.
 
+## The gallery
+
+Every tile is the same size. On a phone the gallery is a swipeable row so each
+photo gets most of the screen; on wider screens the same tiles become a grid.
+
+Tapping one opens the photo viewer, which steps through all twelve with the
+arrows, the left and right keys, or a swipe, and wraps around at either end.
+
+The viewer sizes each photo from its own resolution, allowing up to twice its
+natural width. That detail matters: `max-width` on its own never *enlarges*
+anything, so the small gig snaps opened smaller than the tile that had just been
+tapped. The arrows also sit on top of the photo rather than beside it — flanking
+it stole about 130px on a phone, with the same result.
+
 ## Photos
 
 Originals live in `source-images/`. The versions the site actually serves are
@@ -242,8 +255,9 @@ disc visibly wobbles once it starts spinning.
 The gallery snaps (`d1.jpg` … `d10.jpg`) are 206px squares — Facebook-sized
 thumbnails rather than full photos. There is nothing to resize down to and no
 point inventing pixels by scaling up, so they are converted as they are and the
-gallery lays them out small, around 105px, where they still look sharp. **If the
-band can supply the originals, replace them and they can be shown much larger.**
+gallery shows them at around 278px in the tiles, and up to twice their natural
+width in the photo viewer. **If the band can supply the originals, replace them
+and they will sharpen up straight away** — nothing else needs changing.
 
 The band logo gets special treatment too: the artwork is light
 line-work on a solid black square, so the script uses the image's own brightness

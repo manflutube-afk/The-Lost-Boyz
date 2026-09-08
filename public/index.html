@@ -196,35 +196,48 @@
   <div class="wrap">
     <p class="eyebrow">Loud rooms</p>
     <h2 class="h2">Gallery</h2>
-    <div class="grid">
-      <figure class="grid__item grid__item--wide">
-        <picture>
-          <source type="image/webp" media="(min-width:700px)" srcset="/images/hero-1024.webp">
-          <source type="image/webp" srcset="/images/hero-640.webp">
-          <img src="/images/hero-1600.jpg" loading="lazy" decoding="async" alt="A packed room watching the band under pink and blue lights.">
-        </picture>
-      </figure>
-      <figure class="grid__item grid__item--wide">
-        <picture>
-          <source type="image/webp" srcset="/images/amps-640.webp">
-          <img src="/images/amps-1024.jpg" loading="lazy" decoding="async" alt="A wall of Marshall stacks with a gold-top Les Paul leaning against it.">
-        </picture>
-      </figure>
-    </div>
+    <p class="shots__hint">Tap a photo to open it, then swipe through the rest.</p>
 
-    <!-- Gig snaps. Deliberately laid out small: the source files are 206px
-         squares, so anything larger would just look soft. -->
-    <div class="snaps">
-      <figure class="snap"><img src="/images/d1.webp" width="206" height="206" loading="lazy" decoding="async" alt="The Lost Boyz on stage in front of their winged backdrop."></figure>
-      <figure class="snap"><img src="/images/d2.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d3.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d4.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d5.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d6.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d7.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d8.webp" width="206" height="206" loading="lazy" decoding="async" alt="Fans at a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d9.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
-      <figure class="snap"><img src="/images/d10.webp" width="206" height="206" loading="lazy" decoding="async" alt="From a Lost Boyz gig."></figure>
+    <!-- Every tile the same size: a swipeable row on a phone, a grid on
+         wider screens. Each is a button so it works by keyboard too, and
+         data-full points at the largest version we hold of that shot. -->
+    <div class="shots" id="shots">
+      <button class="shot" type="button" data-full="/images/hero-1600.webp">
+        <img src="/images/hero-640.webp" loading="lazy" decoding="async" alt="A packed room watching the band under pink and blue lights.">
+      </button>
+      <button class="shot" type="button" data-full="/images/amps-1024.webp">
+        <img src="/images/amps-640.webp" loading="lazy" decoding="async" alt="A wall of Marshall stacks with a gold-top Les Paul leaning against it.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d1.webp">
+        <img src="/images/d1.webp" loading="lazy" decoding="async" alt="The Lost Boyz on stage in front of their winged backdrop.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d2.webp">
+        <img src="/images/d2.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d3.webp">
+        <img src="/images/d3.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d4.webp">
+        <img src="/images/d4.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d5.webp">
+        <img src="/images/d5.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d6.webp">
+        <img src="/images/d6.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d7.webp">
+        <img src="/images/d7.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d8.webp">
+        <img src="/images/d8.webp" loading="lazy" decoding="async" alt="Fans at a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d9.webp">
+        <img src="/images/d9.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
+      <button class="shot" type="button" data-full="/images/d10.webp">
+        <img src="/images/d10.webp" loading="lazy" decoding="async" alt="From a Lost Boyz gig.">
+      </button>
     </div>
   </div>
 </section>
@@ -236,15 +249,10 @@
     <h2 class="h2">Book the Boyz</h2>
     <p class="lead">Two of us, a proper PA and a light show. Tell us the date and the room, and we will come and make a racket.</p>
 
-    <!-- TODO: put your real booking email, number and socials in here -->
     <div class="contact">
-      <a class="contact__row is-todo" href="mailto:bookings@example.com">
+      <a class="contact__row" href="mailto:bookings@thelostboyz.uk">
         <span class="contact__k">Email</span>
-        <span class="contact__v">bookings@example.com</span>
-      </a>
-      <a class="contact__row is-todo" href="tel:+440000000000">
-        <span class="contact__k">Phone</span>
-        <span class="contact__v">Add your number</span>
+        <span class="contact__v">bookings@thelostboyz.uk</span>
       </a>
       <a class="contact__row" href="https://www.facebook.com/profile.php?id=61584241187858" target="_blank" rel="noopener">
         <span class="contact__k">Facebook</span>
@@ -264,6 +272,17 @@
 </section>
 
 </main>
+
+<!-- ===== Photo viewer ===== -->
+<dialog class="lb" id="lightbox" aria-label="Photo viewer">
+  <button class="lb__close" id="lbClose" type="button" aria-label="Close">&times;</button>
+  <button class="lb__nav lb__nav--prev" id="lbPrev" type="button" aria-label="Previous photo"></button>
+  <figure class="lb__fig">
+    <img class="lb__img" id="lbImg" alt="">
+    <figcaption class="lb__cap"><span class="lb__count" id="lbCount"></span><span id="lbAlt"></span></figcaption>
+  </figure>
+  <button class="lb__nav lb__nav--next" id="lbNext" type="button" aria-label="Next photo"></button>
+</dialog>
 
 <footer class="ftr">
   <div class="wrap">

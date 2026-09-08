@@ -988,35 +988,170 @@ body.nav-open { overflow: hidden; }
 }
 .grid__item:hover img { transform: scale(1.04); }
 
-/*
- * Gig snaps. The originals are 206px squares, so the tiles are kept small
- * on purpose — stretched across a phone they would just look soft. Small
- * squares in quantity read as a contact sheet, which suits them.
- */
-.snaps {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: .5rem;
-  margin-top: .75rem;
+/* ---------------- Gallery tiles ---------------- */
+
+.shots__hint {
+  margin: 0 0 1rem;
+  font-size: .9rem;
+  color: var(--muted);
 }
 
-.snap {
-  margin: 0;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid var(--line);
+/*
+ * On a phone this is a swipeable row rather than a grid, so each photo gets
+ * most of the screen instead of being one of a dozen thumbnails. It bleeds
+ * to the screen edges on purpose — a tile cut off at the right is what tells
+ * you there is more to swipe to.
+ */
+.shots {
+  display: flex;
+  gap: .75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-inline: calc(var(--pad) * -1);
+  padding: .25rem var(--pad) 1rem;
 }
-.snap img {
+.shots::-webkit-scrollbar { display: none; }
+
+.shot {
+  flex: 0 0 min(74vw, 320px);
+  scroll-snap-align: center;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color .25s, box-shadow .25s;
+}
+.shot img {
+  display: block;
   width: 100%;
   height: 100%;
-  aspect-ratio: 1;
   object-fit: cover;
   transition: transform .4s ease;
 }
-.snap:hover img { transform: scale(1.06); }
+.shot:hover, .shot:focus-visible {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 1px rgba(200, 144, 255, .3), 0 10px 28px rgba(124, 47, 212, .3);
+}
+.shot:hover img { transform: scale(1.05); }
+
+/* ---------------- Photo viewer ---------------- */
+
+.lb {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: rgba(4, 2, 10, .97);
+  color: var(--text);
+  overflow: hidden;
+}
+.lb::backdrop { background: rgba(0, 0, 0, .92); }
+
+.lb[open] {
+  display: grid;
+  place-items: center;
+}
+
+/*
+ * The arrows sit on top of the photo rather than beside it. Flanking it in
+ * their own columns stole about 130px on a phone, which left the photo
+ * opening smaller than the tile that had just been tapped.
+ */
+.lb__fig {
+  width: 100%;
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: .85rem;
+  padding: 3.5rem 1rem 1.5rem;
+}
+
+/*
+ * Width is set inline by the viewer, from each photo's own natural size:
+ * max-width alone never enlarges anything, so the small gig snaps opened
+ * smaller than the tile that had just been tapped. This is only the
+ * fallback for before that runs.
+ */
+.lb__img {
+  width: min(92vw, 560px);
+  height: auto;
+  max-height: 72dvh;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #000;
+}
+
+.lb__cap {
+  max-width: 34ch;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
+.lb__count {
+  display: block;
+  margin-bottom: .3rem;
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .18em;
+  color: var(--violet-hi);
+}
+
+.lb__close {
+  position: absolute;
+  top: .6rem;
+  right: .8rem;
+  width: 46px;
+  height: 46px;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 2.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.lb__close:hover { color: var(--bone); }
+
+.lb__nav {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  background: rgba(7, 4, 12, .6);
+  border: 1px solid var(--violet-dim);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: background .2s, border-color .2s;
+}
+.lb__nav:hover { background: rgba(168, 85, 247, .5); border-color: var(--violet); }
+.lb__nav::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid var(--bone);
+  border-right: 2px solid var(--bone);
+}
+.lb__nav--prev { left: .5rem; }
+.lb__nav--prev::before { transform: rotate(-135deg); margin-left: 4px; }
+.lb__nav--next { right: .5rem; }
+.lb__nav--next::before { transform: rotate(45deg); margin-right: 4px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .snap:hover img { transform: none; }
+  .shot:hover img { transform: none; }
 }
 
 /* ---------------- Booking ---------------- */
@@ -1108,6 +1243,17 @@ body.nav-open { overflow: hidden; }
   }
   .grid__item--wide { grid-column: span 2; }
   .grid__item--wide img { aspect-ratio: 16 / 9; }
+
+  /* enough room for a grid, so the swipe row becomes one */
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    overflow: visible;
+    margin-inline: 0;
+    padding: 0;
+  }
+  .shot { flex: none; }
 
   .credits { grid-template-columns: 1fr 1fr; gap: .6rem 1.5rem; }
 

@@ -548,7 +548,7 @@
    * Set this to a POST endpoint later to collect them properly instead.
    */
   var SPONSOR_ENDPOINT = '';
-  var SPONSOR_EMAIL = 'bookings@example.com'; // TODO: the band's real address
+  var SPONSOR_EMAIL = 'bookings@thelostboyz.uk';
 
   var sponsorBox = document.getElementById('sponsors');
 
@@ -730,6 +730,106 @@
 
       closeDialog();
     });
+  }
+
+  /* ---------- photo viewer ---------- */
+
+  var lb = document.getElementById('lightbox');
+  var shotsBox = document.getElementById('shots');
+
+  if (lb && shotsBox) {
+    var shots = Array.prototype.slice.call(shotsBox.querySelectorAll('.shot'));
+    var lbImg = document.getElementById('lbImg');
+    var lbAlt = document.getElementById('lbAlt');
+    var lbCount = document.getElementById('lbCount');
+    var shotIndex = 0;
+    var lbOpener = null;
+
+    /*
+     * Size the photo from its own resolution. The gig snaps are only 206px
+     * squares, so left to a plain max-width they opened *smaller* than the
+     * tile that had just been tapped. Allowing up to twice their natural
+     * width makes them properly viewable without blowing them up so far
+     * that they turn to mush; the big shots still fill the screen.
+     */
+    var sizeShot = function () {
+      var natural = lbImg.naturalWidth || 0;
+      if (!natural) { return; }
+      var cap = Math.min(natural * 2, 560);
+      lbImg.style.width = 'min(92vw, ' + cap + 'px)';
+    };
+
+    lbImg.addEventListener('load', sizeShot);
+
+    var showShot = function (i) {
+      shotIndex = (i + shots.length) % shots.length;  // wraps around both ways
+      var img = shots[shotIndex].querySelector('img');
+      lbImg.style.width = '';   // drop the last photo's size before swapping
+      lbImg.src = shots[shotIndex].dataset.full || img.src;
+      lbImg.alt = img.alt || '';
+      lbAlt.textContent = img.alt || '';
+      lbCount.textContent = (shotIndex + 1) + ' of ' + shots.length;
+      if (lbImg.complete) { sizeShot(); }   // cached images fire no load event
+    };
+
+    var openShot = function (i, btn) {
+      lbOpener = btn || null;
+      showShot(i);
+      if (typeof lb.showModal === 'function') { lb.showModal(); }
+      else { lb.setAttribute('open', ''); }
+    };
+
+    var closeShot = function () {
+      if (typeof lb.close === 'function') { lb.close(); }
+      else { lb.removeAttribute('open'); }
+      // put the visitor back on the tile they came from
+      if (lbOpener) { lbOpener.focus(); }
+    };
+
+    shots.forEach(function (btn, i) {
+      btn.addEventListener('click', function () { openShot(i, btn); });
+    });
+
+    document.getElementById('lbClose').addEventListener('click', closeShot);
+    document.getElementById('lbPrev').addEventListener('click', function () { showShot(shotIndex - 1); });
+    document.getElementById('lbNext').addEventListener('click', function () { showShot(shotIndex + 1); });
+
+    // Escape is handled by <dialog> itself; these are the arrows.
+    document.addEventListener('keydown', function (e) {
+      if (!lb.open) { return; }
+      if (e.key === 'ArrowLeft') { showShot(shotIndex - 1); }
+      else if (e.key === 'ArrowRight') { showShot(shotIndex + 1); }
+    });
+
+    // tapping the dark area around the photo closes it
+    lb.addEventListener('click', function (e) {
+      if (e.target === lb || e.target === lbImg.parentNode) { closeShot(); }
+    });
+
+    /* swipe between photos */
+    var touchX = null;
+    var touchY = null;
+
+    lb.addEventListener('touchstart', function (e) {
+      var t = e.changedTouches[0];
+      touchX = t.clientX;
+      touchY = t.clientY;
+    }, { passive: true });
+
+    lb.addEventListener('touchend', function (e) {
+      if (touchX === null) { return; }
+
+      var t = e.changedTouches[0];
+      var dx = t.clientX - touchX;
+      var dy = t.clientY - touchY;
+      touchX = null;
+
+      // only a decisive, mostly-sideways flick counts, so scrolling and
+      // pinching are not mistaken for swipes
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+        showShot(dx < 0 ? shotIndex + 1 : shotIndex - 1);
+      }
+    }, { passive: true });
   }
 
   /* ---------- gig dates ---------- */
