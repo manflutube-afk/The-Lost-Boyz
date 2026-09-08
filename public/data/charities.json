@@ -14,7 +14,8 @@
     "who": "Sam Trewin",
     "forCharity": "Brake",
     "blurb": "Running the marathon in April and raising money for Brake.",
-    "url": "https://www.facebook.com/donate/000000000/"
+    "url": "https://www.facebook.com/donate/000000000/",
+    "supportLabel": "Back the lads (optional - overrides the auto \"Support <first name>\" button)"
   },
   "charities": [
     {

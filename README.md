@@ -208,6 +208,12 @@ holds two separate lists:
 Only `name` and `url` are required in either list. With `fundraisers` empty, that
 section shows a short holding message instead.
 
+A fundraiser's button is built from `who`: "Paul Walker" gives **Support Paul**,
+because it is a person doing the fundraising and naming them reads as backing
+someone rather than clicking a link. Entries that are not one person — a family,
+a team, a pub — fall back to the whole name, and adding `supportLabel` overrides
+the button text entirely when neither is right.
+
 **Every donation link goes straight to the charity's own page**, and the intro
 on the page says so plainly. Keep it that way. Collecting money on the band's
 behalf is a different thing entirely: it brings in the Fundraising Regulator's

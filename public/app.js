@@ -744,6 +744,29 @@
       return a;
     };
 
+    /*
+     * "Support Paul" rather than "Support this" — it is a person doing the
+     * fundraising, and naming them reads as backing someone rather than
+     * clicking a link. Uses their first name, since that is how the band
+     * would say it.
+     *
+     * Some entries will not be one person: a family, a team, a pub. Those
+     * fall back to the whole name, and 'supportLabel' in the JSON overrides
+     * the lot when neither is right.
+     */
+    var supportLabel = function (item) {
+      if (item.supportLabel) { return item.supportLabel; }
+      if (!item.who) { return 'Support this'; }
+
+      var who = item.who.trim();
+      var first = who.split(/\s+/)[0];
+
+      if (!first || /^(the|team|friends|family|staff)$/i.test(first)) {
+        return 'Support ' + who;
+      }
+      return 'Support ' + first;
+    };
+
     var charityCard = function (item, isFundraiser) {
       var card = document.createElement('article');
       card.className = 'charity';
@@ -801,7 +824,7 @@
        */
       if (item.donateUrl) { actions.appendChild(outLink(item.donateUrl, 'Donate', true)); }
       if (item.url) {
-        actions.appendChild(outLink(item.url, isFundraiser ? 'Support this' : 'Visit site', !item.donateUrl));
+        actions.appendChild(outLink(item.url, isFundraiser ? supportLabel(item) : 'Visit site', !item.donateUrl));
       }
       if (actions.childNodes.length) { card.appendChild(actions); }
 
