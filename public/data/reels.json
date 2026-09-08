@@ -1,0 +1,13 @@
+{
+  "_readme": "Facebook reels shown on the Reelz section. Paste the reel URL straight from Facebook — the /reel/... link is fine. 'title' is optional; leave it out and the tile just shows the video. The reel has to be public on Facebook or it will not play.",
+  "_example": {
+    "url": "https://www.facebook.com/reel/1234567890",
+    "title": "Friday night at The Dolphin"
+  },
+  "reels": [
+    {
+      "url": "https://www.facebook.com/reel/34991504563830820",
+      "title": "Live"
+    }
+  ]
+}

@@ -468,6 +468,61 @@ body.nav-open { overflow: hidden; }
 }
 .band-shot { margin: 0; }
 
+/* ---------------- Reelz ---------------- */
+
+.reels {
+  display: grid;
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.reels__msg {
+  width: 100%;
+  padding: 1.75rem;
+  text-align: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.reel {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* the purple frame around each reel */
+.reel__frame {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  background: #000;
+  border: 2px solid var(--violet);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 1px rgba(200, 144, 255, .25),
+    0 10px 34px rgba(124, 47, 212, .32);
+  transition: border-color .25s, box-shadow .25s;
+}
+.reel:hover .reel__frame,
+.reel__frame:focus-within {
+  border-color: var(--violet-hi);
+  box-shadow:
+    0 0 0 1px rgba(200, 144, 255, .45),
+    0 12px 40px rgba(124, 47, 212, .5);
+}
+
+.reel__cap {
+  margin-top: .75rem;
+  text-align: center;
+  font-family: var(--f-display);
+  font-size: .95rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lilac);
+}
+
 /* ---------------- Gigs ---------------- */
 
 .gigs__msg {
@@ -622,6 +677,17 @@ body.nav-open { overflow: hidden; }
   .grid__item--wide img { aspect-ratio: 16 / 9; }
 
   .credits { grid-template-columns: 1fr 1fr; gap: .6rem 1.5rem; }
+
+  /*
+   * auto-fit rather than a fixed column count, so one reel sits centred
+   * instead of stranded in the left-hand column, and more reels fill out
+   * the row as they get added.
+   */
+  .reels {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+    justify-content: center;
+    gap: 1.75rem;
+  }
 
   .gig { grid-template-columns: auto 1fr auto; }
   .gig__cta { grid-column: auto; grid-row: 1 / span 2; margin-top: 0; }

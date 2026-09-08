@@ -76,6 +76,99 @@
   var year = document.getElementById('year');
   if (year) { year.textContent = new Date().getFullYear(); }
 
+  /* ---------- reels ---------- */
+
+  /*
+   * Facebook's video plugin renders at whatever width you pass in the URL, so
+   * the iframe is built after the tile has been measured rather than being
+   * stretched with CSS. Reels are 9:16, hence the height.
+   */
+  function buildReel(url, width) {
+    var height = Math.round(width * 16 / 9);
+    var src = 'https://www.facebook.com/plugins/video.php'
+      + '?href=' + encodeURIComponent(url)
+      + '&show_text=false'
+      + '&width=' + width
+      + '&height=' + height;
+
+    var frame = document.createElement('iframe');
+    frame.className = 'reel__frame';
+    frame.src = src;
+    frame.width = width;
+    frame.height = height;
+    frame.loading = 'lazy';
+    frame.scrolling = 'no';
+    frame.frameBorder = '0';
+    frame.allow = 'autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share';
+    frame.allowFullscreen = true;
+    frame.title = 'The Lost Boyz reel';
+    return frame;
+  }
+
+  var reelBox = document.getElementById('reels');
+
+  if (reelBox) {
+    var reelMessage = function (text) {
+      var p = document.createElement('p');
+      p.className = 'reels__msg';
+      p.textContent = text;
+      reelBox.replaceChildren(p);
+    };
+
+    var renderReels = function (reels) {
+      if (!reels.length) {
+        reelMessage('No reels up yet — check back soon.');
+        return;
+      }
+
+      reelBox.replaceChildren();
+
+      // Measure a real tile so the plugin is asked for the right width.
+      var probe = document.createElement('figure');
+      probe.className = 'reel';
+      probe.style.visibility = 'hidden';
+      reelBox.appendChild(probe);
+      var width = Math.round(probe.clientWidth) || 320;
+      reelBox.replaceChildren();
+
+      // Facebook clamps the player, so keep the request inside sane bounds.
+      width = Math.max(220, Math.min(width, 480));
+
+      var frag = document.createDocumentFragment();
+
+      reels.forEach(function (reel) {
+        if (!reel || !reel.url) { return; }
+
+        var fig = document.createElement('figure');
+        fig.className = 'reel';
+        fig.appendChild(buildReel(reel.url, width));
+
+        if (reel.title) {
+          var cap = document.createElement('figcaption');
+          cap.className = 'reel__cap';
+          cap.textContent = reel.title;
+          fig.appendChild(cap);
+        }
+
+        frag.appendChild(fig);
+      });
+
+      reelBox.replaceChildren(frag);
+    };
+
+    fetch('/data/reels.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        renderReels(Array.isArray(data) ? data : (data.reels || []));
+      })
+      .catch(function () {
+        reelMessage('Reels are not loading right now — you can watch them on our Facebook page.');
+      });
+  }
+
   /* ---------- gig dates ---------- */
 
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
