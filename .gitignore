@@ -4,3 +4,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# Browser "Save page as" dumps. Saving a Facebook page pulls down hundreds of
+# megabytes of their JavaScript and never captures the video, so these are
+# always junk -- and 36MB of it nearly ended up committed once already.
+*_files/
