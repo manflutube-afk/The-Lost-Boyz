@@ -1,18 +1,33 @@
 {
-  "_readme": "Facebook reels shown on the Reelz page. Paste the reel URL straight from Facebook — the /reel/... link is fine. 'title' is optional and shows as a caption under the video; none are set yet, so add them when you know what each clip is. Reels must be public on Facebook or they will not play for visitors.",
+  "_readme": "Facebook reels shown on the Reelz page. Paste the reel URL straight from Facebook — the /reel/... link is fine. 'title' is optional and shows as a caption under the video; none are set yet, so add them when you know what each clip is. Reels must be public on Facebook or they will not play for visitors. If a reel is deleted or made private on Facebook it shows \"Video unavailable\" here — remove it from this list.",
   "_example": {
     "url": "https://www.facebook.com/reel/1234567890",
     "title": "Friday night at The Dolphin"
   },
   "reels": [
-    { "url": "https://www.facebook.com/reel/34991504563830820" },
-    { "url": "https://www.facebook.com/reel/1691614358841622" },
-    { "url": "https://www.facebook.com/reel/1544801027110661" },
-    { "url": "https://www.facebook.com/reel/1493842581889603" },
-    { "url": "https://www.facebook.com/reel/1556834439313464" },
-    { "url": "https://www.facebook.com/reel/990466390428594" },
-    { "url": "https://www.facebook.com/reel/1624115715501823" },
-    { "url": "https://www.facebook.com/reel/1610220103530265" },
-    { "url": "https://www.facebook.com/reel/1458023109157711" }
+    {
+      "url": "https://www.facebook.com/reel/34991504563830820"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1691614358841622"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1544801027110661"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1493842581889603"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1556834439313464"
+    },
+    {
+      "url": "https://www.facebook.com/reel/990466390428594"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1624115715501823"
+    },
+    {
+      "url": "https://www.facebook.com/reel/1610220103530265"
+    }
   ]
 }

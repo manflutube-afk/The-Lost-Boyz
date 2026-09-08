@@ -102,6 +102,16 @@ possible:
 - **Only one plays at a time.** Every player reports `startedPlaying`, and that
   handler pauses all the others. Without it, clicking a second reel on a desktop
   leaves two soundtracks fighting.
+
+  There is a catch worth knowing about. The SDK only hands back a player for a
+  video it could actually load — **a reel that has been deleted or made private
+  renders a "Video unavailable" frame and reports nothing at all.** That tile
+  then cannot be paused, and never pauses anything else, so it plays over the
+  top of whatever else is going. Two guards handle it: a tile with no player is
+  stopped by rebuilding it instead, and a click into any reel's iframe is picked
+  up through the window losing focus, which is the only signal an unreported
+  tile gives. If a reel ever misbehaves, check first whether it is still public
+  on Facebook.
 - **Playback is inline.** `data-allowfullscreen` is deliberately `false`. With
   fullscreen allowed, tapping play on a phone hijacks the whole screen and the
   visitor cannot scroll on to the next reel.

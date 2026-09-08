@@ -204,33 +204,6 @@
     };
 
     /*
-     * The SDK builds its own iframe, and gives it allow="encrypted-media" —
-     * no autoplay. The default permissions policy for autoplay is "self", so
-     * a cross-origin frame without allow="autoplay" is refused outright, no
-     * matter how muted it is. That is why scrolling never started anything on
-     * a phone while a desktop, which is far more forgiving, looked fine.
-     *
-     * A frame's permissions are fixed when it loads, so the attribute has to
-     * go on and the frame has to load again for it to count.
-     */
-    var grantAutoplay = function (shell) {
-      var patch = function () {
-        var f = shell.querySelector('iframe');
-        if (!f || f.dataset.autoplayGranted) { return; }
-        f.dataset.autoplayGranted = '1';
-
-        if ((f.getAttribute('allow') || '').indexOf('autoplay') !== -1) { return; }
-
-        f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
-        f.setAttribute('allowfullscreen', 'false');
-        f.src = f.src; // eslint-disable-line no-self-assign -- forces the reload
-      };
-
-      new MutationObserver(patch).observe(shell, { childList: true, subtree: true });
-      patch();
-    };
-
-    /*
      * Builds a tile's player again from scratch. Facebook drops a panel of
      * "related reels" over a finished video, pointing away to Facebook, and
      * seeking back to the start does not clear it — only a fresh player does.
@@ -250,10 +223,32 @@
       reelBox.replaceChildren(p);
     };
 
+    /*
+     * Stop one reel.
+     *
+     * Normally that is just pause(). But the SDK only hands back a player for
+     * a video it could actually load — a reel that has been deleted or made
+     * private renders a "Video unavailable" frame and reports nothing. Such a
+     * tile cannot be paused through the API, so it is rebuilt instead, which
+     * destroys the iframe and stops whatever it was doing.
+     */
+    var settleBy = 0;   // players take a few seconds to arrive after render
+
+    var stopTile = function (id) {
+      var p = players[id];
+      if (p) {
+        try { p.pause(); return; } catch (e) { /* fall through to a rebuild */ }
+      }
+      // Before the players have had time to arrive, a missing one means "not
+      // ready yet", not "broken" — rebuilding then would reload half the page.
+      if (Date.now() < settleBy) { return; }
+      rebuildTile(id);
+    };
+
     var pauseAllBut = function (keepId) {
       tileIds.forEach(function (id) {
-        if (id === keepId || !players[id]) { return; }
-        try { players[id].pause(); } catch (e) { /* player not ready */ }
+        if (id === keepId) { return; }
+        stopTile(id);
       });
     };
 
@@ -445,10 +440,18 @@
       document.body.appendChild(root);
 
       window.fbAsyncInit = function () {
-        FB.init({ xfbml: true, version: FB_VERSION });
+        /*
+         * Subscribe *before* init. FB.init({xfbml:true}) starts parsing the
+         * page straight away, so anything that finished between the init call
+         * and the subscription was never heard about — that tile then had no
+         * player object, could not be paused by the others, and never paused
+         * them either, so two reels ended up playing over each other.
+         */
         FB.Event.subscribe('xfbml.ready', function (msg) {
           if (msg.type === 'video' && msg.id) { wirePlayer(msg.id, msg.instance); }
         });
+
+        FB.init({ xfbml: true, version: FB_VERSION });
       };
 
       var s = document.createElement('script');
@@ -502,12 +505,35 @@
       shells.forEach(function (shell, i) {
         var id = tileIds[i];
         reelCfg[id] = { url: reels[i].url, width: width };
-        grantAutoplay(shell);
         shell.appendChild(makeVideoDiv(id));
       });
 
+      settleBy = Date.now() + 10000;
+
       // The markup is in the page now, so the SDK will find it on init.
       loadSdk();
+
+      /*
+       * A click into any reel's iframe pulls focus out of the page and into
+       * that frame. That is the only signal available for a tile the SDK
+       * never reported — without it, playing a broken reel would leave a
+       * working one still going underneath it.
+       */
+      window.addEventListener('blur', function () {
+        setTimeout(function () {
+          var el = document.activeElement;
+          if (!el || el.tagName !== 'IFRAME') { return; }
+
+          var tile = el.closest ? el.closest('.reel') : null;
+          if (!tile) { return; }
+
+          var id = tile.dataset.reelId;
+          if (id && id !== activeId) {
+            activeId = id;
+            pauseAllBut(id);
+          }
+        }, 0);
+      });
 
       if (autoplayWanted()) {
         watchScroll();
