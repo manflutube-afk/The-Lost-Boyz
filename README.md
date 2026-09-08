@@ -81,23 +81,41 @@ The embeds are deliberately kept off the home page: Facebook's player is slow an
 sets its own cookies, so the home page shows only a thumbnail and the videos load
 on `/reelz`.
 
-**How playback works.** Every tile loads its Facebook player, and the player
-draws the reel's own thumbnail and play button. Tap or click one to play it.
+**How playback works.** The reels use Facebook's **JavaScript SDK**, not plain
+iframes. This matters: a bare iframe gives the page no control at all — it cannot
+start a video, stop one, or even know that a video is playing. The SDK hands back
+a player object per video with `play()`, `pause()`, `mute()` and a
+`startedPlaying` event, and that is what makes the behaviour on this page
+possible:
 
-That is why the players are loaded rather than something lighter: **there is no
-public way to fetch a reel's poster image on its own.** Facebook's oEmbed needs
+- **On a phone, reels play as you scroll onto them,** muted, and stop when they
+  scroll away. Autoplay only works while muted — that is a browser rule, not a
+  choice — so `mute()` is called before every scroll-triggered play. Tapping a
+  reel yourself leaves the sound alone.
+- **Only one plays at a time.** Every player reports `startedPlaying`, and that
+  handler pauses all the others. Without it, clicking a second reel on a desktop
+  leaves two soundtracks fighting.
+- **Playback is inline.** `data-allowfullscreen` is deliberately `false`. With
+  fullscreen allowed, tapping play on a phone hijacks the whole screen and the
+  visitor cannot scroll on to the next reel.
+- **No "related reels" panel at the end.** Facebook covers a finished video with
+  a grid of suggestions pointing back to Facebook. Seeking to the start does not
+  clear it, so when `finishedPlaying` fires the tile's player is rebuilt from
+  scratch, which restores the poster frame. A finished reel is not restarted
+  while it stays on screen, or it would loop and re-download its player each
+  time; scrolling away and back arms it again.
+
+Every tile loads its player rather than something lighter because **there is no
+public way to fetch a reel's poster image on its own** — Facebook's oEmbed needs
 an app token, so the player is the only thing that knows what the video looks
-like. A cheaper placeholder means no thumbnails at all — which is exactly what
-happened in an earlier version, where every tile was a black rectangle until it
-was clicked. `loading="lazy"` keeps the tiles further down the page from loading
-until they are needed.
+like. An earlier version used a cheap placeholder and every tile was a black
+rectangle until clicked.
 
-**There is no autoplay, and this is a Facebook limitation, not an oversight.**
-Facebook's embedded player ignores the `autoplay` parameter outside
-facebook.com. Both spellings were tested on a phone-sized viewport, and the
-video just sits on its poster frame. Scroll-autoplay of the sort Instagram and
-TikTok do needs the actual video files, self-hosted, with a native `<video muted
-playsinline>` element — a few lines of code once the files exist.
+**The cost of this** is Facebook's SDK: a few hundred KB of script, and Facebook
+cookies, on this page. That is the price of the behaviour above, and it is
+confined to `/reelz` — the home page loads no Facebook code at all. If the site
+ever needs a cookie banner, this page is the reason. Self-hosting the video files
+would remove the SDK, the cookies and the Facebook branding in one go.
 
 ### Adding a sponsor
 

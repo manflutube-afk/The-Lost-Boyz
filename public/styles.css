@@ -648,12 +648,18 @@ body.nav-open { overflow: hidden; }
     0 12px 40px rgba(124, 47, 212, .5);
 }
 
-.reel__frame {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
+/*
+ * The SDK renders div.fb-video > span > iframe and writes inline pixel sizes
+ * onto the span, so these need !important to make the player fill the tile.
+ */
+.reel__shell .fb-video,
+.reel__shell .fb-video > span,
+.reel__shell iframe {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
   border: 0;
 }
 

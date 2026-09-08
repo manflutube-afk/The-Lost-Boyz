@@ -159,50 +159,61 @@
   /* ---------- reels ---------- */
 
   /*
-   * Facebook's plugin renders at whatever width the URL asks for, so the
-   * iframes are built after the tiles are in the page and can be measured.
+   * The reels use Facebook's JS SDK rather than plain iframes, because a bare
+   * iframe gives the page no control at all: it cannot start a video, stop
+   * one, or even know that a video is playing. The SDK hands back a player
+   * instance per video with play(), pause() and mute(), plus a startedPlaying
+   * event. That is what makes three things possible:
    *
-   * Every tile loads its player. The player is the only thing that knows what
-   * the video looks like: it draws the reel's own thumbnail and play button.
-   * There is no public way to fetch a reel's poster image on its own, so a
-   * lighter placeholder would mean no thumbnails at all. loading="lazy" keeps
-   * the ones further down the page from loading until they are near.
+   *   - reels play as you scroll onto them on a phone, muted, and stop again
+   *     when they scroll away
+   *   - only one ever plays at a time, so they cannot talk over each other
+   *   - playback happens inline. allowfullscreen is deliberately off; with it
+   *     on, tapping play on a phone hijacks the screen and the visitor cannot
+   *     scroll on to the next reel.
    *
-   * There is deliberately no autoplay here. Facebook's embedded player
-   * ignores the autoplay parameter outside facebook.com -- tested both
-   * spellings, on a phone-sized viewport, and the video simply sits on its
-   * poster. Real scroll-autoplay needs the video files themselves.
+   * Autoplay only works while the video is muted, which is why mute() is
+   * called before every scroll-triggered play. Tapping a reel yourself leaves
+   * the sound alone.
    */
-  function buildReel(url, width) {
-    var height = Math.round(width * 16 / 9);
-    var src = 'https://www.facebook.com/plugins/video.php'
-      + '?href=' + encodeURIComponent(url)
-      + '&show_text=false'
-      // The plugin defaults this to false. Without it, tapping play on a
-      // phone does nothing, because the player wants to go fullscreen.
-      + '&allowfullscreen=true'
-      + '&width=' + width
-      + '&height=' + height;
-
-    var frame = document.createElement('iframe');
-    frame.className = 'reel__frame';
-    frame.src = src;
-    frame.width = width;
-    frame.height = height;
-    frame.loading = 'lazy';
-    frame.scrolling = 'no';
-    frame.frameBorder = '0';
-    // Naming `allow` at all replaces the default permissions policy, so
-    // fullscreen has to be listed here too or the iframe is denied it.
-    frame.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write';
-    frame.allowFullscreen = true;
-    frame.title = 'The Lost Boyz reel';
-    return frame;
-  }
-
   var reelBox = document.getElementById('reels');
 
   if (reelBox) {
+    var FB_SDK = 'https://connect.facebook.net/en_GB/sdk.js';
+    var FB_VERSION = 'v21.0';
+
+    var players = {};    // tile id -> Facebook player instance
+    var reelCfg = {};    // tile id -> { url, width } so a tile can be rebuilt
+    var spent = {};      // tile id -> true once it has played to the end
+    var tileIds = [];
+    var activeId = null;
+
+    var makeVideoDiv = function (id) {
+      var cfg = reelCfg[id];
+      var v = document.createElement('div');
+      v.className = 'fb-video';
+      v.id = id;
+      v.dataset.href = cfg.url;
+      v.dataset.width = cfg.width;
+      v.dataset.showText = 'false';
+      // inline playback: fullscreen would trap the visitor on a phone
+      v.dataset.allowfullscreen = 'false';
+      return v;
+    };
+
+    /*
+     * Builds a tile's player again from scratch. Facebook drops a panel of
+     * "related reels" over a finished video, pointing away to Facebook, and
+     * seeking back to the start does not clear it — only a fresh player does.
+     */
+    var rebuildTile = function (id) {
+      var shell = document.querySelector('[data-reel-id="' + id + '"] .reel__shell');
+      if (!shell || typeof FB === 'undefined') { return; }
+      delete players[id];
+      shell.replaceChildren(makeVideoDiv(id));
+      try { FB.XFBML.parse(shell); } catch (e) { /* leave the tile as it is */ }
+    };
+
     var reelMessage = function (text) {
       var p = document.createElement('p');
       p.className = 'reels__msg';
@@ -210,21 +221,140 @@
       reelBox.replaceChildren(p);
     };
 
+    var pauseAllBut = function (keepId) {
+      tileIds.forEach(function (id) {
+        if (id === keepId || !players[id]) { return; }
+        try { players[id].pause(); } catch (e) { /* player not ready */ }
+      });
+    };
+
+    // Scroll-to-play is a phone behaviour, and only when the visitor has not
+    // asked us to go easy on motion or on their data.
+    var autoplayWanted = function () {
+      if (window.matchMedia('(min-width: 700px)').matches) { return false; }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return false; }
+      var conn = navigator.connection;
+      if (conn && conn.saveData) { return false; }
+      return true;
+    };
+
+    var watchScroll = function () {
+      if (!('IntersectionObserver' in window)) { return; }
+
+      var ratios = new Map();
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { ratios.set(e.target, e.intersectionRatio); });
+
+        var best = null;
+        var bestRatio = 0;
+        ratios.forEach(function (r, el) {
+          if (r > bestRatio) { bestRatio = r; best = el; }
+        });
+
+        // has to be properly on screen before it takes over
+        var bestId = (bestRatio >= 0.6 && best) ? best.dataset.reelId : null;
+        if (bestId === activeId) { return; }
+
+        // Scrolling away from a finished reel arms it again, so coming back
+        // to it later plays it rather than leaving a dead tile.
+        if (activeId) { delete spent[activeId]; }
+
+        activeId = bestId;
+
+        if (!bestId) { pauseAllBut(null); return; }
+
+        var p = players[bestId];
+        if (!p || spent[bestId]) { return; }
+        try {
+          p.mute();          // browsers only allow muted video to start itself
+          p.play();
+        } catch (e) { /* not ready yet; the tap still works */ }
+      }, { threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] });
+
+      reelBox.querySelectorAll('.reel').forEach(function (t) { observer.observe(t); });
+    };
+
+    var wirePlayer = function (id, instance) {
+      players[id] = instance;
+
+      // Whenever anything starts — a tap, or the scroll handler — everything
+      // else stops. This is what keeps them from clashing on a desktop.
+      try {
+        instance.subscribe('startedPlaying', function () {
+          activeId = id;
+          pauseAllBut(id);
+        });
+
+        /*
+         * Left alone, Facebook covers a finished video with a grid of
+         * "related reels" that sends the visitor off to Facebook. Winding
+         * the video back to the start and pausing puts the poster frame
+         * back and takes that panel away with it.
+         */
+        instance.subscribe('finishedPlaying', function () {
+          // Do not start it again on the way back in, or a reel sitting on
+          // screen would loop and re-download its player every time round.
+          spent[id] = true;
+          rebuildTile(id);
+        });
+      } catch (e) { /* older SDK shape; one-at-a-time just won't apply */ }
+
+      /*
+       * The SDK takes a few seconds to hand these back, by which time the
+       * scroll watcher has usually already decided which reel is on screen
+       * and found no player to start. So a player that arrives late and is
+       * the one being looked at has to start itself.
+       */
+      if (id === activeId && autoplayWanted() && !spent[id]) {
+        try {
+          instance.mute();
+          instance.play();
+        } catch (e) { /* the tap still works */ }
+      }
+    };
+
+    var loadSdk = function () {
+      if (document.getElementById('fb-root')) { return; }
+
+      var root = document.createElement('div');
+      root.id = 'fb-root';
+      document.body.appendChild(root);
+
+      window.fbAsyncInit = function () {
+        FB.init({ xfbml: true, version: FB_VERSION });
+        FB.Event.subscribe('xfbml.ready', function (msg) {
+          if (msg.type === 'video' && msg.id) { wirePlayer(msg.id, msg.instance); }
+        });
+      };
+
+      var s = document.createElement('script');
+      s.async = true;
+      s.defer = true;
+      s.crossOrigin = 'anonymous';
+      s.src = FB_SDK;
+      document.body.appendChild(s);
+    };
+
     var renderReels = function (reels) {
       reels = reels.filter(function (r) { return r && r.url; });
 
       if (!reels.length) {
-        reelMessage('No reels up yet -- check back soon.');
+        reelMessage('No reels up yet — check back soon.');
         return;
       }
 
-      // First pass: put the tiles in, so a shell has a real width to measure.
+      // First pass: tiles, so a shell has a real width to measure.
       var frag = document.createDocumentFragment();
       var shells = [];
 
-      reels.forEach(function (reel) {
+      reels.forEach(function (reel, i) {
+        var id = 'reel-' + i;
+        tileIds.push(id);
+
         var fig = document.createElement('figure');
         fig.className = 'reel';
+        fig.dataset.reelId = id;
 
         var shell = document.createElement('div');
         shell.className = 'reel__shell';
@@ -243,11 +373,19 @@
 
       reelBox.replaceChildren(frag);
 
-      // Second pass: measure once, then drop a player into every shell.
+      // Second pass: measure once, then place the players.
       var width = Math.max(220, Math.min(Math.round(shells[0].clientWidth) || 320, 480));
+
       shells.forEach(function (shell, i) {
-        shell.appendChild(buildReel(reels[i].url, width));
+        var id = tileIds[i];
+        reelCfg[id] = { url: reels[i].url, width: width };
+        shell.appendChild(makeVideoDiv(id));
       });
+
+      // The markup is in the page now, so the SDK will find it on init.
+      loadSdk();
+
+      if (autoplayWanted()) { watchScroll(); }
     };
 
     fetch('/data/reels.json', { cache: 'no-cache' })
@@ -259,7 +397,7 @@
         renderReels(Array.isArray(data) ? data : (data.reels || []));
       })
       .catch(function () {
-        reelMessage('Reels are not loading right now -- you can watch them on our Facebook page.');
+        reelMessage('Reels are not loading right now — you can watch them on our Facebook page.');
       });
   }
 
