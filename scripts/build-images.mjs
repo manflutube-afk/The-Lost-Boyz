@@ -147,6 +147,42 @@ for (let i = 1; i <= 10; i++) {
 }
 console.log(`gallery snaps: ${snaps} converted`);
 
+/*
+ * Sponsor logos. Drop whatever a sponsor sends into source-images/sponsors/
+ * and run this; each one is fitted inside 320x160 without being cropped or
+ * stretched, and the surrounding space is left transparent so it sits on the
+ * card's panel whatever shape the logo is.
+ *
+ * 320 wide is deliberate: the card shows them at 160, so this is the two-times
+ * version a phone screen needs.
+ */
+const SPONSOR_SRC = `${SRC}/sponsors`;
+const SPONSOR_OUT = `${OUT}/sponsors`;
+
+if (existsSync(SPONSOR_SRC)) {
+  const { readdirSync } = await import('node:fs');
+  mkdirSync(SPONSOR_OUT, { recursive: true });
+
+  const files = readdirSync(SPONSOR_SRC)
+    .filter((f) => /\.(png|jpe?g|webp|gif|tiff?)$/i.test(f));
+
+  for (const file of files) {
+    const name = file.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    await sharp(`${SPONSOR_SRC}/${file}`)
+      .resize({
+        width: 320,
+        height: 160,
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .webp({ quality: 88, alphaQuality: 90 })
+      .toFile(`${SPONSOR_OUT}/${name}.webp`);
+    console.log(`sponsor logo: ${file} -> sponsors/${name}.webp`);
+  }
+
+  if (!files.length) { console.log('sponsor logos: none to do'); }
+}
+
 // favicons / PWA icons — keep the black backing so the icon reads on any OS
 await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
   .toFile(`${OUT}/icon-512.png`);

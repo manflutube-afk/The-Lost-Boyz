@@ -151,7 +151,20 @@ The Sponsors page is at `/sponsors`. Add businesses in `public/data/sponsors.jso
 }
 ```
 
-Only `name` is required. Put any sponsor logos in `public/images/sponsors/`.
+Only `name` is required.
+
+**Adding a sponsor's logo.** Drop whatever they send into
+`source-images/sponsors/` and run `npm run images`. Each file is fitted inside
+320x160 without cropping or stretching, with transparent space around it so it
+sits on the card whatever shape it is, and written to
+`public/images/sponsors/<name>.webp`. Then point the sponsor's `logo` field at
+that path. The card shows logos at 160 wide, so 320 is the two-times version a
+phone screen needs.
+
+**Ask the sponsor for the file — do not lift it off their Facebook.** A Facebook
+profile picture is 192px at best, which looks soft at the size the card uses,
+and those image URLs are signed and expire. Any business will have their own
+artwork; a printer or embroiderer will have vector originals.
 
 **Where the enquiries go.** The "Become a sponsor" form currently opens the
 visitor's own email app with everything filled in, addressed to `SPONSOR_EMAIL`
