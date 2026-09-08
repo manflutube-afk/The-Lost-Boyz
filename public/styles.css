@@ -1238,16 +1238,17 @@ body.nav-open { overflow: hidden; }
 }
 .contact__v { color: var(--bone); word-break: break-word; }
 
-/* ---------------- Sponsors call-out (home page) ---------------- */
+/* ---------------- Call-outs at the foot of the home page ---------------- */
 
-.sec--sponsors {
-  background: var(--ink);
-  text-align: center;
-}
-/* the heading rule is left-aligned by default, so centre it here */
-.sec--sponsors .h2::after { margin-inline: auto; }
+.sec--cta { text-align: center; }
+/* the heading rule is left-aligned by default, so centre it in these */
+.sec--cta .h2::after { margin-inline: auto; }
 
-.sponsors-links {
+/* alternating grounds so the two call-outs read as separate bands */
+.sec--sponsors { background: var(--ink); }
+.sec--charities { background: var(--ink-2); }
+
+.cta-links {
   display: flex;
   flex-wrap: wrap;
   gap: .75rem;
