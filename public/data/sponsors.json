@@ -7,5 +7,12 @@
     "tier": "Featured",
     "logo": "/images/sponsors/corner-cafe.webp"
   },
-  "sponsors": []
+  "sponsors": [
+    {
+      "name": "Inkspires",
+      "url": "https://www.facebook.com/profile.php?id=61586288057948",
+      "blurb": "Embroidery and DTF printing with a fast turnaround and no minimum order. Based at St Austell Bay Business Park.",
+      "tier": "Featured"
+    }
+  ]
 }
