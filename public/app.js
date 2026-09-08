@@ -3,6 +3,74 @@
 (function () {
   'use strict';
 
+  /* ---------- start at the top on a refresh ---------- */
+
+  /*
+   * Browsers put you back where you were when a page is reloaded. On a long
+   * single-page site that means a refresh drops you into the middle of
+   * whatever section you happened to be reading, which feels broken.
+   *
+   * This is deliberately limited to reloads. Scroll restoration going *back*
+   * to a page is the behaviour people expect — losing your place after
+   * tapping back would be its own annoyance — so back and forward are left
+   * alone. A link with a #section on the end is left alone too: that is
+   * someone asking for a particular part of the page, refresh or not.
+   */
+  (function () {
+    if (!('scrollRestoration' in history)) { return; }
+
+    var entries = (performance.getEntriesByType && performance.getEntriesByType('navigation')) || [];
+    var isReload = entries.length
+      ? entries[0].type === 'reload'
+      // older browsers, where performance.navigation.type 1 means reload
+      : (performance.navigation && performance.navigation.type === 1);
+
+    if (isReload && !window.location.hash) {
+      history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
+
+      /*
+       * Setting it to manual is not quite enough on its own. The browser's
+       * own restore lands after this script has run, and because the page is
+       * still short at that point — images not in yet — it clamps the old
+       * position to whatever height exists and drops you part way down.
+       *
+       * So hold the top briefly while the page settles, and give up the
+       * moment the visitor touches anything, so this can never fight someone
+       * who has started scrolling on their own.
+       */
+      var userMoved = false;
+      var moves = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+      var noteUser = function () { userMoved = true; };
+
+      moves.forEach(function (ev) {
+        window.addEventListener(ev, noteUser, { once: true, passive: true });
+      });
+
+      var pinTop = function () {
+        if (!userMoved) { window.scrollTo(0, 0); }
+      };
+
+      window.addEventListener('load', pinTop);
+      setTimeout(pinTop, 300);
+      setTimeout(function () {
+        pinTop();
+        window.removeEventListener('load', pinTop);
+        moves.forEach(function (ev) { window.removeEventListener(ev, noteUser); });
+      }, 800);
+
+      return;
+    }
+
+    /*
+     * Put it back otherwise. scrollRestoration sticks to the history entry,
+     * so a "manual" left over from an earlier refresh would go on suppressing
+     * restoration for every later visit to this entry — including the back
+     * button, which is exactly what this is trying not to break.
+     */
+    history.scrollRestoration = 'auto';
+  })();
+
   /* ---------- mobile nav drawer ---------- */
 
   var toggle = document.getElementById('navToggle');
