@@ -54,6 +54,32 @@ These are placeholders. Search the project for `TODO` to find them all.
 | `public/index.html` — Booking section | Replace `bookings@example.com` and the phone number. The Facebook link is already set. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 
+### Adding a reel
+
+The Reelz page lives at `/reelz` and is its own page, reached from the thumbnail
+on the home page. Add videos in `public/data/reels.json`:
+
+```json
+{
+  "reels": [
+    {
+      "url": "https://www.facebook.com/reel/34991504563830820",
+      "title": "Friday night at The Dolphin"
+    }
+  ]
+}
+```
+
+Paste the Facebook reel URL exactly as it appears in the address bar — the
+`/reel/...` form works as-is. `title` is optional. The reel has to be **public**
+on Facebook or it will not play for anyone else, and if a reel is later deleted
+or made private its tile will break, since the video is streamed from Facebook
+rather than hosted here.
+
+The embeds are deliberately kept off the home page: Facebook's player is slow and
+sets its own cookies, so the home page shows only a thumbnail and the videos load
+on `/reelz`.
+
 ### Adding a gig
 
 Edit `public/data/gigs.json` and add entries to the `gigs` list:
@@ -103,11 +129,13 @@ footer.
 
 ```
 public/            everything served to the browser
-  index.html       the whole site — one page, anchored sections
+  index.html       the main site — one page, anchored sections
+  reelz.html       the Reelz page, served at /reelz
   404.html         not-found page
   styles.css       mobile-first, breakpoints at 700px and 900px
-  app.js           nav drawer, sticky header, gig rendering
+  app.js           nav drawer, sticky header, reel and gig rendering
   data/gigs.json   live dates — the one file you edit regularly
+  data/reels.json  Facebook reel links for the Reelz page
   images/          generated; don't edit by hand
 scripts/
   build-images.mjs image pipeline (npm run images)

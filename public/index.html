@@ -36,7 +36,7 @@
   <nav class="nav" id="nav" aria-label="Main">
     <a href="#music">Music</a>
     <a href="#band">The Boyz</a>
-    <a href="#reelz">Reelz</a>
+    <a href="/reelz">Reelz</a>
     <a href="#live">Live</a>
     <a href="#gallery">Gallery</a>
     <a href="#booking">Booking</a>
@@ -151,10 +151,21 @@
   <div class="wrap">
     <p class="eyebrow">Straight off the stage</p>
     <h2 class="h2">Reelz</h2>
-    <!-- Videos come from /data/reels.json — paste a Facebook reel URL in there. -->
-    <div id="reels" class="reels" aria-live="polite">
-      <p class="reels__msg">Loading reels…</p>
-    </div>
+    <p class="lead">Live video from the boyz — the good bits, filmed on the night.</p>
+
+    <!-- Deliberately just a thumbnail, not the embeds. Facebook's player is
+         slow to load, so it stays on /reelz rather than holding up the
+         home page. -->
+    <a class="teaser" href="/reelz">
+      <picture>
+        <source type="image/webp" media="(min-width:700px)" srcset="/images/live1-1024.webp">
+        <source type="image/webp" srcset="/images/live1-640.webp">
+        <img src="/images/live1-1024.jpg" loading="lazy" decoding="async"
+             alt="The Lost Boyz on stage in front of their winged backdrop.">
+      </picture>
+      <span class="teaser__play" aria-hidden="true"></span>
+      <span class="teaser__cta">See our Reelz</span>
+    </a>
   </div>
 </section>
 
