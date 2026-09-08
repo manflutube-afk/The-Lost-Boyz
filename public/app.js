@@ -1138,7 +1138,27 @@
       meta.className = 'gig__meta';
       meta.textContent = [g.town, g.time].filter(Boolean).join(' · ');
 
-      card.append(date, venue, meta);
+      /*
+       * Venue, town and note live in one wrapper rather than being three
+       * separate grid children. Auto-placement had been doing the layout,
+       * and adding a fourth child pushed the venue into the button's column
+       * on wide screens. One block keeps the card to [date][details][button]
+       * at every width, however many lines the details run to.
+       */
+      var body = document.createElement('div');
+      body.className = 'gig__body';
+      body.append(venue, meta);
+
+      // an optional line for anything that makes the night different —
+      // a charity do, a support act, a birthday
+      if (g.note) {
+        var note = document.createElement('div');
+        note.className = 'gig__note';
+        note.textContent = g.note;
+        body.appendChild(note);
+      }
+
+      card.append(date, body);
 
       if (g.ticketUrl) {
         var a = document.createElement('a');
@@ -1146,7 +1166,12 @@
         a.href = g.ticketUrl;
         a.rel = 'noopener';
         a.target = '_blank';
-        a.textContent = 'Tickets';
+        /*
+         * Not every gig sells tickets. A free night at a pub with a Facebook
+         * event behind it wants "Event details", not a Tickets button that
+         * promises something to buy.
+         */
+        a.textContent = g.linkLabel || 'Tickets';
         card.appendChild(a);
       }
 

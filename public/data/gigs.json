@@ -5,7 +5,19 @@
     "venue": "The Dolphin Inn",
     "town": "Penzance",
     "time": "9pm",
+    "note": "optional - a line about what makes the night different",
+    "linkLabel": "optional - button text, defaults to \"Tickets\"",
     "ticketUrl": "https://example.com/tickets"
   },
-  "gigs": []
+  "gigs": [
+    {
+      "date": "2026-09-19",
+      "venue": "The Ship Inn",
+      "town": "Lerryn",
+      "time": "7pm",
+      "note": "Paul's Big Shave — a charity night for Brake, with the boyz playing live",
+      "linkLabel": "Event details",
+      "ticketUrl": "https://www.facebook.com/events/2224289328305855/"
+    }
+  ]
 }

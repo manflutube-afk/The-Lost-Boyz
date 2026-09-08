@@ -1048,7 +1048,6 @@ body.nav-open { overflow: hidden; }
   border-radius: var(--radius);
 }
 .gig__date {
-  grid-row: 1 / span 2;
   display: grid;
   place-items: center;
   width: 62px;
@@ -1073,6 +1072,18 @@ body.nav-open { overflow: hidden; }
   color: var(--bone);
 }
 .gig__meta { font-size: .88rem; color: var(--muted); }
+
+/* venue, town and note as one block, so the card stays [date][details][button] */
+.gig__body { display: grid; gap: .1rem; }
+
+/* the optional line for a charity night, a support act, whatever it is */
+.gig__note {
+  margin-top: .45rem;
+  font-size: .86rem;
+  line-height: 1.45;
+  color: var(--violet-hi);
+}
+
 .gig__cta { grid-column: 1 / -1; margin-top: .9rem; }
 
 /* ---------------- Gallery ---------------- */
@@ -1400,7 +1411,7 @@ body.nav-open { overflow: hidden; }
   .charities { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
 
   .gig { grid-template-columns: auto 1fr auto; }
-  .gig__cta { grid-column: auto; grid-row: 1 / span 2; margin-top: 0; }
+  .gig__cta { grid-column: auto; margin-top: 0; }
 }
 
 @media (min-width: 900px) {
