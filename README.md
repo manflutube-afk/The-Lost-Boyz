@@ -90,8 +90,27 @@ possible:
 
 - **On a phone, reels play as you scroll onto them,** muted, and stop when they
   scroll away. Autoplay only works while muted — that is a browser rule, not a
-  choice — so `mute()` is called before every scroll-triggered play. Tapping a
-  reel yourself leaves the sound alone.
+  choice — so players are muted the moment they exist and again before every
+  scroll-triggered play. Tapping a reel yourself leaves the sound alone.
+
+  Getting this right on real phones took some care, and it is worth knowing why.
+  **Autoplay working on a desktop proves nothing about a phone.** Desktop
+  browsers will often let a video through based on how much video you have
+  watched on that site before, so a machine used for testing becomes steadily
+  more permissive than a visitor's phone. Device emulation does not change this
+  — it changes the screen size and the user agent, not the autoplay policy. So
+  `startMuted()` mutes, plays, then checks whether the position actually moved,
+  and tries again up to four times, because the SDK reports a player ready
+  slightly before it will reliably act on `play()`. If a browser still refuses,
+  the visitor's first touch anywhere on the page starts the reel that is on
+  screen — and that fallback is skipped once anything has played, so it can
+  never mute or restart a reel someone chose to play themselves.
+
+  Note also that this is **not** gated on `prefers-reduced-motion`. It was
+  originally, which quietly disabled the whole feature for anyone with "Reduce
+  Motion" switched on in iOS accessibility settings — a common setting, and a
+  confusing thing to debug. That setting is about interface animation, not video
+  the visitor came to watch.
 - **Only one plays at a time.** Every player reports `startedPlaying`, and that
   handler pauses all the others. Without it, clicking a second reel on a desktop
   leaves two soundtracks fighting.

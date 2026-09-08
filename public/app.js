@@ -182,6 +182,7 @@
     var FB_SDK = 'https://connect.facebook.net/en_GB/sdk.js';
     var FB_VERSION = 'v21.0';
 
+    var anyStarted = false;
     var players = {};    // tile id -> Facebook player instance
     var reelCfg = {};    // tile id -> { url, width } so a tile can be rebuilt
     var spent = {};      // tile id -> true once it has played to the end
@@ -231,11 +232,48 @@
     // Scroll-to-play is a phone behaviour, and only when the visitor has not
     // asked us to go easy on motion or on their data.
     var autoplayWanted = function () {
+      // Phones only. Deliberately not gated on prefers-reduced-motion: that
+      // setting is about interface animation, and plenty of people leave
+      // "Reduce Motion" switched on in iOS accessibility settings, which was
+      // quietly turning this feature off for them entirely.
       if (window.matchMedia('(min-width: 700px)').matches) { return false; }
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return false; }
       var conn = navigator.connection;
       if (conn && conn.saveData) { return false; }
       return true;
+    };
+
+    /*
+     * Starting a video from code, with no tap behind it, is only allowed
+     * while it is muted — and mobile browsers are far stricter about this
+     * than a desktop one, which will often let a video through on the
+     * strength of how much video you have watched on that site before. That
+     * difference is why this can look fine on a desktop and do nothing on a
+     * phone.
+     *
+     * So: mute first, then play, then check whether it actually moved, and
+     * try again a few times if it did not. The SDK reports a player ready
+     * slightly before it will reliably act on play().
+     */
+    var startMuted = function (id, attempt) {
+      var p = players[id];
+      if (!p || id !== activeId || spent[id]) { return; }
+
+      attempt = attempt || 1;
+
+      try {
+        p.mute();
+        p.play();
+      } catch (e) { return; }
+
+      setTimeout(function () {
+        if (id !== activeId || spent[id] || attempt >= 4) { return; }
+
+        var pos = 0;
+        try { pos = p.getCurrentPosition() || 0; } catch (e) { return; }
+
+        // still sitting at the start, so it never really began
+        if (pos <= 0.05) { startMuted(id, attempt + 1); }
+      }, 700);
     };
 
     var watchScroll = function () {
@@ -264,12 +302,7 @@
 
         if (!bestId) { pauseAllBut(null); return; }
 
-        var p = players[bestId];
-        if (!p || spent[bestId]) { return; }
-        try {
-          p.mute();          // browsers only allow muted video to start itself
-          p.play();
-        } catch (e) { /* not ready yet; the tap still works */ }
+        startMuted(bestId, 1);
       }, { threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] });
 
       reelBox.querySelectorAll('.reel').forEach(function (t) { observer.observe(t); });
@@ -278,10 +311,15 @@
     var wirePlayer = function (id, instance) {
       players[id] = instance;
 
+      // Mute every player the moment it exists, so it is already silent well
+      // before anything tries to start it.
+      try { instance.mute(); } catch (e) { /* not ready; startMuted retries */ }
+
       // Whenever anything starts — a tap, or the scroll handler — everything
       // else stops. This is what keeps them from clashing on a desktop.
       try {
         instance.subscribe('startedPlaying', function () {
+          anyStarted = true;
           activeId = id;
           pauseAllBut(id);
         });
@@ -307,10 +345,7 @@
        * the one being looked at has to start itself.
        */
       if (id === activeId && autoplayWanted() && !spent[id]) {
-        try {
-          instance.mute();
-          instance.play();
-        } catch (e) { /* the tap still works */ }
+        startMuted(id, 1);
       }
     };
 
@@ -385,7 +420,21 @@
       // The markup is in the page now, so the SDK will find it on init.
       loadSdk();
 
-      if (autoplayWanted()) { watchScroll(); }
+      if (autoplayWanted()) {
+        watchScroll();
+
+        /*
+         * Last resort. If the browser has refused every attempt so far, a
+         * genuine touch satisfies it, and the reel already on screen can
+         * start. Skipped once anything has played, so it can never mute or
+         * restart a reel the visitor chose to play themselves.
+         */
+        var nudge = function () {
+          if (!anyStarted && activeId) { startMuted(activeId, 1); }
+        };
+        document.addEventListener('touchstart', nudge, { once: true, passive: true });
+        document.addEventListener('click', nudge, { once: true });
+      }
     };
 
     fetch('/data/reels.json', { cache: 'no-cache' })
