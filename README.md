@@ -88,29 +88,18 @@ a player object per video with `play()`, `pause()`, `mute()` and a
 `startedPlaying` event, and that is what makes the behaviour on this page
 possible:
 
-- **On a phone, reels play as you scroll onto them,** muted, and stop when they
-  scroll away. Autoplay only works while muted — that is a browser rule, not a
-  choice — so players are muted the moment they exist and again before every
-  scroll-triggered play. Tapping a reel yourself leaves the sound alone.
+- **Scroll-to-play is currently switched off.** iOS will not let a video inside
+  a cross-origin iframe start itself, and the setup that would allow it — muted
+  and inline from before the video loads — happens inside Facebook's player,
+  out of reach. The attempt did real harm: to try at all, the reel had to be
+  muted first, so tapping one caught it silent and the opening seconds of the
+  song were lost. `autoplayWanted()` in `app.js` now returns `false`, with the
+  old test kept underneath it in a comment.
 
-  Getting this right on real phones took some care, and it is worth knowing why.
-  **Autoplay working on a desktop proves nothing about a phone.** Desktop
-  browsers will often let a video through based on how much video you have
-  watched on that site before, so a machine used for testing becomes steadily
-  more permissive than a visitor's phone. Device emulation does not change this
-  — it changes the screen size and the user agent, not the autoplay policy. So
-  `startMuted()` mutes, plays, then checks whether the position actually moved,
-  and tries again up to four times, because the SDK reports a player ready
-  slightly before it will reliably act on `play()`. If a browser still refuses,
-  the visitor's first touch anywhere on the page starts the reel that is on
-  screen — and that fallback is skipped once anything has played, so it can
-  never mute or restart a reel someone chose to play themselves.
+  Turn it back on the day the band's own video files exist. A self-hosted
+  `<video muted playsinline>` autoplays on iOS without any of this, and the
+  scroll watcher is already written and working.
 
-  Note also that this is **not** gated on `prefers-reduced-motion`. It was
-  originally, which quietly disabled the whole feature for anyone with "Reduce
-  Motion" switched on in iOS accessibility settings — a common setting, and a
-  confusing thing to debug. That setting is about interface animation, not video
-  the visitor came to watch.
 - **Only one plays at a time.** Every player reports `startedPlaying`, and that
   handler pauses all the others. Without it, clicking a second reel on a desktop
   leaves two soundtracks fighting.
@@ -165,9 +154,13 @@ To collect enquiries properly instead, set `SPONSOR_ENDPOINT` in `app.js` to a
 URL that accepts a JSON `POST`, and the form will send there and show an error if
 it fails. Nothing else needs changing.
 
-**The prices are not confirmed.** Only the £10 a month tier came from the band.
-The £25 monthly and £50 one-off tiers in `sponsors.html` are placeholders — get
-them signed off before the site goes live.
+**Prices.** Supporter is £5 a month and Featured is £10 a month, both from the
+band. The £50 one-off tier in `sponsors.html` is still a placeholder — get it
+signed off before the site goes live. Prices appear twice in that file: on the
+plan cards and in the enquiry form's dropdown, so change both.
+
+The sponsors themselves are listed **above** the sponsorship plans, so visitors
+see who is already backing the band before they are asked for anything.
 
 ### Adding a gig
 
@@ -245,6 +238,12 @@ Two images get special treatment in that script.
 background, so it is only trimmed and then padded out to a **centred square**.
 That padding matters: trimming leaves slightly uneven margins, and an off-centre
 disc visibly wobbles once it starts spinning.
+
+The gallery snaps (`d1.jpg` … `d10.jpg`) are 206px squares — Facebook-sized
+thumbnails rather than full photos. There is nothing to resize down to and no
+point inventing pixels by scaling up, so they are converted as they are and the
+gallery lays them out small, around 105px, where they still look sharp. **If the
+band can supply the originals, replace them and they can be shown much larger.**
 
 The band logo gets special treatment too: the artwork is light
 line-work on a solid black square, so the script uses the image's own brightness

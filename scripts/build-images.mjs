@@ -132,6 +132,21 @@ if (existsSync(DISC)) {
   console.warn('skipping lostcd: source-images/lostcd.png not found');
 }
 
+/*
+ * Gallery snaps (d1..d10). These arrive as 206px squares — Facebook-sized
+ * thumbnails rather than full photos — so there is nothing to resize down to
+ * and no point inventing pixels by scaling up. They are converted as they
+ * are, and the gallery lays them out small enough to stay sharp.
+ */
+let snaps = 0;
+for (let i = 1; i <= 10; i++) {
+  const src = `${SRC}/d${i}.jpg`;
+  if (!existsSync(src)) { continue; }
+  await sharp(src).webp({ quality: 82 }).toFile(`${OUT}/d${i}.webp`);
+  snaps++;
+}
+console.log(`gallery snaps: ${snaps} converted`);
+
 // favicons / PWA icons — keep the black backing so the icon reads on any OS
 await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
   .toFile(`${OUT}/icon-512.png`);

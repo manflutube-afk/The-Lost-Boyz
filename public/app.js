@@ -259,15 +259,27 @@
 
     // Scroll-to-play is a phone behaviour, and only when the visitor has not
     // asked us to go easy on motion or on their data.
+    /*
+     * Scroll-to-play is switched off.
+     *
+     * iOS will not let a video in a cross-origin iframe start itself, and the
+     * setup that would allow it — muted and inline from before the video
+     * loads — happens inside Facebook's player, out of reach from here. The
+     * attempt was doing real harm: to try at all the reel had to be muted
+     * first, so tapping one caught it silent and the opening seconds of the
+     * song were lost.
+     *
+     * Flip this back to the commented-out test the day the band's own video
+     * files exist. A self-hosted <video muted playsinline> autoplays on iOS
+     * without any of this, and the scroll watcher below is ready for it.
+     */
     var autoplayWanted = function () {
-      // Phones only. Deliberately not gated on prefers-reduced-motion: that
-      // setting is about interface animation, and plenty of people leave
-      // "Reduce Motion" switched on in iOS accessibility settings, which was
-      // quietly turning this feature off for them entirely.
-      if (window.matchMedia('(min-width: 700px)').matches) { return false; }
-      var conn = navigator.connection;
-      if (conn && conn.saveData) { return false; }
-      return true;
+      return false;
+
+      // if (window.matchMedia('(min-width: 700px)').matches) { return false; }
+      // var conn = navigator.connection;
+      // if (conn && conn.saveData) { return false; }
+      // return true;
     };
 
     /*
