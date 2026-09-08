@@ -269,6 +269,12 @@ gallery shows them at around 278px in the tiles, and up to twice their natural
 width in the photo viewer. **If the band can supply the originals, replace them
 and they will sharpen up straight away** — nothing else needs changing.
 
+The **social sharing card** (`og.jpg`, 1200x630 — the size Facebook, WhatsApp
+and the rest crop to) is built in that script from the cut-out logo on the
+site's own violet glow, rather than being a crop of a photo. The logo is sized
+to leave clear air around the wingtips, because platforms crop these cards
+differently and anything tight to an edge is the first thing lost.
+
 The band logo gets special treatment too: the artwork is light
 line-work on a solid black square, so the script uses the image's own brightness
 as an alpha channel. That knocks the black out and leaves a transparent logo that

@@ -153,8 +153,43 @@ await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
 await sharp(LOGO).resize(192, 192, { fit: 'cover' }).png()
   .toFile(`${OUT}/icon-192.png`);
 
-// social share card, cropped from the album cover
-await sharp(`${SRC}/A2.jpg`).resize(1200, 630, { fit: 'cover', position: 'centre' })
-  .jpeg({ quality: 82 }).toFile(`${OUT}/og.jpg`);
+/*
+ * Social sharing card, 1200x630 — the size Facebook, WhatsApp, X and the
+ * rest crop to. Built from the cut-out logo on the site's own violet glow,
+ * rather than a crop of the album art, so a shared link is recognisably the
+ * band rather than an arbitrary slice of a picture.
+ */
+const OG_W = 1200;
+const OG_H = 630;
+
+const ogBackground = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${OG_W}" height="${OG_H}">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="44%" r="72%">
+      <stop offset="0%"   stop-color="#4a1878"/>
+      <stop offset="52%"  stop-color="#170b26"/>
+      <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="${OG_W}" height="${OG_H}" fill="url(#glow)"/>
+  <rect x="0" y="0" width="${OG_W}" height="6" fill="#a855f7"/>
+</svg>`);
+
+// Sized to leave clear air around the wingtips: social platforms crop these
+// cards differently, and anything tight to an edge is the first thing lost.
+const ogLogoWidth = 600;
+const ogLogo = await sharp(cutoutPng).resize({ width: ogLogoWidth }).png().toBuffer();
+const ogLogoMeta = await sharp(ogLogo).metadata();
+
+await sharp(ogBackground)
+  .composite([{
+    input: ogLogo,
+    left: Math.round((OG_W - ogLogoWidth) / 2),
+    top: Math.round((OG_H - ogLogoMeta.height) / 2),
+  }])
+  .jpeg({ quality: 88, mozjpeg: true })
+  .toFile(`${OUT}/og.jpg`);
+
+console.log(`og card: ${OG_W}x${OG_H} from the logo`);
 
 console.log('done');
