@@ -35,29 +35,44 @@
        * still short at that point — images not in yet — it clamps the old
        * position to whatever height exists and drops you part way down.
        *
-       * So hold the top briefly while the page settles, and give up the
-       * moment the visitor touches anything, so this can never fight someone
-       * who has started scrolling on their own.
+       * A fixed timer was not enough either: on a desktop, with the big hero
+       * and gallery images taking longer, the restore arrives after any
+       * sensible delay has expired. So instead of guessing when it lands,
+       * watch for it — any scroll we did not ask for gets put straight back
+       * to the top, until the page has finished loading.
+       *
+       * It gives up the instant the visitor touches anything, so it can
+       * never fight someone scrolling of their own accord.
        */
-      var userMoved = false;
+      var pinning = true;
       var moves = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
-      var noteUser = function () { userMoved = true; };
 
-      moves.forEach(function (ev) {
-        window.addEventListener(ev, noteUser, { once: true, passive: true });
-      });
-
-      var pinTop = function () {
-        if (!userMoved) { window.scrollTo(0, 0); }
+      var stopPinning = function () {
+        if (!pinning) { return; }
+        pinning = false;
+        window.removeEventListener('scroll', onScroll);
+        moves.forEach(function (ev) { window.removeEventListener(ev, stopPinning); });
       };
 
-      window.addEventListener('load', pinTop);
-      setTimeout(pinTop, 300);
-      setTimeout(function () {
+      var pinTop = function () {
+        if (pinning && window.scrollY !== 0) { window.scrollTo(0, 0); }
+      };
+
+      function onScroll() { pinTop(); }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      moves.forEach(function (ev) {
+        window.addEventListener(ev, stopPinning, { passive: true });
+      });
+
+      window.addEventListener('load', function () {
         pinTop();
-        window.removeEventListener('load', pinTop);
-        moves.forEach(function (ev) { window.removeEventListener(ev, noteUser); });
-      }, 800);
+        // a short grace after load, for a restore that lands right on the line
+        setTimeout(stopPinning, 500);
+      });
+
+      // and a hard stop, so nothing can hold the page hostage
+      setTimeout(stopPinning, 3000);
 
       return;
     }
