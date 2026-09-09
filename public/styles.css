@@ -695,6 +695,8 @@ body.nav-open { overflow: hidden; }
   display: grid;
   gap: 1.5rem;
   justify-items: center;
+  /* clips are portrait and landscape both, so tiles differ in height */
+  align-items: start;
 }
 
 .reels__msg {
@@ -713,11 +715,17 @@ body.nav-open { overflow: hidden; }
   margin: 0;
 }
 
-/* the purple frame — holds either the placeholder or the loaded player */
+/*
+ * The purple frame around each clip. No aspect-ratio here — it is set on the
+ * element from the video's real dimensions, because these were filmed both
+ * ways up and one fixed shape would crop half of them to bits. Setting it
+ * per clip also reserves the right space before the poster arrives, so the
+ * page does not jump as they load.
+ */
 .reel__shell {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;
+  aspect-ratio: 9 / 16;   /* fallback only; overridden per clip */
   overflow: hidden;
   background: #000;
   border: 2px solid var(--violet);
@@ -735,26 +743,19 @@ body.nav-open { overflow: hidden; }
     0 12px 40px rgba(124, 47, 212, .5);
 }
 
-/*
- * The SDK renders div.fb-video > span > iframe and writes inline pixel sizes
- * onto the span, so these need !important to make the player fill the tile.
- */
-.reel__shell .fb-video,
-.reel__shell .fb-video > span,
-.reel__shell iframe {
-  position: absolute !important;
-  inset: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+.reel__video {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* the tile already matches the clip, so this neither crops nor letterboxes */
+  object-fit: contain;
+  background: #000;
   border: 0;
 }
 
-/*
- * A faint holding pattern behind the player. Facebook's iframe paints its
- * own thumbnail once it loads, so this is only ever seen for a moment while
- * that happens — but without it the tile is a black rectangle.
- */
+/* seen only until the poster frame paints */
 .reel__shell::before {
   content: "";
   position: absolute;

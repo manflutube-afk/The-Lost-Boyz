@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler pages dev",
     "deploy": "wrangler pages deploy",
-    "images": "node scripts/build-images.mjs"
+    "images": "node scripts/build-images.mjs",
+    "videos": "node scripts/build-videos.mjs"
   },
   "devDependencies": {
     "sharp": "^0.34.5",

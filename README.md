@@ -53,85 +53,58 @@ These are placeholders. Search the project for `TODO` to find them all.
 | `public/index.html` — Music section | Apple Music is linked as a **pre-add** — the single is not out until 20 September. On release day change the "Pre-add the single" label to "Listen on", and add Spotify and YouTube next to it as those links arrive, deleting the line underneath that says they are to follow. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 
-### Adding a reel
+### Adding a video to Reelz
 
-The Reelz page lives at `/reelz` and is its own page, reached from the thumbnail
-on the home page. Add videos in `public/data/reels.json`:
+The clips are **hosted here**, not embedded from Facebook. Drop the files into
+`source-images/` and run:
 
-```json
-{
-  "reels": [
-    {
-      "url": "https://www.facebook.com/reel/34991504563830820",
-      "title": "Friday night at The Dolphin"
-    }
-  ]
-}
+```bash
+npm run videos
 ```
 
-Paste the Facebook reel URL exactly as it appears in the address bar — the
-`/reel/...` form works as-is. `title` is optional. The reel has to be **public**
-on Facebook or it will not play for anyone else, and if a reel is later deleted
-or made private its tile will break, since the video is streamed from Facebook
-rather than hosted here.
+That re-encodes every clip, pulls a poster frame from each, and rewrites
+`public/data/reels.json` with the list the page reads. Videos are shown in
+filename order, so rename the sources if you want a different order.
 
-The embeds are deliberately kept off the home page: Facebook's player is slow and
-sets its own cookies, so the home page shows only a thumbnail and the videos load
-on `/reelz`.
+To caption a clip, add a `title` to its entry in `public/data/reels.json`.
+Titles survive a rebuild — the script reads the existing file and keeps them.
 
-**How playback works.** The reels use Facebook's **JavaScript SDK**, not plain
-iframes. This matters: a bare iframe gives the page no control at all — it cannot
-start a video, stop one, or even know that a video is playing. The SDK hands back
-a player object per video with `play()`, `pause()`, `mute()` and a
-`startedPlaying` event, and that is what makes the behaviour on this page
-possible:
+**Why the clips are re-encoded rather than used as they are.** Phone footage
+cannot go straight onto a website:
 
-- **Scroll-to-play is currently switched off.** iOS will not let a video inside
-  a cross-origin iframe start itself, and the setup that would allow it — muted
-  and inline from before the video loads — happens inside Facebook's player,
-  out of reach. The attempt did real harm: to try at all, the reel had to be
-  muted first, so tapping one caught it silent and the opening seconds of the
-  song were lost. `autoplayWanted()` in `app.js` now returns `false`, with the
-  old test kept underneath it in a comment.
+- They arrive as `.mov`, and one in this batch was **HEVC**, which most
+  browsers refuse to play at all.
+- One was **42MB**. Cloudflare Pages rejects any file over **25 MiB**, so it
+  could not have been deployed.
+- The index in a raw `.mov` sits at the end of the file, so nothing plays until
+  the whole thing has downloaded. The re-encode moves it to the front.
 
-  Turn it back on the day the band's own video files exist. A self-hosted
-  `<video muted playsinline>` autoplays on iOS without any of this, and the
-  scroll watcher is already written and working.
+Each clip is given a bitrate worked out from its own length against a size
+budget, capped on top of a quality setting. A fixed quality setting cannot
+promise a size: the near-three-minute clip in the first batch went past 25 MiB
+and was still climbing. Anything over 100 seconds is also scaled down, because
+spreading a small bitrate over a big frame is what makes video look like wet
+paint. If a clip somehow still overshoots, it is re-encoded lower rather than
+left as a file the deploy would refuse.
 
-- **Only one plays at a time.** Every player reports `startedPlaying`, and that
-  handler pauses all the others. Without it, clicking a second reel on a desktop
-  leaves two soundtracks fighting.
+**The originals are not in this repository.** Ten clips came to 130MB, and git
+never forgets a file, so `source-images/*.mov` is ignored. Only the transcoded
+copies in `public/videos/` are committed and served. Keep your own backup of the
+originals — you need them to re-run the script.
 
-  There is a catch worth knowing about. The SDK only hands back a player for a
-  video it could actually load — **a reel that has been deleted or made private
-  renders a "Video unavailable" frame and reports nothing at all.** That tile
-  then cannot be paused, and never pauses anything else, so it plays over the
-  top of whatever else is going. Two guards handle it: a tile with no player is
-  stopped by rebuilding it instead, and a click into any reel's iframe is picked
-  up through the window losing focus, which is the only signal an unreported
-  tile gives. If a reel ever misbehaves, check first whether it is still public
-  on Facebook.
-- **Playback is inline.** `data-allowfullscreen` is deliberately `false`. With
-  fullscreen allowed, tapping play on a phone hijacks the whole screen and the
-  visitor cannot scroll on to the next reel.
-- **No "related reels" panel at the end.** Facebook covers a finished video with
-  a grid of suggestions pointing back to Facebook. Seeking to the start does not
-  clear it, so when `finishedPlaying` fires the tile's player is rebuilt from
-  scratch, which restores the poster frame. A finished reel is not restarted
-  while it stays on screen, or it would loop and re-download its player each
-  time; scrolling away and back arms it again.
+**What this replaced, and why it is worth not going back.** The reels used to be
+embedded from Facebook through their JavaScript SDK. That version could not
+autoplay on an iPhone at all — iOS will not let a video inside a cross-origin
+iframe start itself, and the setup that would allow it lives inside Facebook's
+player, out of reach. It threw a grid of "related reels" over the end of every
+clip, pointing people away to Facebook. A reel that was deleted or made private
+appeared as a broken tile and, because Facebook reported no player for it, could
+not be stopped and played over the top of everything else. It loaded a few
+hundred KB of Facebook script and set Facebook cookies on the page. And the
+videos counted for Facebook's search ranking, not this site's.
 
-Every tile loads its player rather than something lighter because **there is no
-public way to fetch a reel's poster image on its own** — Facebook's oEmbed needs
-an app token, so the player is the only thing that knows what the video looks
-like. An earlier version used a cheap placeholder and every tile was a black
-rectangle until clicked.
+Owning the files makes all of that go away, and the code is a third of the size.
 
-**The cost of this** is Facebook's SDK: a few hundred KB of script, and Facebook
-cookies, on this page. That is the price of the behaviour above, and it is
-confined to `/reelz` — the home page loads no Facebook code at all. If the site
-ever needs a cookie banner, this page is the reason. Self-hosting the video files
-would remove the SDK, the cookies and the Facebook branding in one go.
 
 ### Adding a sponsor
 

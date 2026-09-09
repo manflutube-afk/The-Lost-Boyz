@@ -9,3 +9,11 @@ Thumbs.db
 # megabytes of their JavaScript and never captures the video, so these are
 # always junk -- and 36MB of it nearly ended up committed once already.
 *_files/
+
+# Raw camera footage. These are the originals straight off a phone — 130MB for
+# ten clips, one of them 42MB — and only the transcoded copies in
+# public/videos/ are ever served. Keeping them out stops the repository
+# carrying that weight forever. Keep your own backup of the originals.
+source-images/*.mov
+source-images/*.MOV
+source-images/*.mp4

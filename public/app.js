@@ -242,63 +242,17 @@
   /* ---------- reels ---------- */
 
   /*
-   * The reels use Facebook's JS SDK rather than plain iframes, because a bare
-   * iframe gives the page no control at all: it cannot start a video, stop
-   * one, or even know that a video is playing. The SDK hands back a player
-   * instance per video with play(), pause() and mute(), plus a startedPlaying
-   * event. That is what makes three things possible:
+   * Self-hosted video, played by the browser's own <video> element.
    *
-   *   - reels play as you scroll onto them on a phone, muted, and stop again
-   *     when they scroll away
-   *   - only one ever plays at a time, so they cannot talk over each other
-   *   - playback happens inline. allowfullscreen is deliberately off; with it
-   *     on, tapping play on a phone hijacks the screen and the visitor cannot
-   *     scroll on to the next reel.
-   *
-   * Autoplay only works while the video is muted, which is why mute() is
-   * called before every scroll-triggered play. Tapping a reel yourself leaves
-   * the sound alone.
+   * This replaced a Facebook embed, and the contrast is the point. Everything
+   * that was impossible through their player -- starting a clip as you scroll
+   * onto it on a phone, stopping one when another starts, no grid of "related
+   * reels" thrown over the end, no Facebook cookies -- takes a few lines here,
+   * because the page actually owns the video.
    */
   var reelBox = document.getElementById('reels');
 
   if (reelBox) {
-    var FB_SDK = 'https://connect.facebook.net/en_GB/sdk.js';
-    var FB_VERSION = 'v21.0';
-
-    var anyStarted = false;
-    var autoStarting = {};  // id -> true while the scroll handler is starting it
-    var players = {};    // tile id -> Facebook player instance
-    var reelCfg = {};    // tile id -> { url, width } so a tile can be rebuilt
-    var spent = {};      // tile id -> true once it has played to the end
-    var tileIds = [];
-    var activeId = null;
-
-    var makeVideoDiv = function (id) {
-      var cfg = reelCfg[id];
-      var v = document.createElement('div');
-      v.className = 'fb-video';
-      v.id = id;
-      v.dataset.href = cfg.url;
-      v.dataset.width = cfg.width;
-      v.dataset.showText = 'false';
-      // inline playback: fullscreen would trap the visitor on a phone
-      v.dataset.allowfullscreen = 'false';
-      return v;
-    };
-
-    /*
-     * Builds a tile's player again from scratch. Facebook drops a panel of
-     * "related reels" over a finished video, pointing away to Facebook, and
-     * seeking back to the start does not clear it — only a fresh player does.
-     */
-    var rebuildTile = function (id) {
-      var shell = document.querySelector('[data-reel-id="' + id + '"] .reel__shell');
-      if (!shell || typeof FB === 'undefined') { return; }
-      delete players[id];
-      shell.replaceChildren(makeVideoDiv(id));
-      try { FB.XFBML.parse(shell); } catch (e) { /* leave the tile as it is */ }
-    };
-
     var reelMessage = function (text) {
       var p = document.createElement('p');
       p.className = 'reels__msg';
@@ -306,137 +260,80 @@
       reelBox.replaceChildren(p);
     };
 
-    /*
-     * Stop one reel.
-     *
-     * Normally that is just pause(). But the SDK only hands back a player for
-     * a video it could actually load — a reel that has been deleted or made
-     * private renders a "Video unavailable" frame and reports nothing. Such a
-     * tile cannot be paused through the API, so it is rebuilt instead, which
-     * destroys the iframe and stops whatever it was doing.
-     */
-    var settleBy = 0;   // players take a few seconds to arrive after render
+    var videos = [];
 
-    var stopTile = function (id) {
-      var p = players[id];
-      if (p) {
-        try { p.pause(); return; } catch (e) { /* fall through to a rebuild */ }
-      }
-      // Before the players have had time to arrive, a missing one means "not
-      // ready yet", not "broken" — rebuilding then would reload half the page.
-      if (Date.now() < settleBy) { return; }
-      rebuildTile(id);
-    };
-
-    var pauseAllBut = function (keepId) {
-      tileIds.forEach(function (id) {
-        if (id === keepId) { return; }
-        stopTile(id);
+    var pauseOthers = function (keep) {
+      videos.forEach(function (v) {
+        if (v !== keep && !v.paused) { v.pause(); }
       });
     };
 
-    // Scroll-to-play is a phone behaviour, and only when the visitor has not
-    // asked us to go easy on motion or on their data.
     /*
-     * Scroll-to-play is switched off.
-     *
-     * iOS will not let a video in a cross-origin iframe start itself, and the
-     * setup that would allow it — muted and inline from before the video
-     * loads — happens inside Facebook's player, out of reach from here. The
-     * attempt was doing real harm: to try at all the reel had to be muted
-     * first, so tapping one caught it silent and the opening seconds of the
-     * song were lost.
-     *
-     * Flip this back to the commented-out test the day the band's own video
-     * files exist. A self-hosted <video muted playsinline> autoplays on iOS
-     * without any of this, and the scroll watcher below is ready for it.
+     * Play-as-you-scroll is a phone behaviour. On a desktop the tiles sit
+     * still showing their poster frame and wait to be clicked, which is what
+     * people expect of a wall of videos on a big screen.
      */
     var autoplayWanted = function () {
-      return false;
-
-      // if (window.matchMedia('(min-width: 700px)').matches) { return false; }
-      // var conn = navigator.connection;
-      // if (conn && conn.saveData) { return false; }
-      // return true;
+      if (window.matchMedia('(min-width: 700px)').matches) { return false; }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return false; }
+      var conn = navigator.connection;
+      if (conn && conn.saveData) { return false; }
+      return true;
     };
 
-    /*
-     * Starting a video from code, with no tap behind it, is only allowed
-     * while it is muted — and mobile browsers are far stricter about this
-     * than a desktop one, which will often let a video through on the
-     * strength of how much video you have watched on that site before. That
-     * difference is why this can look fine on a desktop and do nothing on a
-     * phone.
-     *
-     * So: mute first, then play, then check whether it actually moved, and
-     * try again a few times if it did not. The SDK reports a player ready
-     * slightly before it will reliably act on play().
-     */
-    /*
-     * Hand a reel back with its sound on. Whenever we stop trying to start
-     * something ourselves, it has to be left unmuted, or the visitor presses
-     * play later and gets a silent video — which is exactly what our own
-     * mute() caused.
-     */
-    var giveUp = function (id) {
-      delete autoStarting[id];
-      var p = players[id];
-      if (!p) { return; }
-      try { p.unmute(); } catch (e) { /* nothing sensible left to do */ }
-    };
+    var buildTile = function (reel) {
+      var fig = document.createElement('figure');
+      fig.className = 'reel';
 
-    var startMuted = function (id, attempt) {
-      var p = players[id];
-      if (!p || id !== activeId || spent[id]) { return; }
-
-      attempt = attempt || 1;
-      autoStarting[id] = true;
+      var shell = document.createElement('div');
+      shell.className = 'reel__shell';
 
       /*
-       * mute() travels to the player by postMessage, so it is not in force
-       * the moment the call returns. Playing on the very next line looks to
-       * the browser like an unmuted video starting itself with no tap behind
-       * it, which is the thing it blocks. So wait until the player confirms
-       * it is actually muted, and only then play.
+       * Each clip keeps its own shape. These were filmed both ways up -- some
+       * portrait, some landscape -- and forcing a single aspect on all of them
+       * would crop half the set to pieces. Setting it here also means the
+       * space is reserved before the poster loads, so nothing jumps about.
        */
-      try { p.mute(); } catch (e) { giveUp(id); return; }
+      if (reel.width && reel.height) {
+        shell.style.aspectRatio = reel.width + ' / ' + reel.height;
+      }
 
-      var waited = 0;
+      var video = document.createElement('video');
+      video.className = 'reel__video';
+      video.setAttribute('playsinline', '');  // iOS plays it in the tile rather than seizing the screen
+      video.preload = 'none';                 // not a byte of video until someone asks for it
+      video.controls = true;
+      if (reel.poster) { video.poster = reel.poster; }
 
-      var playWhenMuted = function () {
-        if (id !== activeId || spent[id]) { giveUp(id); return; }
+      var source = document.createElement('source');
+      source.src = reel.file;
+      source.type = 'video/mp4';
+      video.appendChild(source);
 
-        var muted = false;
-        try { muted = p.isMuted(); } catch (e) { muted = false; }
+      // one at a time, however it was started -- a tap, a click, or the
+      // scroll watcher below
+      video.addEventListener('play', function () { pauseOthers(video); });
 
-        if (!muted && waited < 1200) {
-          waited += 100;
-          setTimeout(playWhenMuted, 100);
-          return;
-        }
+      shell.appendChild(video);
+      fig.appendChild(shell);
 
-        try { p.play(); } catch (e) { giveUp(id); return; }
+      var caption = [reel.title, reel.duration].filter(Boolean).join(' \u00b7 ');
+      if (caption) {
+        var cap = document.createElement('figcaption');
+        cap.className = 'reel__cap';
+        cap.textContent = caption;
+        fig.appendChild(cap);
+      }
 
-        setTimeout(function () {
-          // Two tries, not four. Every attempt is time the reel sits muted, and
-        // a tap landing in that window is what made tapped reels silent.
-        if (id !== activeId || spent[id] || attempt >= 2) { giveUp(id); return; }
-
-          var pos = 0;
-          try { pos = p.getCurrentPosition() || 0; } catch (e) { giveUp(id); return; }
-
-          // still sitting at the start, so it never really began
-          if (pos <= 0.05) { startMuted(id, attempt + 1); }
-        }, 800);
-      };
-
-      playWhenMuted();
+      videos.push(video);
+      return fig;
     };
 
     var watchScroll = function () {
       if (!('IntersectionObserver' in window)) { return; }
 
       var ratios = new Map();
+      var playing = null;
 
       var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { ratios.set(e.target, e.intersectionRatio); });
@@ -448,191 +345,42 @@
         });
 
         // has to be properly on screen before it takes over
-        var bestId = (bestRatio >= 0.6 && best) ? best.dataset.reelId : null;
-        if (bestId === activeId) { return; }
+        if (bestRatio < 0.6) { best = null; }
+        if (best === playing) { return; }
 
-        // Scrolling away from a finished reel arms it again, so coming back
-        // to it later plays it rather than leaving a dead tile.
-        if (activeId) { delete spent[activeId]; }
+        if (playing) { playing.pause(); }
+        playing = best;
+        if (!best) { return; }
 
-        activeId = bestId;
+        /*
+         * Muted, because no browser lets a video start itself with sound.
+         * That is the one real constraint left, and the controls hand the
+         * sound back with a single tap.
+         */
+        best.muted = true;
 
-        if (!bestId) { pauseAllBut(null); return; }
-
-        startMuted(bestId, 1);
+        var started = best.play();
+        if (started && started.catch) {
+          started.catch(function () { /* refused; the tile still plays on tap */ });
+        }
       }, { threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] });
 
-      reelBox.querySelectorAll('.reel').forEach(function (t) { observer.observe(t); });
-    };
-
-    var wirePlayer = function (id, instance) {
-      players[id] = instance;
-
-
-      // Whenever anything starts — a tap, or the scroll handler — everything
-      // else stops. This is what keeps them from clashing on a desktop.
-      try {
-        instance.subscribe('startedPlaying', function () {
-          anyStarted = true;
-
-          /*
-           * Only a reel the scroll handler started stays muted, and only
-           * because browsers insist on it. Anything a visitor pressed play
-           * on themselves gets its sound — which is every reel on a desktop,
-           * where nothing autoplays at all.
-           */
-          if (!autoStarting[id]) {
-            try { instance.unmute(); } catch (e) { /* leave it as it is */ }
-          }
-          delete autoStarting[id];
-
-          activeId = id;
-          pauseAllBut(id);
-        });
-
-        /*
-         * Left alone, Facebook covers a finished video with a grid of
-         * "related reels" that sends the visitor off to Facebook. Winding
-         * the video back to the start and pausing puts the poster frame
-         * back and takes that panel away with it.
-         */
-        instance.subscribe('finishedPlaying', function () {
-          // Do not start it again on the way back in, or a reel sitting on
-          // screen would loop and re-download its player every time round.
-          spent[id] = true;
-          rebuildTile(id);
-        });
-      } catch (e) { /* older SDK shape; one-at-a-time just won't apply */ }
-
-      /*
-       * The SDK takes a few seconds to hand these back, by which time the
-       * scroll watcher has usually already decided which reel is on screen
-       * and found no player to start. So a player that arrives late and is
-       * the one being looked at has to start itself.
-       */
-      if (id === activeId && autoplayWanted() && !spent[id]) {
-        startMuted(id, 1);
-      }
-    };
-
-    var loadSdk = function () {
-      if (document.getElementById('fb-root')) { return; }
-
-      var root = document.createElement('div');
-      root.id = 'fb-root';
-      document.body.appendChild(root);
-
-      window.fbAsyncInit = function () {
-        /*
-         * Subscribe *before* init. FB.init({xfbml:true}) starts parsing the
-         * page straight away, so anything that finished between the init call
-         * and the subscription was never heard about — that tile then had no
-         * player object, could not be paused by the others, and never paused
-         * them either, so two reels ended up playing over each other.
-         */
-        FB.Event.subscribe('xfbml.ready', function (msg) {
-          if (msg.type === 'video' && msg.id) { wirePlayer(msg.id, msg.instance); }
-        });
-
-        FB.init({ xfbml: true, version: FB_VERSION });
-      };
-
-      var s = document.createElement('script');
-      s.async = true;
-      s.defer = true;
-      s.crossOrigin = 'anonymous';
-      s.src = FB_SDK;
-      document.body.appendChild(s);
+      videos.forEach(function (v) { observer.observe(v); });
     };
 
     var renderReels = function (reels) {
-      reels = reels.filter(function (r) { return r && r.url; });
+      reels = reels.filter(function (r) { return r && r.file; });
 
       if (!reels.length) {
-        reelMessage('No reels up yet — check back soon.');
+        reelMessage('No videos up yet — check back soon.');
         return;
       }
 
-      // First pass: tiles, so a shell has a real width to measure.
       var frag = document.createDocumentFragment();
-      var shells = [];
-
-      reels.forEach(function (reel, i) {
-        var id = 'reel-' + i;
-        tileIds.push(id);
-
-        var fig = document.createElement('figure');
-        fig.className = 'reel';
-        fig.dataset.reelId = id;
-
-        var shell = document.createElement('div');
-        shell.className = 'reel__shell';
-        fig.appendChild(shell);
-        shells.push(shell);
-
-        if (reel.title) {
-          var cap = document.createElement('figcaption');
-          cap.className = 'reel__cap';
-          cap.textContent = reel.title;
-          fig.appendChild(cap);
-        }
-
-        frag.appendChild(fig);
-      });
-
+      reels.forEach(function (reel) { frag.appendChild(buildTile(reel)); });
       reelBox.replaceChildren(frag);
 
-      // Second pass: measure once, then place the players.
-      var width = Math.max(220, Math.min(Math.round(shells[0].clientWidth) || 320, 480));
-
-      shells.forEach(function (shell, i) {
-        var id = tileIds[i];
-        reelCfg[id] = { url: reels[i].url, width: width };
-        shell.appendChild(makeVideoDiv(id));
-      });
-
-      settleBy = Date.now() + 10000;
-
-      // The markup is in the page now, so the SDK will find it on init.
-      loadSdk();
-
-      /*
-       * A click into any reel's iframe pulls focus out of the page and into
-       * that frame. That is the only signal available for a tile the SDK
-       * never reported — without it, playing a broken reel would leave a
-       * working one still going underneath it.
-       */
-      window.addEventListener('blur', function () {
-        setTimeout(function () {
-          var el = document.activeElement;
-          if (!el || el.tagName !== 'IFRAME') { return; }
-
-          var tile = el.closest ? el.closest('.reel') : null;
-          if (!tile) { return; }
-
-          var id = tile.dataset.reelId;
-          if (id && id !== activeId) {
-            activeId = id;
-            pauseAllBut(id);
-          }
-        }, 0);
-      });
-
-      if (autoplayWanted()) {
-        watchScroll();
-
-        /*
-         * Last resort. If the browser has refused every attempt so far, a
-         * genuine touch satisfies it, and the reel already on screen can
-         * start. Skipped once anything has played, so it can never mute or
-         * restart a reel the visitor chose to play themselves.
-         */
-        var nudge = function () {
-          if (!anyStarted && activeId) { startMuted(activeId, 1); }
-        };
-        document.addEventListener('touchstart', nudge, { once: true, passive: true });
-        document.addEventListener('click', nudge, { once: true });
-      }
+      if (autoplayWanted()) { watchScroll(); }
     };
 
     fetch('/data/reels.json', { cache: 'no-cache' })
@@ -644,96 +392,10 @@
         renderReels(Array.isArray(data) ? data : (data.reels || []));
       })
       .catch(function () {
-        reelMessage('Reels are not loading right now — you can watch them on our Facebook page.');
+        reelMessage('The videos are not loading right now — please try again shortly.');
       });
   }
 
-
-  /* ---------- sponsors ---------- */
-
-  /*
-   * Where sponsor enquiries go. Left empty, the form opens the visitor's own
-   * email app with everything filled in, which needs no accounts or keys.
-   * Set this to a POST endpoint later to collect them properly instead.
-   */
-  var SPONSOR_ENDPOINT = '';
-  var SPONSOR_EMAIL = 'bookings@thelostboyz.uk';
-
-  var sponsorBox = document.getElementById('sponsors');
-
-  if (sponsorBox) {
-    var renderSponsors = function (list) {
-      list = list.filter(function (s) { return s && s.name; });
-
-      if (!list.length) {
-        var p = document.createElement('p');
-        p.className = 'sponsors__msg';
-        p.textContent = 'No sponsors on board just yet — this could be your business.';
-        sponsorBox.replaceChildren(p);
-        return;
-      }
-
-      var frag = document.createDocumentFragment();
-
-      list.forEach(function (s) {
-        var card = document.createElement('article');
-        card.className = 'sponsor';
-
-        if (s.logo) {
-          var img = document.createElement('img');
-          img.className = 'sponsor__logo';
-          img.src = s.logo;
-          img.alt = s.name;
-          img.loading = 'lazy';
-          card.appendChild(img);
-        }
-
-        var name = document.createElement('h3');
-        name.className = 'sponsor__name';
-        if (s.url) {
-          var a = document.createElement('a');
-          a.href = s.url;
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.textContent = s.name;
-          name.appendChild(a);
-        } else {
-          name.textContent = s.name;
-        }
-        card.appendChild(name);
-
-        if (s.tier) {
-          var tier = document.createElement('p');
-          tier.className = 'sponsor__tier';
-          tier.textContent = s.tier;
-          card.appendChild(tier);
-        }
-
-        if (s.blurb) {
-          var blurb = document.createElement('p');
-          blurb.className = 'sponsor__blurb';
-          blurb.textContent = s.blurb;
-          card.appendChild(blurb);
-        }
-
-        frag.appendChild(card);
-      });
-
-      sponsorBox.replaceChildren(frag);
-    };
-
-    fetch('/data/sponsors.json', { cache: 'no-cache' })
-      .then(function (r) {
-        if (!r.ok) { throw new Error('HTTP ' + r.status); }
-        return r.json();
-      })
-      .then(function (data) {
-        renderSponsors(Array.isArray(data) ? data : (data.sponsors || []));
-      })
-      .catch(function () {
-        renderSponsors([]);
-      });
-  }
 
   /* ---------- charities and fundraisers ---------- */
 
