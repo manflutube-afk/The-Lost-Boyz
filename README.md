@@ -207,10 +207,13 @@ To collect enquiries properly instead, set `SPONSOR_ENDPOINT` in `app.js` to a
 URL that accepts a JSON `POST`, and the form will send there and show an error if
 it fails. Nothing else needs changing.
 
-**Prices.** Supporter is £5 a month and Featured is £10 a month, both from the
-band. The £50 one-off tier in `sponsors.html` is still a placeholder — get it
-signed off before the site goes live. Prices appear twice in that file: on the
-plan cards and in the enquiry form's dropdown, so change both.
+**Prices.** Supporter £5 a month, Featured £10 a month, and a £50 one-off that
+puts a business on the site for two weeks. All three came from the band.
+
+Each plan appears twice in `sponsors.html`: on its card, and as an option in the
+enquiry form. **The two strings must match word for word** — the form preselects
+whichever plan was clicked by matching that text, so a stray comma in one and
+not the other quietly breaks the preselect.
 
 The sponsors themselves are listed **above** the sponsorship plans, so visitors
 see who is already backing the band before they are asked for anything.

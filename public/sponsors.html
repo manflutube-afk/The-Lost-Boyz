@@ -66,8 +66,10 @@
       </div>
 
       <!-- ===== Plans =====
-           TODO: the one-off tier is still a placeholder to sign off with the
-           band. The £5 and £10 monthly prices came from them. -->
+           All three prices and what they include came from the band. The plan
+           text on each card and the matching option in the enquiry form have
+           to stay word-for-word identical: the form preselects the plan by
+           matching that string. -->
       <h2 class="h3">Become a sponsor</h2>
       <p class="sponsor-cta">
         <button class="btn btn--solid" type="button" data-sponsor-open>Become a sponsor</button>
@@ -100,13 +102,13 @@
 
         <article class="plan">
           <h3 class="plan__name">One-off</h3>
-          <p class="plan__price">From £50</p>
+          <p class="plan__price">£50 <span>one-off</span></p>
           <ul class="plan__list">
-            <li>A one-off contribution to kit or travel</li>
-            <li>Your business credited on this page</li>
-            <li>No ongoing commitment</li>
+            <li>Featured on the site for two weeks</li>
+            <li>A one-off contribution to kit and travel</li>
+            <li>Nothing ongoing — pay once and that is it</li>
           </ul>
-          <button class="btn plan__btn" type="button" data-sponsor-open data-plan="One-off — from £50">Choose One-off</button>
+          <button class="btn plan__btn" type="button" data-sponsor-open data-plan="One-off — £50, featured for two weeks">Choose One-off</button>
         </article>
       </div>
 
@@ -128,7 +130,7 @@
       <select id="spPlan" name="plan" required>
         <option value="Supporter — £5/month">Supporter — £5/month</option>
         <option value="Featured — £10/month">Featured — £10/month</option>
-        <option value="One-off — from £50">One-off — from £50</option>
+        <option value="One-off — £50, featured for two weeks">One-off — £50, featured for two weeks</option>
         <option value="Not sure yet">Not sure yet — let&rsquo;s chat</option>
       </select>
     </div>
