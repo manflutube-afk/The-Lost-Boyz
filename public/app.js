@@ -588,6 +588,92 @@
       });
   }
 
+  /* ---------- sponsors ---------- */
+
+  /*
+   * Where sponsor enquiries go. Left empty, the form opens the visitor's own
+   * email app with everything filled in, which needs no accounts or keys.
+   * Set this to a POST endpoint later to collect them properly instead.
+   */
+  var SPONSOR_ENDPOINT = '';
+  var SPONSOR_EMAIL = 'bookings@thelostboyz.uk';
+
+  var sponsorBox = document.getElementById('sponsors');
+
+  if (sponsorBox) {
+    var renderSponsors = function (list) {
+      list = list.filter(function (s) { return s && s.name; });
+
+      if (!list.length) {
+        var p = document.createElement('p');
+        p.className = 'sponsors__msg';
+        p.textContent = 'No sponsors on board just yet — this could be your business.';
+        sponsorBox.replaceChildren(p);
+        return;
+      }
+
+      var frag = document.createDocumentFragment();
+
+      list.forEach(function (s) {
+        var card = document.createElement('article');
+        card.className = 'sponsor';
+
+        if (s.logo) {
+          var img = document.createElement('img');
+          img.className = 'sponsor__logo';
+          img.src = s.logo;
+          img.alt = s.name;
+          img.loading = 'lazy';
+          card.appendChild(img);
+        }
+
+        var name = document.createElement('h3');
+        name.className = 'sponsor__name';
+        if (s.url) {
+          var a = document.createElement('a');
+          a.href = s.url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = s.name;
+          name.appendChild(a);
+        } else {
+          name.textContent = s.name;
+        }
+        card.appendChild(name);
+
+        if (s.tier) {
+          var tier = document.createElement('p');
+          tier.className = 'sponsor__tier';
+          tier.textContent = s.tier;
+          card.appendChild(tier);
+        }
+
+        if (s.blurb) {
+          var blurb = document.createElement('p');
+          blurb.className = 'sponsor__blurb';
+          blurb.textContent = s.blurb;
+          card.appendChild(blurb);
+        }
+
+        frag.appendChild(card);
+      });
+
+      sponsorBox.replaceChildren(frag);
+    };
+
+    fetch('/data/sponsors.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        renderSponsors(Array.isArray(data) ? data : (data.sponsors || []));
+      })
+      .catch(function () {
+        renderSponsors([]);
+      });
+  }
+
   /* ---------- charities and fundraisers ---------- */
 
   var charityBox = document.getElementById('charities');
