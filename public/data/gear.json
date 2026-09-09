@@ -1,0 +1,27 @@
+{
+  "_readme": "The kit listed on /geeks-corner. Each group is a heading with a list of items under it — one group per player, or per category, whatever suits. 'name' is the only required field on an item; 'what' is a short line saying what it is, and 'note' is for anything worth adding: why they use it, what it does to the sound, where it came from. Ask the band for the actual makes and models; do not guess at them.",
+  "_exampleGroup": {
+    "name": "Darren — guitars",
+    "blurb": "Optional line introducing the group.",
+    "items": [
+      {
+        "name": "Make and model goes here",
+        "what": "Electric guitar",
+        "note": "Anything worth saying about it — why this one, what it does, how long he has had it."
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "In the studio",
+      "blurb": "Where the single was made.",
+      "items": [
+        {
+          "name": "KJM Studio",
+          "what": "Recording studio",
+          "note": "Two Lost Souls was recorded here, and produced by Andrew and Darren themselves."
+        }
+      ]
+    }
+  ]
+}

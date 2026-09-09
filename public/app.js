@@ -501,6 +501,93 @@
   }
 
 
+  /* ---------- geeks corner: the gear ---------- */
+
+  var gearBox = document.getElementById('gear');
+
+  if (gearBox) {
+    var gearMsg = function (text) {
+      var p = document.createElement('p');
+      p.className = 'gear__msg';
+      p.textContent = text;
+      gearBox.replaceChildren(p);
+    };
+
+    var gearItem = function (item) {
+      var card = document.createElement('article');
+      card.className = 'kit';
+
+      var name = document.createElement('h3');
+      name.className = 'kit__name';
+      name.textContent = item.name;
+      card.appendChild(name);
+
+      if (item.what) {
+        var what = document.createElement('p');
+        what.className = 'kit__what';
+        what.textContent = item.what;
+        card.appendChild(what);
+      }
+
+      if (item.note) {
+        var note = document.createElement('p');
+        note.className = 'kit__note';
+        note.textContent = item.note;
+        card.appendChild(note);
+      }
+
+      return card;
+    };
+
+    var renderGear = function (groups) {
+      groups = (groups || []).filter(function (g) {
+        return g && g.name && Array.isArray(g.items) && g.items.length;
+      });
+
+      if (!groups.length) {
+        gearMsg('The boyz are still writing this one up — check back soon.');
+        return;
+      }
+
+      var frag = document.createDocumentFragment();
+
+      groups.forEach(function (group) {
+        var heading = document.createElement('h2');
+        heading.className = 'h3';
+        heading.textContent = group.name;
+        frag.appendChild(heading);
+
+        if (group.blurb) {
+          var blurb = document.createElement('p');
+          blurb.className = 'lead';
+          blurb.textContent = group.blurb;
+          frag.appendChild(blurb);
+        }
+
+        var list = document.createElement('div');
+        list.className = 'kits';
+        group.items
+          .filter(function (i) { return i && i.name; })
+          .forEach(function (item) { list.appendChild(gearItem(item)); });
+        frag.appendChild(list);
+      });
+
+      gearBox.replaceChildren(frag);
+    };
+
+    fetch('/data/gear.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        renderGear(Array.isArray(data) ? data : data.groups);
+      })
+      .catch(function () {
+        gearMsg('That is not loading right now. Please try again shortly.');
+      });
+  }
+
   /* ---------- charities and fundraisers ---------- */
 
   var charityBox = document.getElementById('charities');

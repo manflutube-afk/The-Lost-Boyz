@@ -127,6 +127,44 @@ videos counted for Facebook's search ranking, not this site's.
 Owning the files makes all of that go away, and the code is a third of the size.
 
 
+### Adding gear to Geeks Corner
+
+The page is at `/geeks-corner`, listed in the nav as **Gear** — the full name
+would not fit alongside eight other items. Edit `public/data/gear.json`:
+
+```json
+{
+  "groups": [
+    {
+      "name": "Darren — guitars",
+      "blurb": "Optional line introducing the group.",
+      "items": [
+        {
+          "name": "Make and model",
+          "what": "Electric guitar",
+          "note": "Why this one, what it does, how long he has had it."
+        }
+      ]
+    }
+  ]
+}
+```
+
+A group is a heading with items under it — one per player, or per category,
+whatever reads best. Only `name` is required on an item. A group with no items
+is skipped, so half-finished sections do not show as empty headings, and with no
+groups at all the page shows a short holding message.
+
+**The kit is not filled in yet, and it should not be guessed at.** All that is
+listed is KJM Studio, which is on the record sleeve. Everything else needs to
+come from the band: guitars, amps, pedals, drums, cymbals, PA, microphones. A
+gear page that gets the models wrong is worse than no gear page — the people who
+read it are exactly the people who will notice.
+
+Worth asking for the `note` on each item too. "Marshall JCM800" is a list; "the
+JCM800 he has had since he was seventeen and refuses to replace" is the reason
+anyone reads a page like this.
+
 ### Adding a sponsor
 
 The Sponsors page is at `/sponsors`. Add businesses in `public/data/sponsors.json`:

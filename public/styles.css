@@ -936,6 +936,49 @@ body.nav-open { overflow: hidden; }
 }
 .sponsor__blurb { margin: 0; font-size: .92rem; color: var(--text); }
 
+/* ---------------- Geeks Corner ---------------- */
+
+.gear__msg {
+  padding: 1.75rem;
+  text-align: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.kits {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kit {
+  padding: 1.35rem 1.4rem;
+  background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.kit__name {
+  margin: 0 0 .2rem;
+  font-family: var(--f-display);
+  font-size: 1.2rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+.kit__what {
+  margin: 0 0 .7rem;
+  font-size: .78rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--violet-hi);
+}
+
+.kit__note { margin: 0; font-size: .95rem; color: var(--text); }
+
 /* ---------------- Charities ---------------- */
 
 .charities {
@@ -1476,6 +1519,7 @@ body.nav-open { overflow: hidden; }
   .plans { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
   .sponsors { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; }
   .charities { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+  .kits { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
 
   .gig { grid-template-columns: auto 1fr auto; }
   .gig__cta { grid-column: auto; margin-top: 0; }
