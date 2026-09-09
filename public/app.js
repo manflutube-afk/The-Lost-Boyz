@@ -338,7 +338,28 @@
       video.className = 'reel__video';
       video.setAttribute('playsinline', '');  // iOS plays it in the tile rather than seizing the screen
       video.preload = 'none';                 // not a byte of video until someone asks for it
-      video.controls = true;
+
+      /*
+       * Controls are left off wherever clips start themselves.
+       *
+       * A phone keeps the native controls sitting over a playing video, with
+       * a dark scrim behind them, until the video is tapped. That made every
+       * autoplaying clip look dimmed, as though it were waiting to be
+       * started. So a clip that plays on its own plays clean, and the
+       * controls arrive the moment the visitor taps — which is also the
+       * gesture that turns the sound on.
+       *
+       * On a desktop nothing autoplays, so the controls are the only way to
+       * start a clip and belong there from the outset.
+       */
+      var selfStarting = autoplayWanted();
+      video.controls = !selfStarting;
+
+      if (selfStarting) {
+        video.addEventListener('click', function () {
+          video.controls = true;
+        });
+      }
       if (reel.poster) { video.poster = reel.poster; }
 
       var source = document.createElement('source');
@@ -407,7 +428,16 @@
             if (!best.muted) {
               best.muted = true;
               var retry = best.play();
-              if (retry && retry.catch) { retry.catch(function () { /* leave it for a tap */ }); }
+              if (retry && retry.catch) {
+                retry.catch(function () {
+                  // Even muted it will not go. Give the tile its controls
+                  // back, or there is a poster on screen with no way to
+                  // start it.
+                  best.controls = true;
+                });
+              }
+            } else {
+              best.controls = true;
             }
           });
         }

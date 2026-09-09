@@ -81,6 +81,15 @@ including the one already running. A line above the videos says so, and removes
 itself the moment the sound comes on. If a play with sound is ever refused
 anyway, it falls back to silent rather than leaving a tile doing nothing.
 
+**Controls.** A clip that starts itself plays with the native controls off. A
+phone keeps those controls sitting over a playing video, with a dark scrim
+behind them, until it is tapped — which made every autoplaying clip look dimmed,
+as though it were waiting to be started. Tapping brings the controls in, and
+that same tap turns the sound on. On a desktop nothing autoplays, so the
+controls are the only way to start a clip and are there from the outset. If
+autoplay is ever refused outright the controls come back too, so a tile is never
+left with a poster and no way to play it.
+
 **Why the clips are re-encoded rather than used as they are.** Phone footage
 cannot go straight onto a website:
 
