@@ -293,9 +293,14 @@
       soundAllowed = true;
       clearHint();
 
-      videos.forEach(function (v) {
-        if (!v.paused) { v.muted = false; }
-      });
+      /*
+       * Every clip, not just the one playing. Unmuting only what was playing
+       * at this instant left a clip silent whenever the visitor's first touch
+       * landed while its play() was still pending — play() is asynchronous,
+       * so the video is still "paused" for a moment after being asked to
+       * start, and it fell through the gap and stayed muted for good.
+       */
+      videos.forEach(function (v) { v.muted = false; });
     };
 
     // the events that actually count as an interaction; scrolling on a phone
@@ -367,9 +372,20 @@
       source.type = 'video/mp4';
       video.appendChild(source);
 
-      // one at a time, however it was started -- a tap, a click, or the
-      // scroll watcher below
-      video.addEventListener('play', function () { pauseOthers(video); });
+      video.addEventListener('play', function () {
+        // one at a time, however it was started — a tap, a click, or the
+        // scroll watcher below
+        pauseOthers(video);
+
+        /*
+         * Settle the sound here, where playback genuinely begins, rather than
+         * trusting what was decided before play() was called. Those two
+         * moments are not the same, and a clip asked to start just before the
+         * visitor's first touch would otherwise keep the muted state it was
+         * given a moment earlier.
+         */
+        if (soundAllowed) { video.muted = false; }
+      });
 
       shell.appendChild(video);
       fig.appendChild(shell);
