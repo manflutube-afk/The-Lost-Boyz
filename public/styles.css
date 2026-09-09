@@ -881,6 +881,14 @@ body.nav-open { overflow: hidden; }
 
 .plan__btn { width: 100%; }
 
+/* only added once a plan actually has a payment link behind it */
+.plans__note {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
 .sponsors { display: grid; gap: 1rem; }
 
 .sponsors__msg {

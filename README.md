@@ -198,6 +198,44 @@ profile picture is 192px at best, which looks soft at the size the card uses,
 and those image URLs are signed and expire. Any business will have their own
 artwork; a printer or embroiderer will have vector originals.
 
+### Taking sponsorship payments with Stripe
+
+The page is wired for **Stripe Payment Links**, and nothing is switched on until
+the band creates them. Put each link in `public/data/payments.json` against its
+plan, and that plan's button changes from opening the enquiry form to going
+straight to Stripe. Leave one empty and it carries on using the form, so the
+page works whether none, some or all three are set up.
+
+**What the band needs to do**, once, in their own Stripe account:
+
+1. Create the account at stripe.com and finish verification — business details
+   and a bank account. This has to be the band's account, not yours: it is their
+   money and their obligation to whoever pays.
+2. Create three Payment Links: two **recurring monthly** ones at £5 and £10, and
+   one **one-off** at £50.
+3. Paste each link into `payments.json`. They look like
+   `https://buy.stripe.com/xxxxxxxx`.
+
+**Why Payment Links rather than anything cleverer.** They need no API key, no
+server and no card details ever reaching this site — Stripe hosts the payment
+page itself. A static site on Cloudflare Pages has nowhere safe to keep a secret
+key, and three fixed prices do not need one.
+
+**Never put a Stripe secret key in this repository.** Anything beginning
+`sk_live_` or `sk_test_` grants full control of the account, and every file
+under `public/` is served to the world. Payment Links need no key at all, which
+is the main reason for choosing them.
+
+**The keys in `payments.json` must match the plan text exactly** — the same
+string as on the card and in the enquiry form. That one string ties all three
+together.
+
+**Money creates obligations the code cannot handle.** Once real payments are
+taken, someone has to actually do what was sold: put a sponsor's logo up, and —
+for the £50 one-off — take them down again after two weeks. Monthly sponsors can
+cancel, and Stripe's customer portal is the tidiest way to let them. Worth the
+band deciding who does that before the first payment lands, not after.
+
 **Where the enquiries go.** The "Become a sponsor" form currently opens the
 visitor's own email app with everything filled in, addressed to `SPONSOR_EMAIL`
 at the top of `app.js`. That needs no accounts or API keys, but it does rely on

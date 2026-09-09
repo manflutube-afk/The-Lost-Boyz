@@ -1,0 +1,9 @@
+{
+  "_readme": "Stripe Payment Links, one per sponsorship plan. Each key must match the plan text on the card and in the enquiry form exactly — that string is how the three are tied together. Paste the link Stripe gives you (it looks like https://buy.stripe.com/xxxxxxxx) and the plan's button turns into a payment button. Leave one empty and that plan carries on using the enquiry form instead, so the page works whether none, some or all of them are set up.",
+  "_security": "Payment Links are public URLs and are safe to keep in this file. A Stripe SECRET key (sk_live_… or sk_test_…) must never go in this repository, or in any file under public/ — everything here is served to the world. Payment Links need no key at all, which is the main reason for using them.",
+  "links": {
+    "Supporter — £5/month": "",
+    "Featured — £10/month": "",
+    "One-off — £50, featured for two weeks": ""
+  }
+}

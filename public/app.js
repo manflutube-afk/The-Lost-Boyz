@@ -919,6 +919,62 @@
     });
   }
 
+  /* ---------- sponsor payments ---------- */
+
+  /*
+   * Stripe Payment Links, one per plan.
+   *
+   * A link is just a URL Stripe hosts, so there is no secret key anywhere,
+   * no server to run and no card details ever touching this site — which
+   * matters, because everything under public/ is served to the world.
+   *
+   * A plan with a link gets a button that goes to Stripe. A plan without one
+   * keeps the enquiry form, so the page works whether none, some or all of
+   * the three have been set up.
+   */
+  var planButtons = document.querySelectorAll('.plan__btn[data-plan]');
+
+  if (planButtons.length) {
+    fetch('/data/payments.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+      })
+      .then(function (data) {
+        var links = (data && data.links) || {};
+        var wired = 0;
+
+        Array.prototype.forEach.call(planButtons, function (btn) {
+          var url = links[btn.dataset.plan];
+
+          // Only a real Stripe link counts. An empty string, or a placeholder
+          // someone has half-filled in, leaves the enquiry form alone.
+          if (!url || url.indexOf('https://') !== 0) { return; }
+
+          var pay = document.createElement('a');
+          pay.className = btn.className;
+          pay.href = url;
+          pay.target = '_blank';
+          pay.rel = 'noopener';
+          pay.textContent = btn.textContent;
+          btn.replaceWith(pay);
+          wired++;
+        });
+
+        if (!wired) { return; }
+
+        // Say who is taking the money, once, under the plans.
+        var plans = document.querySelector('.plans');
+        if (plans && !document.querySelector('.plans__note')) {
+          var note = document.createElement('p');
+          note.className = 'plans__note';
+          note.textContent = 'Payments are handled by Stripe. Your card details never touch this website.';
+          plans.parentNode.insertBefore(note, plans.nextSibling);
+        }
+      })
+      .catch(function () { /* no payment links yet; the enquiry form stands */ });
+  }
+
   /* ---------- photo viewer ---------- */
 
   var lb = document.getElementById('lightbox');
