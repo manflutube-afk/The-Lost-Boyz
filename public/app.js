@@ -269,6 +269,42 @@
     };
 
     /*
+     * Sound.
+     *
+     * No browser will let a page start a video with sound before the visitor
+     * has interacted with it — try, and play() is refused and nothing happens
+     * at all. So a clip that starts itself has to start silent. That is not a
+     * setting anywhere; it is the rule.
+     *
+     * What can be done is to turn the sound on the moment the visitor touches
+     * the screen, and on a phone their first scroll counts. So the first clip
+     * runs quiet for a moment, then that gesture unlocks it and everything
+     * from then on plays with sound, including the one already running.
+     */
+    var soundAllowed = false;
+    var soundHint = null;
+
+    var clearHint = function () {
+      if (soundHint) { soundHint.remove(); soundHint = null; }
+    };
+
+    var unlockSound = function () {
+      if (soundAllowed) { return; }
+      soundAllowed = true;
+      clearHint();
+
+      videos.forEach(function (v) {
+        if (!v.paused) { v.muted = false; }
+      });
+    };
+
+    // the events that actually count as an interaction; scrolling on a phone
+    // produces touchend, so a swipe is enough
+    ['touchend', 'pointerup', 'click', 'keydown'].forEach(function (ev) {
+      document.addEventListener(ev, unlockSound, { passive: true });
+    });
+
+    /*
      * Play-as-you-scroll is a phone behaviour. On a desktop the tiles sit
      * still showing their poster frame and wait to be clicked, which is what
      * people expect of a wall of videos on a big screen.
@@ -357,11 +393,23 @@
          * That is the one real constraint left, and the controls hand the
          * sound back with a single tap.
          */
-        best.muted = true;
+        // with sound if the visitor has already touched the page, silent if not
+        best.muted = !soundAllowed;
 
         var started = best.play();
         if (started && started.catch) {
-          started.catch(function () { /* refused; the tile still plays on tap */ });
+          started.catch(function () {
+            /*
+             * Refused. If we asked for sound, that is almost certainly why —
+             * so fall back to silent rather than leaving a tile sitting there
+             * doing nothing. Better quiet than dead.
+             */
+            if (!best.muted) {
+              best.muted = true;
+              var retry = best.play();
+              if (retry && retry.catch) { retry.catch(function () { /* leave it for a tap */ }); }
+            }
+          });
         }
       }, { threshold: [0, 0.25, 0.5, 0.6, 0.75, 1] });
 
@@ -380,7 +428,17 @@
       reels.forEach(function (reel) { frag.appendChild(buildTile(reel)); });
       reelBox.replaceChildren(frag);
 
-      if (autoplayWanted()) { watchScroll(); }
+      if (autoplayWanted()) {
+        watchScroll();
+
+        // say why the first one is quiet, rather than leaving people to wonder
+        if (!soundAllowed) {
+          soundHint = document.createElement('p');
+          soundHint.className = 'reels__hint';
+          soundHint.textContent = 'Tap the screen to turn the sound on.';
+          reelBox.parentNode.insertBefore(soundHint, reelBox);
+        }
+      }
     };
 
     fetch('/data/reels.json', { cache: 'no-cache' })

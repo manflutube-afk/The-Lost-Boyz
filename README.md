@@ -69,6 +69,18 @@ filename order, so rename the sources if you want a different order.
 To caption a clip, add a `title` to its entry in `public/data/reels.json`.
 Titles survive a rebuild — the script reads the existing file and keeps them.
 
+**Sound.** A clip that starts itself has to start silent. No browser will let a
+page begin playing audio before the visitor has interacted with it — ask for
+sound and `play()` is simply refused, so you get no video at all rather than a
+quiet one. This is not a setting; it is the rule everywhere.
+
+So the page turns the sound on at the visitor's first touch, and on a phone
+their first scroll counts as one. In practice the opening clip runs quiet for a
+second or two, that gesture unlocks it, and everything after plays with sound —
+including the one already running. A line above the videos says so, and removes
+itself the moment the sound comes on. If a play with sound is ever refused
+anyway, it falls back to silent rather than leaving a tile doing nothing.
+
 **Why the clips are re-encoded rather than used as they are.** Phone footage
 cannot go straight onto a website:
 

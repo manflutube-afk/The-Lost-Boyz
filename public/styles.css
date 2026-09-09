@@ -699,6 +699,18 @@ body.nav-open { overflow: hidden; }
   align-items: start;
 }
 
+/* removed the moment the sound is unlocked, so it never nags */
+.reels__hint {
+  margin: 0 0 1.25rem;
+  padding: .6rem 1rem;
+  text-align: center;
+  font-size: .88rem;
+  color: var(--lilac);
+  background: rgba(168, 85, 247, .1);
+  border: 1px dashed var(--violet-dim);
+  border-radius: 999px;
+}
+
 .reels__msg {
   width: 100%;
   padding: 1.75rem;
