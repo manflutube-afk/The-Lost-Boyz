@@ -2,10 +2,19 @@
 
 The official site for **The Lost Boyz** — a two-piece rock band: Darren Endean and
 Andrew Boraston. Mobile-first, static, and hosted on Cloudflare Pages at
-<https://thelostboyz.uk> (currently served from `the-lost-boyz.pages.dev`
-until the domain is pointed at it).
+<https://thelostboyz.uk>. The `the-lost-boyz.pages.dev` address still works and
+still serves the same site; every page names the real domain as its canonical
+one, so search engines only ever count the one address.
 
 ---
+
+## One thing still missing: www
+
+`thelostboyz.uk` is live, but `www.thelostboyz.uk` has no DNS record at all,
+so anybody who types the www out of habit — or follows an old link with it on
+— gets nothing. In the Cloudflare dashboard, add `www.thelostboyz.uk` as a
+second custom domain on the Pages project; Cloudflare creates the record and
+redirects it to the bare domain by itself.
 
 ## Running it locally
 
@@ -121,9 +130,9 @@ phone.
 
 The image is fetched over the internet when the email is opened, so the address
 it is fetched from has to be a live one. That is `SITE_URL` in
-`wrangler.jsonc`, currently the pages.dev address. **On the day the domain is
-pointed at the site, change it to `https://thelostboyz.uk`** — otherwise every
-email sent afterwards will still be pulling its logo from pages.dev.
+`wrangler.jsonc`, and it is set to `https://thelostboyz.uk` now the domain is
+pointed at the site. If the site ever moves, that is the line to change or
+every email sent afterwards will be asking a dead address for its logo.
 
 ### The little round picture next to the sender
 

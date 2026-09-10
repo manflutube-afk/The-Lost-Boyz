@@ -21,10 +21,8 @@
     // who it comes from. The domain must be verified in Resend, and
     // thelostboyz.uk is.
     "FROM_EMAIL": "The Lost Boyz <website@thelostboyz.uk>",
-    // where the logo in the emails is fetched from. Change this to
-    // "https://thelostboyz.uk" on the day the domain is pointed at the site,
-    // or the logo in every email sent after that will still be coming from
-    // the pages.dev address.
-    "SITE_URL": "https://the-lost-boyz.pages.dev"
+    // where the logo in the emails is fetched from. The domain is pointed at
+    // the site now, so this is the live address rather than the pages.dev one.
+    "SITE_URL": "https://thelostboyz.uk"
   }
 }
