@@ -2114,6 +2114,32 @@ body.nav-open { overflow: hidden; }
 @media (min-width: 700px) {
   .countdown { font-size: .78rem; padding: .36rem .95rem; }
   .countdown__n { font-size: 1.15rem; }
+
+  /*
+   * Once the pill sits beside the title it is centred on it rather than stood
+   * on the same baseline.
+   *
+   * Baseline alignment lines up the bottom of the two lots of lettering, which
+   * is right when they are a similar size and wrong when one is a 52px heading
+   * and the other is 12px type in a bordered pill: the pill's box then hangs
+   * well below the heading, and it measured 16px low.
+   *
+   * Centring alone is not quite it either, because the heading's box includes
+   * the violet rule underneath it and the gap above that -- all of it below
+   * the letters -- so centring on that box still leaves the pill low. The
+   * negative margin takes that back off, and what the pill ends up centred on
+   * is the heading's type rather than its box.
+   *
+   * The figure is measured rather than reasoned, and it is safe as a fixed
+   * one: the heading is clamped at 3.25rem, and 8.5vw passes that by 612px,
+   * so from this breakpoint upwards it is always 52px and the offset never
+   * changes.
+   *
+   * Below this width the two stack and the base baseline rule applies, which
+   * is left alone.
+   */
+  .single-head__row { align-items: center; }
+  .single-head__row .countdown { margin-top: -0.85rem; }
 }
 
 /* ---------------- Coming dreckly ---------------- */
