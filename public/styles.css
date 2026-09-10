@@ -956,19 +956,19 @@ body.nav-open { overflow: hidden; }
  * and out as you scrolled. Everything shares this now, so every left edge
  * lines up top to bottom.
  */
-.wrap--story { max-width: 1180px; }
+.wrap--story { max-width: 1240px; }
 
 .story { margin-bottom: 1rem; }
 
 /*
- * The column is wide; the lines are not quite as wide. Text set the full
- * width of a 1180px page is genuinely hard to read — the eye loses its
- * place coming back to the start of the next line — so paragraphs stop at
- * a long but still readable measure while headings, the bios and the
- * memorial rows use the whole width.
+ * The story runs the full width of the page — no shorter measure holding
+ * the paragraphs in, so a line carries a long way before it wraps and the
+ * block sits centred on the screen rather than hard against the left with
+ * empty space beside it. Long lines are harder to track back to the start
+ * of, so they are given extra leading further down to compensate.
  */
 .story p,
-.bio__text p { margin: 0 0 1.15rem; max-width: 78ch; }
+.bio__text p { margin: 0 0 1.15rem; }
 
 /* the closing line, given a little room to land */
 .story__end {
@@ -1656,6 +1656,18 @@ body.nav-open { overflow: hidden; }
   .gig__cta { grid-column: auto; margin-top: 0; }
 }
 
+/*
+ * A long line needs more space beneath it: the wider the measure, the
+ * further the eye has to travel back, and tight leading is where it lands
+ * on the wrong line. This only applies once the page is actually wide.
+ */
+@media (min-width: 880px) {
+  .story p,
+  .story .lead,
+  .bio__text p,
+  .remember p { line-height: 1.8; }
+}
+
 /* ---- the memorial rows ---- */
 @media (min-width: 880px) {
   /*
@@ -1688,7 +1700,6 @@ body.nav-open { overflow: hidden; }
 
   /* the name now heads the writing beside the photo, so it starts with it */
   .remember__name { text-align: left; font-size: 1.9rem; }
-  .remember p { max-width: 62ch; }
 
 }
 
