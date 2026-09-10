@@ -40,13 +40,13 @@
   <nav class="nav" id="nav" aria-label="Main">
     <a href="#music">Music</a>
     <a href="/our-story">Our Story</a>
-    <a href="/reelz">Reelz</a>
     <a href="#live">Live</a>
-    <a href="#gallery">Gallery</a>
+    <a href="#booking">Booking</a>
+    <a href="/reelz">Reelz</a>
     <a href="/geeks-corner">Geekz</a>
     <a href="/sponsors">Sponsors</a>
     <a href="/charities">Charities</a>
-    <a href="#booking">Booking</a>
+    <a href="#gallery">Gallery</a>
   </nav>
 </header>
 
@@ -76,7 +76,7 @@
     <p class="hero__tag">Classic rock duo — coming to a venue near you in 2026</p>
     <div class="hero__cta">
       <a class="btn btn--solid" href="#music">The debut single</a>
-      <a class="btn" href="#booking">Book the band</a>
+      <a class="btn" href="#booking">Book the Boyz</a>
     </div>
   </div>
   <a class="hero__scroll" href="#music" aria-label="Scroll to music"><span></span></a>
@@ -179,6 +179,33 @@
   </div>
 </section>
 
+<!-- ============ LIVE ============ -->
+<section class="sec sec--live" id="live">
+  <div class="wrap">
+    <p class="eyebrow">On the road</p>
+    <h2 class="h2">Live dates</h2>
+    <!-- Dates come from /data/gigs.json — edit that file, no HTML needed. -->
+    <div id="gigs" class="gigs" aria-live="polite">
+      <p class="gigs__msg">Loading dates…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOKING ============ -->
+<section class="sec sec--booking" id="booking">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">Pubs, clubs, weddings, parties</p>
+    <h2 class="h2">Book the Boyz</h2>
+    <p class="lead">Two of us, a proper PA and a light show. Tell us the date and the room, and we will come and make a racket.</p>
+
+    <div class="book-actions">
+      <button class="btn btn--solid btn--big" type="button" data-booking-open>Book the Boyz</button>
+      <a class="btn btn--big" href="https://www.facebook.com/profile.php?id=61584241187858"
+         target="_blank" rel="noopener">Find us on Facebook</a>
+    </div>
+  </div>
+</section>
+
 <!-- ============ REELZ ============ -->
 <section class="sec sec--reelz" id="reelz">
   <div class="wrap">
@@ -201,15 +228,30 @@
   </div>
 </section>
 
-<!-- ============ LIVE ============ -->
-<section class="sec sec--live" id="live">
-  <div class="wrap">
-    <p class="eyebrow">On the road</p>
-    <h2 class="h2">Live dates</h2>
-    <!-- Dates come from /data/gigs.json — edit that file, no HTML needed. -->
-    <div id="gigs" class="gigs" aria-live="polite">
-      <p class="gigs__msg">Loading dates…</p>
-    </div>
+<!-- ============ SPONSORS ============ -->
+<section class="sec sec--cta sec--sponsors">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">Behind the boyz</p>
+    <h2 class="h2">Our sponsors</h2>
+    <p class="lead">Local businesses help us keep the show on the road — diesel, strings, skins,
+      a vehicle that starts. If you fancy joining them, there is a plan to suit.</p>
+    <p class="cta-links">
+      <a class="btn btn--solid" href="/sponsors">See our sponsors</a>
+      <a class="btn" href="/sponsors">Become a sponsor</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ CHARITIES ============ -->
+<section class="sec sec--cta sec--charities">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">Giving something back</p>
+    <h2 class="h2">Charities we support</h2>
+    <p class="lead">A few causes close to us, and the people raising money for them.
+      Whatever you can give goes straight to the charity.</p>
+    <p class="cta-links">
+      <a class="btn btn--solid" href="/charities">Charities we support</a>
+    </p>
   </div>
 </section>
 
@@ -264,48 +306,6 @@
   </div>
 </section>
 
-<!-- ============ BOOKING ============ -->
-<section class="sec sec--booking" id="booking">
-  <div class="wrap wrap--narrow">
-    <p class="eyebrow">Pubs, clubs, weddings, parties</p>
-    <h2 class="h2">Book the Boyz</h2>
-    <p class="lead">Two of us, a proper PA and a light show. Tell us the date and the room, and we will come and make a racket.</p>
-
-    <div class="book-actions">
-      <button class="btn btn--solid btn--big" type="button" data-booking-open>Book the Boyz</button>
-      <a class="btn btn--big" href="https://www.facebook.com/profile.php?id=61584241187858"
-         target="_blank" rel="noopener">Find us on Facebook</a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SPONSORS ============ -->
-<section class="sec sec--cta sec--sponsors">
-  <div class="wrap wrap--narrow">
-    <p class="eyebrow">Behind the boyz</p>
-    <h2 class="h2">Our sponsors</h2>
-    <p class="lead">Local businesses help us keep the show on the road — diesel, strings, skins,
-      a vehicle that starts. If you fancy joining them, there is a plan to suit.</p>
-    <p class="cta-links">
-      <a class="btn btn--solid" href="/sponsors">See our sponsors</a>
-      <a class="btn" href="/sponsors">Become a sponsor</a>
-    </p>
-  </div>
-</section>
-
-<!-- ============ CHARITIES ============ -->
-<section class="sec sec--cta sec--charities">
-  <div class="wrap wrap--narrow">
-    <p class="eyebrow">Giving something back</p>
-    <h2 class="h2">Charities we support</h2>
-    <p class="lead">A few causes close to us, and the people raising money for them.
-      Whatever you can give goes straight to the charity.</p>
-    <p class="cta-links">
-      <a class="btn btn--solid" href="/charities">Charities we support</a>
-    </p>
-  </div>
-</section>
-
 <!-- ============ DEDICATION ============ -->
 <section class="dedication" aria-label="Dedication">
   <div class="wrap wrap--narrow">
@@ -314,7 +314,6 @@
     <p class="dedication__motto" lang="kw">Yn agan kolonnow bys vykken</p>
   </div>
 </section>
-
 </main>
 
 <!-- ===== Photo viewer ===== -->

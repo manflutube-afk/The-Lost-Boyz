@@ -411,11 +411,29 @@ body.nav-open { overflow: hidden; }
 /* ---------------- Section furniture ---------------- */
 
 .sec { padding: clamp(3.5rem, 11vw, 6.5rem) 0; }
-.sec--music { background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%); }
-.sec--band  { background: var(--ink-2); }
-.sec--live  { background: var(--ink); }
-.sec--gallery { background: var(--ink-2); }
-.sec--booking { background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%); }
+
+/*
+ * The grounds alternate between the two darks so each section reads as its
+ * own band, and a section that changes tone does it with a gradient rather
+ * than a hard line.
+ *
+ * The order of these matters: they are tuned to the order the sections appear
+ * in on the home page, and each one has to start on the tone the section
+ * above it finished on. Move a section and this needs walking through again,
+ * or the page ends up with a run of three identical bands and a step in the
+ * middle of it.
+ *
+ * Reading down the page: music fades ink to ink-2, our story holds ink-2,
+ * live fades back to ink, booking and reelz hold ink, reelz fades up to
+ * ink-2, sponsors holds it, charities fades back to ink, gallery holds ink,
+ * and the dedication closes on ink behind its own rule.
+ */
+.sec--music   { background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%); }
+.sec--band    { background: var(--ink-2); }
+.sec--live    { background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%); }
+.sec--booking { background: var(--ink); }
+.sec--reelz   { background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%); }
+.sec--gallery { background: var(--ink); }
 
 .eyebrow {
   margin: 0 0 .35rem;
@@ -881,7 +899,14 @@ body.nav-open { overflow: hidden; }
 .teaser {
   position: relative;
   display: block;
-  width: min(100%, 320px);
+  /*
+   * The third value is the same trick used on the disc and the gallery: a
+   * 3:4 thumbnail at the full width of a phone is 427px tall, which does not
+   * fit on a short one, so jumping to Reelz landed it half off the bottom.
+   * Capping the width by the height available keeps its shape and simply
+   * makes it a little smaller. On a normal-sized phone the cap barely bites.
+   */
+  width: min(100%, 320px, calc((100svh - 330px) * 3 / 4));
   margin-inline: auto;
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -2263,8 +2288,8 @@ body.nav-open { overflow: hidden; }
 .sec--cta .h2::after { margin-inline: auto; }
 
 /* alternating grounds so the two call-outs read as separate bands */
-.sec--sponsors { background: var(--ink); }
-.sec--charities { background: var(--ink-2); }
+.sec--sponsors  { background: var(--ink-2); }
+.sec--charities { background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%); }
 
 .cta-links {
   display: flex;
