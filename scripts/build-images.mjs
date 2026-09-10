@@ -309,6 +309,51 @@ if (existsSync(SPONSOR_SRC)) {
 }
 
 /*
+ * Venue photographs for the gig pages — what the place looks like from the
+ * road, so somebody driving there knows what they are looking for.
+ *
+ * Drop a photo into source-images/venues/ named after the venue, e.g.
+ * "ship-inn-lerryn.jpg", and reference it from the gig page as
+ * /images/venues/ship-inn-lerryn-{640,960}.webp.
+ *
+ * Not cropped to a fixed shape: a photograph of a building is useless if the
+ * sign has been cut off the top of it, and the page lets each one keep its
+ * own proportions.
+ */
+const VENUE_SRC = `${SRC}/venues`;
+const VENUE_OUT = `${OUT}/venues`;
+
+if (existsSync(VENUE_SRC)) {
+  const { readdirSync } = await import('node:fs');
+  mkdirSync(VENUE_OUT, { recursive: true });
+
+  const files = readdirSync(VENUE_SRC).filter((f) => /\.(png|jpe?g|webp|tiff?)$/i.test(f));
+
+  for (const file of files) {
+    const name = file.replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    // only the widths the photo can actually fill — a small original would
+    // otherwise be written out twice under two different names
+    const { width: venueWidth } = await sharp(`${VENUE_SRC}/${file}`).metadata();
+    const widths = [640, 960].filter((w) => w <= venueWidth);
+    if (!widths.length) { widths.push(venueWidth); }
+
+    for (const w of widths) {
+      await sharp(`${VENUE_SRC}/${file}`)
+        .resize({ width: w })
+        .webp({ quality: 80 })
+        .toFile(`${VENUE_OUT}/${name}-${w}.webp`);
+    }
+    console.log(`venue: ${file} (${venueWidth}px) -> venues/${name}-{${widths.join(',')}}.webp`);
+  }
+
+  if (!files.length) { console.log('venues: none to do'); }
+}
+
+/*
  * Portraits for the Our Story page. Anything in source-images/people/ is
  * resized to two widths so a phone and a retina screen each get a sensible
  * file. Nothing is cropped: these are photographs of people, and deciding

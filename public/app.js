@@ -1175,6 +1175,18 @@
       mon.textContent = MONTHS[d.getMonth()];
       date.append(day, mon);
 
+      /*
+       * The year is only shown when the gig is not in the current one. With
+       * dates either side of new year in the list, a bare "16 JAN" sitting
+       * under "17 OCT" reads as a date that has already gone by.
+       */
+      if (d.getFullYear() !== today.getFullYear()) {
+        var yr = document.createElement('span');
+        yr.className = 'gig__yr';
+        yr.textContent = d.getFullYear();
+        date.append(yr);
+      }
+
       var venue = document.createElement('div');
       venue.className = 'gig__venue';
       venue.textContent = g.venue || 'TBC';

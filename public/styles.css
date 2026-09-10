@@ -1515,6 +1515,12 @@ body.nav-open { overflow: hidden; }
   text-transform: uppercase;
   color: var(--violet-hi);
 }
+/* only appears on gigs that are not in the current year */
+.gig__yr {
+  font-size: .6rem;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
 .gig__venue {
   font-family: var(--f-display);
   font-size: 1.15rem;
@@ -1776,6 +1782,29 @@ body.nav-open { overflow: hidden; }
 
 .venue__body { padding: 0 1.15rem 1.15rem; }
 
+/* photo of the place first, map second — you want to know what you are
+   looking for before you know how to get there */
+.venue__grid { display: grid; gap: 1rem; }
+
+.venue__shot { margin: 0; }
+.venue__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+
+.venue__credit {
+  margin-top: .55rem;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+/* the licence line, quieter than the sentence it follows */
+.venue__by { display: block; font-size: .78rem; opacity: .75; }
+.venue__by a { color: inherit; }
+
 .venue__map {
   aspect-ratio: 16 / 10;
   /* never taller than the screen it is being read on */
@@ -1794,6 +1823,18 @@ body.nav-open { overflow: hidden; }
   flex-wrap: wrap;
   gap: .6rem;
   margin: 0;
+}
+
+@media (min-width: 720px) {
+  .venue__grid { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  /*
+   * The two columns stretch to the same height and the map fills whatever
+   * that turns out to be, so the photo and the map are one pair of panels
+   * rather than two things of different sizes sitting next to each other.
+   */
+  .venue__shot { display: flex; flex-direction: column; }
+  .venue__credit { margin-top: auto; padding-top: .55rem; }
+  .venue__map { aspect-ratio: auto; height: 100%; min-height: 220px; }
 }
 
 /* ---------------- Booking ---------------- */
