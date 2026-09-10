@@ -291,6 +291,36 @@ const sodfest = [];
     // g2 before g10: sorting these as text puts g10 second
     .sort((a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10));
 
+  /*
+   * The rest of the gallery: the merchandise photographs and Archie on
+   * stage. Named here rather than found by pattern, because the file names
+   * they arrived under are not names to publish -- "lost boyz bracelet.jpg"
+   * would become part of a public URL otherwise.
+   */
+  const named = [
+    ['merch-tshirt-front', 'tshirt.jpg'],
+    ['merch-tshirt-back',  'tshirt back.jpg'],
+    ['merch-shirts',       'merch.jpg'],
+    ['merch-bracelet',     'lost boyz bracelet.jpg'],
+    ['archie',             'people/Darren’s guitar tech Archie.jpg'],
+  ].filter(([, file]) => existsSync(`${SRC}/${file}`));
+
+  for (const [outName, srcFile] of named) {
+    await sharp(`${SRC}/${srcFile}`)
+      .rotate()
+      .resize(640, 640, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 80 })
+      .toFile(`${SODFEST_OUT}/${outName}-640.webp`);
+
+    await sharp(`${SRC}/${srcFile}`)
+      .rotate()
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(`${SODFEST_OUT}/${outName}-1200.webp`);
+
+    console.log(`gallery: ${srcFile} -> ${outName}-{640,1200}.webp`);
+  }
+
   for (const file of found) {
     const name = file.replace(/\.[^.]+$/, '').toLowerCase();
 
