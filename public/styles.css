@@ -52,6 +52,13 @@ body {
   overflow-x: clip;
 }
 
+/*
+ * The same on the root element. body's overflow does not clip anything whose
+ * containing block is the document itself, so a stray absolutely-positioned
+ * element could still widen the page; this catches those.
+ */
+html { overflow-x: clip; }
+
 img { max-width: 100%; height: auto; display: block; }
 
 a { color: var(--violet-hi); }
@@ -2163,7 +2170,43 @@ body.nav-open { overflow: hidden; }
   background: #0d0716;
   border: 1px solid var(--line);
 }
+.venue__map { position: relative; }
 .venue__frame { display: block; width: 100%; height: 100%; border: 0; }
+
+/*
+ * The map does not take a touch until it has been asked to. Scrolling a gig
+ * page on a phone, the moment a thumb crosses an embedded map the map takes
+ * the gesture and pans instead of the page — which reads as the page sliding
+ * about. The cover intercepts that first touch; once tapped it goes for good.
+ */
+.venue__frame { pointer-events: none; }
+.venue__map.is-live .venue__frame { pointer-events: auto; }
+
+.venue__cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 .9rem;
+  background: linear-gradient(180deg, transparent 55%, rgba(7, 4, 12, .55) 100%);
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.venue__cover span {
+  padding: .45rem .9rem;
+  background: rgba(7, 4, 12, .82);
+  border: 1px solid var(--violet-dim);
+  border-radius: 999px;
+  color: var(--lilac);
+  font-family: var(--f-display);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.venue__cover:hover span,
+.venue__cover:focus-visible span { border-color: var(--violet); color: #fff; }
 
 .venue__addr { margin: .9rem 0 1rem; color: var(--muted); font-size: .95rem; }
 

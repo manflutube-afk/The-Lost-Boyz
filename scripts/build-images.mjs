@@ -432,4 +432,83 @@ await sharp(ogBackground)
 
 console.log(`og card: ${OG_W}x${OG_H} from the logo`);
 
+/*
+ * The email header.
+ *
+ * The logo is pale line-work meant for a dark page, and an email is read on
+ * white — put the cut-out straight into a message and it all but disappears.
+ * So the dark ground is baked into the image rather than left to a table cell
+ * the mail client might not colour in.
+ *
+ * PNG, not webp: Gmail copes with webp but Outlook does not, and an email is
+ * exactly the place where a format has to work everywhere. 1200 wide, shown
+ * at 600, so it stays sharp on a phone.
+ */
+const MAIL_W = 1200;
+const MAIL_H = 400;
+
+const mailBackground = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${MAIL_W}" height="${MAIL_H}">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="46%" r="78%">
+      <stop offset="0%"   stop-color="#4a1878"/>
+      <stop offset="55%"  stop-color="#170b26"/>
+      <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="${MAIL_W}" height="${MAIL_H}" fill="url(#glow)"/>
+  <rect x="0" y="${MAIL_H - 6}" width="${MAIL_W}" height="6" fill="#a855f7"/>
+</svg>`);
+
+const mailLogoWidth = 440;
+const mailLogo = await sharp(cutoutPng).resize({ width: mailLogoWidth }).png().toBuffer();
+const mailLogoMeta = await sharp(mailLogo).metadata();
+
+await sharp(mailBackground)
+  .composite([{
+    input: mailLogo,
+    left: Math.round((MAIL_W - mailLogoWidth) / 2),
+    top: Math.round((MAIL_H - 6 - mailLogoMeta.height) / 2),
+  }])
+  .png({ compressionLevel: 9 })
+  .toFile(`${OUT}/email-header.png`);
+
+console.log(`email header: ${MAIL_W}x${MAIL_H}`);
+
+/*
+ * A square version, for anywhere a service wants an avatar — a Resend or
+ * Gravatar profile picture, a social account, a favicon at a larger size.
+ * Same reasoning: the ground is baked in so it reads on any background.
+ */
+const AVATAR = 512;
+
+const avatarBackground = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${AVATAR}" height="${AVATAR}">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="72%">
+      <stop offset="0%"   stop-color="#4a1878"/>
+      <stop offset="58%"  stop-color="#170b26"/>
+      <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="${AVATAR}" height="${AVATAR}" fill="url(#glow)"/>
+</svg>`);
+
+// Sized for a circular crop: most services round the corners off, so the
+// wingtips are kept well inside the circle that survives it.
+const avatarLogoWidth = 340;
+const avatarLogo = await sharp(cutoutPng).resize({ width: avatarLogoWidth }).png().toBuffer();
+const avatarLogoMeta = await sharp(avatarLogo).metadata();
+
+await sharp(avatarBackground)
+  .composite([{
+    input: avatarLogo,
+    left: Math.round((AVATAR - avatarLogoWidth) / 2),
+    top: Math.round((AVATAR - avatarLogoMeta.height) / 2),
+  }])
+  .png({ compressionLevel: 9 })
+  .toFile(`${OUT}/avatar-512.png`);
+
+console.log(`avatar: ${AVATAR}x${AVATAR}`);
+
 console.log('done');

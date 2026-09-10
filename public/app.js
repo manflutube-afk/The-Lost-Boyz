@@ -278,22 +278,42 @@
     discObserver.observe(disc);
   }
 
-  /* ---------- the gallery strip only snaps while it is being swiped ---------- */
+  /* ---------- the gallery strip stays put unless it is being swiped ---------- */
 
   /*
-   * A scroll-snap container re-snaps every time the viewport is resized, and
-   * on a phone the address bar sliding away as you scroll *is* a resize. The
-   * gallery strip was therefore sliding sideways on its own while somebody
-   * was scrolling vertically past it, which made the whole page feel loose.
+   * The gallery is the only thing on the site that scrolls sideways, and it is
+   * therefore the only thing that can make the page appear to slide left and
+   * right while somebody is scrolling down it.
    *
-   * So snapping is only on while a finger is actually on the strip. The delay
-   * before switching it off again lets the flick's momentum run out and the
-   * strip settle on a photo first.
+   * Two separate causes, both dealt with here.
+   *
+   * 1. A scroll-snap container re-snaps whenever the viewport is resized, and
+   *    on a phone the address bar sliding away as you scroll *is* a resize. So
+   *    snapping is only switched on once a swipe has been identified as a
+   *    sideways one.
+   *
+   * 2. iOS decides which way a swipe is going very early and is happy to call
+   *    a slightly diagonal upward flick "sideways". The strip then pans under
+   *    the thumb while the page scrolls, which is exactly the wobble being
+   *    complained about. The axis is worked out here instead: once a gesture
+   *    has been judged vertical, the strip's scroll position is pinned back to
+   *    where it started on every move, so it cannot drift a pixel.
+   *
+   * Pinning rather than preventDefault is deliberate. Cancelling the touch
+   * would also cancel the page's own scrolling, which is the thing the visitor
+   * actually asked for; putting the strip back leaves their scroll alone.
    */
   var strip = document.getElementById('shots');
 
   if (strip) {
     var settle = null;
+    var startX = 0;
+    var startY = 0;
+    var startLeft = 0;
+    var axis = null;
+
+    // how far a finger must travel before the direction is called
+    var AXIS_DEADZONE = 6;
 
     var snapOn = function () {
       clearTimeout(settle);
@@ -305,15 +325,85 @@
       settle = setTimeout(function () { strip.classList.remove('is-swiping'); }, 700);
     };
 
-    strip.addEventListener('touchstart', snapOn, { passive: true });
-    strip.addEventListener('pointerdown', snapOn);
-    ['touchend', 'touchcancel', 'pointerup', 'pointercancel']
-      .forEach(function (name) { strip.addEventListener(name, snapOffSoon, { passive: true }); });
+    strip.addEventListener('touchstart', function (e) {
+      var touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      startLeft = strip.scrollLeft;
+      axis = null;
+    }, { passive: true });
 
-    // a mouse wheel or a keyboard on the strip deserves the same treatment
+    strip.addEventListener('touchmove', function (e) {
+      var touch = e.touches[0];
+      var dx = Math.abs(touch.clientX - startX);
+      var dy = Math.abs(touch.clientY - startY);
+
+      if (axis === null) {
+        // not enough movement yet to tell which way this is going
+        if (dx < AXIS_DEADZONE && dy < AXIS_DEADZONE) { return; }
+        axis = dy > dx ? 'y' : 'x';
+        if (axis === 'x') { snapOn(); }
+      }
+
+      // a swipe up or down must not take the photographs with it
+      if (axis === 'y' && strip.scrollLeft !== startLeft) {
+        strip.scrollLeft = startLeft;
+      }
+    }, { passive: true });
+
+    ['touchend', 'touchcancel'].forEach(function (name) {
+      strip.addEventListener(name, function () {
+        // one last pin, because the flick's momentum lands after the finger has gone
+        if (axis === 'y') {
+          strip.scrollLeft = startLeft;
+          requestAnimationFrame(function () { strip.scrollLeft = startLeft; });
+        }
+        axis = null;
+        snapOffSoon();
+      }, { passive: true });
+    });
+
+    // a mouse or a keyboard on the strip is unambiguous, so it just snaps
+    strip.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'touch') { snapOn(); }
+    });
+    ['pointerup', 'pointercancel'].forEach(function (name) {
+      strip.addEventListener(name, function (e) {
+        if (e.pointerType !== 'touch') { snapOffSoon(); }
+      }, { passive: true });
+    });
     strip.addEventListener('wheel', function () { snapOn(); snapOffSoon(); }, { passive: true });
     strip.addEventListener('keydown', function () { snapOn(); snapOffSoon(); });
   }
+
+  /* ---------- the map waits to be asked ---------- */
+
+  /*
+   * An embedded map is a scrolling surface of its own. Scroll down a gig page
+   * on a phone and the moment your thumb crosses the map, the map takes the
+   * gesture and pans instead of the page — which feels like the page sliding
+   * about underneath you.
+   *
+   * So the map ignores touches until it is tapped once. Until then a cover
+   * sits over it saying so; after the tap it behaves like a normal map.
+   */
+  document.querySelectorAll('.venue__map').forEach(function (box) {
+    var frame = box.querySelector('iframe');
+    if (!frame) { return; }
+
+    var cover = document.createElement('button');
+    cover.type = 'button';
+    cover.className = 'venue__cover';
+    cover.innerHTML = '<span>Tap to move the map</span>';
+
+    var wake = function () {
+      box.classList.add('is-live');
+      cover.remove();
+    };
+
+    cover.addEventListener('click', wake);
+    box.appendChild(cover);
+  });
 
   /* ---------- the story button presses ---------- */
 

@@ -53,44 +53,112 @@ const rowsHtml = (fields, labelColour, valueColour) =>
     )
     .join('');
 
+/*
+ * The masthead.
+ *
+ * The logo on this site is pale line-work made for a dark page, and email is
+ * read on white — dropped in as-is it would all but vanish. The image built by
+ * the build script has the dark ground baked into it, so it reads the same
+ * wherever it lands, and it is a PNG because Outlook still does not do webp.
+ *
+ * It is served at twice the size it is shown at, so it stays sharp on a phone,
+ * and it carries alt text because most mail clients block images until asked.
+ */
+function masthead(siteUrl) {
+  return (
+    '<tr><td style="padding:0">' +
+    '<img src="' + siteUrl + '/images/email-header.png" width="600" height="200" ' +
+    'alt="The Lost Boyz" ' +
+    'style="display:block;width:100%;max-width:600px;height:auto;border:0;background:#170b26"></td></tr>'
+  );
+}
+
+/*
+ * A table, not a div. Every mail client renders tables; rather fewer of them
+ * render modern layout, and Outlook in particular still lays out with Word.
+ */
+function wrapEmail(siteUrl, inner) {
+  return (
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" ' +
+    'style="background:#f4f1f7;padding:24px 12px">' +
+    '<tr><td align="center">' +
+    '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" ' +
+    'style="width:100%;max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden">' +
+    masthead(siteUrl) +
+    '<tr><td style="padding:26px 26px 30px;font-family:system-ui,Segoe UI,Arial,sans-serif;' +
+    'font-size:15px;line-height:1.6;color:#222">' + inner + '</td></tr>' +
+    '</table>' +
+    '<p style="margin:14px 0 0;font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:12px;color:#8a8397">' +
+    'The Lost Boyz &middot; classic rock duo &middot; Cornwall</p>' +
+    '</td></tr></table>'
+  );
+}
+
+/* A plain-text version of the same thing, for clients that want one. */
+function textOf(lines) {
+  return lines.filter(Boolean).join('\n');
+}
+
 /* The band's copy of the enquiry: every field, in the order it was asked. */
-function bandEmail(kind, fields, replyTo) {
+function bandEmail(kind, fields, replyTo, siteUrl) {
   const heading = kind === 'sponsor' ? 'Sponsor enquiry' : 'Booking enquiry';
+
+  const inner =
+    '<h1 style="margin:0 0 16px;font-size:20px;letter-spacing:.02em">' + heading + '</h1>' +
+    '<table role="presentation" style="border-collapse:collapse">' +
+    rowsHtml(fields, '#6b6478', '#111') + '</table>' +
+    '<p style="margin:20px 0 0;color:#6b6478;font-size:13px">Sent from the website. ' +
+    'Reply straight to this email to answer them.</p>';
 
   return {
     subject: heading + ' from ' + replyTo,
-    html:
-      '<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px">' +
-      '<h2 style="margin:0 0 14px">' + heading + '</h2>' +
-      '<table style="border-collapse:collapse">' + rowsHtml(fields, '#666', '#111') + '</table>' +
-      '<p style="margin:18px 0 0;color:#666;font-size:13px">Sent from thelostboyz.uk. ' +
-      'Reply straight to this email to answer them.</p></div>',
+    html: wrapEmail(siteUrl, inner),
+    text: textOf([
+      heading,
+      '',
+      ...fields.filter(([, v]) => v).map(([label, value]) => label + ': ' + value),
+      '',
+      'Sent from the website. Reply to this email to answer them.',
+    ]),
   };
 }
 
 /* Their copy: short, warm, and a record of what they actually sent. */
-function confirmationEmail(kind, fields, name) {
+function confirmationEmail(kind, fields, name, siteUrl) {
   const opening =
     kind === 'sponsor'
       ? 'Thank you for thinking about sponsoring us — it genuinely helps keep the show on the road.'
       : 'Thank you for getting in touch about a booking.';
+
+  const inner =
+    '<p style="margin:0 0 14px">' + (name ? 'Hello ' + escapeHtml(name) + ',' : 'Hello,') + '</p>' +
+    '<p style="margin:0 0 16px">' + opening +
+    ' Your message has come through and one of us will get back to you dreckly.</p>' +
+    '<p style="margin:0 0 8px;color:#6b6478;font-size:13px">Here is what you sent:</p>' +
+    '<table role="presentation" style="border-collapse:collapse;margin:0 0 20px">' +
+    rowsHtml(fields, '#6b6478', '#222') + '</table>' +
+    '<p style="margin:0 0 16px">If anything above is wrong, just reply to this email and tell us.</p>' +
+    '<p style="margin:0">Cheers,<br>Darren &amp; Andrew</p>';
 
   return {
     subject:
       kind === 'sponsor'
         ? 'Thanks for your sponsorship enquiry — The Lost Boyz'
         : 'Thanks for your booking enquiry — The Lost Boyz',
-    html:
-      '<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;color:#222;max-width:560px">' +
-      '<h2 style="margin:0 0 6px;letter-spacing:.04em">THE LOST BOYZ</h2>' +
-      '<p style="margin:0 0 18px;color:#777;font-size:13px">Classic rock duo &middot; Cornwall</p>' +
-      '<p style="margin:0 0 14px">' + (name ? 'Hello ' + escapeHtml(name) + ',' : 'Hello,') + '</p>' +
-      '<p style="margin:0 0 14px">' + opening +
-      ' Your message has come through and one of us will get back to you dreckly.</p>' +
-      '<p style="margin:0 0 8px;color:#777;font-size:13px">Here is what you sent:</p>' +
-      '<table style="border-collapse:collapse;margin:0 0 18px">' + rowsHtml(fields, '#777', '#222') + '</table>' +
-      '<p style="margin:0 0 14px">If anything above is wrong, just reply to this email and tell us.</p>' +
-      '<p style="margin:0">Cheers,<br>Darren &amp; Andrew</p></div>',
+    html: wrapEmail(siteUrl, inner),
+    text: textOf([
+      name ? 'Hello ' + name + ',' : 'Hello,',
+      '',
+      opening + ' Your message has come through and one of us will get back to you dreckly.',
+      '',
+      'Here is what you sent:',
+      ...fields.filter(([, v]) => v).map(([label, value]) => label + ': ' + value),
+      '',
+      'If anything above is wrong, just reply to this email and tell us.',
+      '',
+      'Cheers,',
+      'Darren & Andrew',
+    ]),
   };
 }
 
@@ -162,6 +230,9 @@ export async function onRequestPost(context) {
   const apiKey = env.RESEND_API_KEY;
   const bandTo = env.BAND_EMAIL || 'bookings@thelostboyz.uk';
   const from = env.FROM_EMAIL || 'The Lost Boyz <website@thelostboyz.uk>';
+  // where the logo in the email is fetched from. Change this to
+  // https://thelostboyz.uk once the domain points at the site.
+  const siteUrl = (env.SITE_URL || 'https://the-lost-boyz.pages.dev').replace(/\/+$/, '');
 
   if (!apiKey) {
     return json(
@@ -170,7 +241,7 @@ export async function onRequestPost(context) {
     );
   }
 
-  const forBand = bandEmail(kind, fields, email);
+  const forBand = bandEmail(kind, fields, email, siteUrl);
 
   try {
     // The band's copy is the one that matters, so it is sent and checked
@@ -182,6 +253,7 @@ export async function onRequestPost(context) {
       reply_to: email,
       subject: forBand.subject,
       html: forBand.html,
+      text: forBand.text,
     });
   } catch (e) {
     return json({ ok: false, error: 'That did not send. Please try again in a moment.' }, 502);
@@ -190,13 +262,14 @@ export async function onRequestPost(context) {
   // Their receipt. A failure here must not tell them the enquiry failed,
   // because it did not — the band already has it.
   try {
-    const receipt = confirmationEmail(kind, fields, name);
+    const receipt = confirmationEmail(kind, fields, name, siteUrl);
     await send(apiKey, {
       from: from,
       to: [email],
       reply_to: bandTo,
       subject: receipt.subject,
       html: receipt.html,
+      text: receipt.text,
     });
   } catch (e) {
     return json({ ok: true, confirmation: false }, 200);

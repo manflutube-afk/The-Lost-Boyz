@@ -109,6 +109,59 @@ anything committed to git stays in the history even after it is deleted.
 
 </details>
 
+### The logo in the emails
+
+Both emails open with `public/images/email-header.png`, built by `npm run
+images` from the same cut-out logo as the site. The dark ground is baked into
+the picture rather than left to a background colour, because the logo is pale
+line-work made for a dark page and email is read on white — dropped in as-is it
+would all but disappear. It is a PNG because Outlook still does not handle
+webp, and it is built at 1200 wide but shown at 600 so it stays sharp on a
+phone.
+
+The image is fetched over the internet when the email is opened, so the address
+it is fetched from has to be a live one. That is `SITE_URL` in
+`wrangler.jsonc`, currently the pages.dev address. **On the day the domain is
+pointed at the site, change it to `https://thelostboyz.uk`** — otherwise every
+email sent afterwards will still be pulling its logo from pages.dev.
+
+### The little round picture next to the sender
+
+Short version: not realistically, and not for the reason you would expect.
+
+That avatar is a standard called **BIMI**, and it needs three things:
+
+1. a DMARC record on the domain set to `p=quarantine` or `p=reject`;
+2. the logo as a proper vector SVG in the "SVG Tiny PS" profile — a traced
+   copy of a photograph or a JPEG will not do, it has to be real vector
+   artwork, so this needs whatever Darren drew the logo in;
+3. **for Gmail specifically, a Verified Mark Certificate** — which requires a
+   registered trademark and runs to four figures a year.
+
+Without the certificate the avatar appears in Yahoo, AOL and Fastmail, and not
+in Gmail, which is where most people will read it. So it is a lot of work and
+money for very little.
+
+`public/images/avatar-512.png` is built anyway — the logo on the dark ground,
+square, and sized so the wingtips survive a circular crop. Use it for the
+Resend account picture, social profiles, or anywhere else that wants one.
+
+### Worth doing: a DMARC record
+
+The domain has SPF and DKIM (Resend set those up) but **no DMARC record at
+all**. Adding one is five minutes and makes mail from the domain more trusted.
+In Cloudflare DNS add a TXT record:
+
+| Field | Value |
+| --- | --- |
+| Name | `_dmarc` |
+| Type | `TXT` |
+| Content | `v=DMARC1; p=none; rua=mailto:bookings@thelostboyz.uk` |
+
+`p=none` only asks for reports and changes nothing about delivery, so it is
+safe to add straight away. Tighten it to `p=quarantine` later once the reports
+show nothing unexpected is sending as the domain.
+
 ### If the key is ever missing or wrong
 
 Nothing breaks. The endpoint answers "not switched on yet", and the page opens

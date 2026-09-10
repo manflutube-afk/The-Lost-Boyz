@@ -20,6 +20,11 @@
     "BAND_EMAIL": "bookings@thelostboyz.uk",
     // who it comes from. The domain must be verified in Resend, and
     // thelostboyz.uk is.
-    "FROM_EMAIL": "The Lost Boyz <website@thelostboyz.uk>"
+    "FROM_EMAIL": "The Lost Boyz <website@thelostboyz.uk>",
+    // where the logo in the emails is fetched from. Change this to
+    // "https://thelostboyz.uk" on the day the domain is pointed at the site,
+    // or the logo in every email sent after that will still be coming from
+    // the pages.dev address.
+    "SITE_URL": "https://the-lost-boyz.pages.dev"
   }
 }
