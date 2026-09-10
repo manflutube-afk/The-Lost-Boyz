@@ -43,7 +43,7 @@
     <a href="/reelz">Reelz</a>
     <a href="#live">Live</a>
     <a href="#gallery">Gallery</a>
-    <a href="/geeks-corner">Gear</a>
+    <a href="/geeks-corner">Geekz</a>
     <a href="/sponsors">Sponsors</a>
     <a href="/charities">Charities</a>
     <a href="#booking">Booking</a>
@@ -271,11 +271,11 @@
     <h2 class="h2">Book the Boyz</h2>
     <p class="lead">Two of us, a proper PA and a light show. Tell us the date and the room, and we will come and make a racket.</p>
 
+    <p class="book-cta">
+      <button class="btn btn--solid btn--big" type="button" data-booking-open>Book the Boyz</button>
+    </p>
+
     <div class="contact">
-      <a class="contact__row" href="mailto:bookings@thelostboyz.uk">
-        <span class="contact__k">Email</span>
-        <span class="contact__v">bookings@thelostboyz.uk</span>
-      </a>
       <a class="contact__row" href="https://www.facebook.com/profile.php?id=61584241187858" target="_blank" rel="noopener">
         <span class="contact__k">Facebook</span>
         <span class="contact__v">facebook.com/The Lost Boyz</span>
@@ -331,6 +331,105 @@
     <figcaption class="lb__cap"><span class="lb__count" id="lbCount"></span><span id="lbAlt"></span></figcaption>
   </figure>
   <button class="lb__nav lb__nav--next" id="lbNext" type="button" aria-label="Next photo"></button>
+</dialog>
+
+
+<!-- ===== Booking enquiry form ===== -->
+<dialog class="modal" id="bookingDialog" aria-labelledby="bookingTitle">
+  <form class="modal__inner" id="bookingForm" method="dialog" novalidate>
+    <button class="modal__close" type="button" data-modal-close aria-label="Close">&times;</button>
+
+    <h2 class="modal__title" id="bookingTitle">Book the Boyz</h2>
+    <p class="modal__intro">Tell us what you have in mind and we will come straight back to you.</p>
+
+    <fieldset class="field field--choice">
+      <legend>Are you booking as&hellip;</legend>
+      <label class="choice">
+        <input type="radio" name="who" value="A business or venue" checked>
+        <span>A business or venue</span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="who" value="An individual">
+        <span>An individual</span>
+      </label>
+    </fieldset>
+
+    <div class="field" id="bkBusinessField">
+      <label for="bkBusiness">Pub, club or business name</label>
+      <input id="bkBusiness" name="business" type="text" autocomplete="organization">
+    </div>
+
+    <div class="field">
+      <label for="bkName">Your name</label>
+      <input id="bkName" name="name" type="text" autocomplete="name" required>
+    </div>
+
+    <div class="field">
+      <label for="bkEmail">Email</label>
+      <input id="bkEmail" name="email" type="email" autocomplete="email" required>
+    </div>
+
+    <div class="field">
+      <label for="bkPhone">Phone <span class="field__opt">(optional)</span></label>
+      <input id="bkPhone" name="phone" type="tel" autocomplete="tel">
+    </div>
+
+    <div class="field">
+      <label for="bkOccasion">What is the do?</label>
+      <select id="bkOccasion" name="occasion">
+        <option>Pub or club night</option>
+        <option>Wedding</option>
+        <option>Birthday or anniversary</option>
+        <option>Private party</option>
+        <option>Charity night</option>
+        <option>Festival or event</option>
+        <option>Something else</option>
+      </select>
+    </div>
+
+    <div class="field field--pair">
+      <div>
+        <label for="bkDate">Date <span class="field__opt">(or roughly when)</span></label>
+        <input id="bkDate" name="date" type="text" placeholder="e.g. Sat 14 March, or spring 2027">
+      </div>
+      <div>
+        <label for="bkVenue">Venue or town</label>
+        <input id="bkVenue" name="venue" type="text" autocomplete="address-level2">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="bkMessage">Anything else we should know?</label>
+      <textarea id="bkMessage" name="message" rows="4"
+        placeholder="Times, how long you want us on for, whether there is a stage, parking, anything at all."></textarea>
+    </div>
+
+    <!-- Not shown to anyone, and not read out: only a bot fills this in. -->
+    <div class="hp" aria-hidden="true">
+      <label for="bkWebsite">Website</label>
+      <input id="bkWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+    </div>
+
+    <p class="modal__err" id="bookingErr" role="alert" hidden></p>
+
+    <div class="modal__actions">
+      <button class="btn" type="button" data-modal-close>Cancel</button>
+      <button class="btn btn--solid" type="submit">Send it</button>
+    </div>
+
+    <p class="modal__note">Your details go to the band and nowhere else. Nothing is stored on this website.</p>
+  </form>
+</dialog>
+
+<!-- ===== Thank you ===== -->
+<dialog class="modal modal--thanks" id="thanksDialog" aria-labelledby="thanksTitle">
+  <div class="modal__inner thanks">
+    <img class="thanks__mark" src="/images/logo-320.webp" width="200" height="152" alt="" loading="lazy">
+    <p class="thanks__sent">Thank you &mdash; your information has been sent through the air waves</p>
+    <p class="thanks__big" id="thanksTitle">The Boyz Will Get Back To You Dreckly</p>
+    <p class="thanks__note" id="thanksNote" hidden></p>
+    <button class="btn btn--solid btn--big thanks__go" type="button" data-modal-close>Rock on</button>
+  </div>
 </dialog>
 
 <footer class="ftr">

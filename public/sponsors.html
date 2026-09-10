@@ -43,7 +43,7 @@
     <a href="/reelz">Reelz</a>
     <a href="/#live">Live</a>
     <a href="/#gallery">Gallery</a>
-    <a href="/geeks-corner">Gear</a>
+    <a href="/geeks-corner">Geekz</a>
     <a href="/sponsors" aria-current="page">Sponsors</a>
     <a href="/charities">Charities</a>
     <a href="/#booking">Booking</a>
@@ -112,6 +112,31 @@
         </article>
       </div>
 
+      <!--
+        The fourth option, deliberately outside the grid of three. Some
+        sponsors want to do something that is not on a price list — put their
+        name on the drum riser, cover a van hire, kit the boyz out in shirts —
+        and a page of fixed tiers quietly turns those people away. Its enquiry
+        opens with the plan set to "Something different", so it lands as an
+        obvious conversation rather than a sign-up.
+      -->
+      <article class="plan plan--custom">
+        <span class="plan__flag plan__flag--custom">Your idea</span>
+        <h3 class="plan__name">Something different</h3>
+        <p class="plan__price">Let&rsquo;s talk</p>
+        <p class="plan__blurb">Not everything fits in a box. If you have something else in
+          mind &mdash; sponsoring a whole gig, putting your name on the kit, covering the van
+          for a weekend, kitting the boyz out, swapping sponsorship for what you do &mdash;
+          tell us what you were thinking and we will work it out between us.</p>
+        <ul class="plan__list">
+          <li>Any amount, one-off or ongoing</li>
+          <li>Trade instead of cash, if that suits you better</li>
+          <li>No obligation &mdash; ask the question and see</li>
+        </ul>
+        <button class="btn btn--solid plan__btn" type="button" data-sponsor-open
+                data-plan="Something different &mdash; let&rsquo;s talk">Tell us your idea</button>
+      </article>
+
       <p class="backlink"><a class="btn" href="/">Back to the site</a></p>
     </div>
   </section>
@@ -131,6 +156,7 @@
         <option value="Supporter — £5/month">Supporter — £5/month</option>
         <option value="Featured — £10/month">Featured — £10/month</option>
         <option value="One-off — £50, featured for two weeks">One-off — £50, featured for two weeks</option>
+        <option value="Something different — let’s talk">Something different — let&rsquo;s talk</option>
         <option value="Not sure yet">Not sure yet — let&rsquo;s chat</option>
       </select>
     </div>
@@ -160,6 +186,12 @@
       <textarea id="spMessage" name="message" rows="3"></textarea>
     </div>
 
+    <!-- Not shown to anyone, and not read out: only a bot fills this in. -->
+    <div class="hp" aria-hidden="true">
+      <label for="spWebsite">Website</label>
+      <input id="spWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+    </div>
+
     <p class="modal__err" id="sponsorErr" role="alert" hidden></p>
 
     <div class="modal__actions">
@@ -169,6 +201,18 @@
 
     <p class="modal__note">Your details go straight to the band by email. Nothing is stored on this website.</p>
   </form>
+</dialog>
+
+
+<!-- ===== Thank you ===== -->
+<dialog class="modal modal--thanks" id="thanksDialog" aria-labelledby="thanksTitle">
+  <div class="modal__inner thanks">
+    <img class="thanks__mark" src="/images/logo-320.webp" width="200" height="152" alt="" loading="lazy">
+    <p class="thanks__sent">Thank you &mdash; your information has been sent through the air waves</p>
+    <p class="thanks__big" id="thanksTitle">The Boyz Will Get Back To You Dreckly</p>
+    <p class="thanks__note" id="thanksNote" hidden></p>
+    <button class="btn btn--solid btn--big thanks__go" type="button" data-modal-close>Rock on</button>
+  </div>
 </dialog>
 
 <footer class="ftr">

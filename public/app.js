@@ -682,7 +682,14 @@
    * email app with everything filled in, which needs no accounts or keys.
    * Set this to a POST endpoint later to collect them properly instead.
    */
-  var SPONSOR_ENDPOINT = '';
+  /*
+   * Where enquiries go. /api/enquiry is a Cloudflare Pages Function that
+   * emails the band and sends the visitor a confirmation. If it is not
+   * configured yet — or is having a bad day — every form here falls back to
+   * the visitor's own email app with the enquiry already written out, so an
+   * enquiry is never quietly lost.
+   */
+  var ENQUIRY_ENDPOINT = '/api/enquiry';
   var SPONSOR_EMAIL = 'bookings@thelostboyz.uk';
 
   var sponsorBox = document.getElementById('sponsors');
@@ -810,7 +817,9 @@
 
     var charityCard = function (item, isFundraiser) {
       var card = document.createElement('article');
-      card.className = 'charity';
+      // fundraisers are marked so the stylesheet can tell them apart from
+      // the charities listed underneath them
+      card.className = isFundraiser ? 'charity charity--fundraiser' : 'charity';
 
       var h = document.createElement('h3');
       h.className = 'charity__name';
@@ -900,6 +909,214 @@
       });
   }
 
+  /* ---------- sending an enquiry, and saying thank you ---------- */
+
+  /*
+   * One sender for both forms.
+   *
+   * The endpoint emails the band and sends the visitor a confirmation. Three
+   * things can happen, and each is answered differently:
+   *
+   *   it worked            say thank you, and mention the confirmation
+   *   it is not set up yet hand the whole enquiry to their own email app
+   *   it genuinely failed  say so, and offer their email app as the way out
+   *
+   * The one thing never done is claim an enquiry was sent when it was not.
+   */
+  function sendEnquiry(data, opts) {
+    var button = opts.button;
+
+    if (button) {
+      button.disabled = true;
+      button.textContent = opts.sending || 'Sending…';
+    }
+
+    var finish = function () {
+      if (button) {
+        button.disabled = false;
+        button.textContent = opts.idle || 'Send';
+      }
+    };
+
+    fetch(ENQUIRY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (payload) {
+          return { status: r.status, ok: r.ok, payload: payload };
+        });
+      })
+      .then(function (res) {
+        finish();
+
+        if (res.ok && res.payload.ok) {
+          opts.onSent(res.payload.confirmation !== false);
+          return;
+        }
+
+        // Not switched on yet — their email app, with everything filled in.
+        if (res.status === 503 || res.payload.reason === 'not-configured') {
+          opts.onFallback();
+          return;
+        }
+
+        opts.onFail(res.payload.error
+          || 'Sorry, that did not send. Please email us instead at ' + SPONSOR_EMAIL + '.');
+      })
+      .catch(function () {
+        finish();
+        opts.onFail('Sorry, that did not send — check your connection, or email us at '
+          + SPONSOR_EMAIL + '.');
+      });
+  }
+
+  /*
+   * The thank you. Shared by both forms, and only ever shown once something
+   * has actually gone through.
+   */
+  function showThanks(confirmedTo) {
+    var thanks = document.getElementById('thanksDialog');
+    if (!thanks) { return; }
+
+    var note = document.getElementById('thanksNote');
+    if (note) {
+      if (confirmedTo) {
+        note.textContent = 'We have sent a copy to ' + confirmedTo + ' so you have it in writing.';
+        note.hidden = false;
+      } else {
+        note.hidden = true;
+      }
+    }
+
+    if (typeof thanks.showModal === 'function') { thanks.showModal(); }
+    else { thanks.setAttribute('open', ''); }
+  }
+
+  /* every dialog on the page closes from a [data-modal-close] button */
+  document.querySelectorAll('dialog [data-modal-close]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var box = btn.closest('dialog');
+      if (!box) { return; }
+      if (typeof box.close === 'function') { box.close(); }
+      else { box.removeAttribute('open'); }
+    });
+  });
+
+  /* ---------- book the boyz ---------- */
+
+  var bookingDialog = document.getElementById('bookingDialog');
+
+  if (bookingDialog) {
+    var bookingForm = document.getElementById('bookingForm');
+    var bookingErr = document.getElementById('bookingErr');
+    var businessField = document.getElementById('bkBusinessField');
+    var bookingOpener = null;
+
+    var val = function (id) { return document.getElementById(id).value.trim(); };
+
+    var whoNow = function () {
+      var picked = bookingForm.querySelector('input[name="who"]:checked');
+      return picked ? picked.value : 'An individual';
+    };
+
+    // the pub or business name only matters if they are booking as one
+    var syncBusiness = function () {
+      businessField.hidden = whoNow() !== 'A business or venue';
+    };
+
+    bookingForm.querySelectorAll('input[name="who"]').forEach(function (radio) {
+      radio.addEventListener('change', syncBusiness);
+    });
+    syncBusiness();
+
+    var closeBooking = function () {
+      if (typeof bookingDialog.close === 'function') { bookingDialog.close(); }
+      else { bookingDialog.removeAttribute('open'); }
+      if (bookingOpener) { bookingOpener.focus(); }
+    };
+
+    document.querySelectorAll('[data-booking-open]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        bookingOpener = btn;
+        bookingErr.hidden = true;
+        if (typeof bookingDialog.showModal === 'function') { bookingDialog.showModal(); }
+        else { bookingDialog.setAttribute('open', ''); }
+      });
+    });
+
+    // clicking the backdrop closes it
+    bookingDialog.addEventListener('click', function (e) {
+      if (e.target === bookingDialog) { closeBooking(); }
+    });
+
+    var bookingMailto = function (data) {
+      var body = 'Booking as: ' + data.who
+        + (data.business ? '\nBusiness: ' + data.business : '')
+        + '\nName: ' + data.name
+        + '\nEmail: ' + data.email
+        + (data.phone ? '\nPhone: ' + data.phone : '')
+        + '\nKind of do: ' + data.occasion
+        + (data.date ? '\nDate: ' + data.date : '')
+        + (data.venue ? '\nVenue or town: ' + data.venue : '')
+        + (data.message ? '\n\n' + data.message : '');
+
+      window.location.href = 'mailto:' + SPONSOR_EMAIL
+        + '?subject=' + encodeURIComponent('Booking enquiry — ' + (data.business || data.name))
+        + '&body=' + encodeURIComponent(body);
+
+      closeBooking();
+    };
+
+    bookingForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var data = {
+        kind: 'booking',
+        who: whoNow(),
+        business: businessField.hidden ? '' : val('bkBusiness'),
+        name: val('bkName'),
+        email: val('bkEmail'),
+        phone: val('bkPhone'),
+        occasion: val('bkOccasion'),
+        date: val('bkDate'),
+        venue: val('bkVenue'),
+        message: val('bkMessage'),
+        website: document.getElementById('bkWebsite').value
+      };
+
+      if (!data.name || !data.email) {
+        bookingErr.textContent = 'Please give us your name and an email address.';
+        bookingErr.hidden = false;
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        bookingErr.textContent = 'That email address does not look right — please check it.';
+        bookingErr.hidden = false;
+        return;
+      }
+      bookingErr.hidden = true;
+
+      sendEnquiry(data, {
+        button: bookingForm.querySelector('button[type="submit"]'),
+        sending: 'Sending…',
+        idle: 'Send it',
+        onSent: function (confirmed) {
+          bookingForm.reset();
+          syncBusiness();
+          closeBooking();
+          showThanks(confirmed ? data.email : null);
+        },
+        onFail: function (message) {
+          bookingErr.textContent = message;
+          bookingErr.hidden = false;
+        },
+        onFallback: function () { bookingMailto(data); }
+      });
+    });
+  }
+
   /* ---------- sponsor enquiry form ---------- */
 
   var dialog = document.getElementById('sponsorDialog');
@@ -972,25 +1189,31 @@
       }
       errBox.hidden = true;
 
-      if (SPONSOR_ENDPOINT) {
-        fetch(SPONSOR_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        })
-          .then(function (r) {
-            if (!r.ok) { throw new Error('HTTP ' + r.status); }
-            form.reset();
-            closeDialog();
-          })
-          .catch(function () {
-            errBox.textContent = 'Sorry, that did not send. Please email us instead at ' + SPONSOR_EMAIL + '.';
-            errBox.hidden = false;
-          });
-        return;
-      }
+      data.kind = 'sponsor';
+      data.website = document.getElementById('spWebsite').value;
 
-      // No endpoint set: hand it to the visitor's email app, filled in.
+      var submitBtn = form.querySelector('button[type="submit"]');
+
+      sendEnquiry(data, {
+        button: submitBtn,
+        sending: 'Sending…',
+        idle: 'Send enquiry',
+        onSent: function (confirmed) {
+          form.reset();
+          closeDialog();
+          showThanks(confirmed ? data.email : null);
+        },
+        onFail: function (message) {
+          errBox.textContent = message;
+          errBox.hidden = false;
+        },
+        onFallback: function () { sponsorMailto(data); }
+      });
+    });
+
+    // The way out if the endpoint cannot be reached: the visitor's own email
+    // app, with everything they typed already in the message.
+    function sponsorMailto(data) {
       var body = 'Plan: ' + data.plan
         + '\nBusiness: ' + data.business
         + '\nName: ' + data.name
@@ -999,11 +1222,11 @@
         + (data.message ? '\n\n' + data.message : '');
 
       window.location.href = 'mailto:' + SPONSOR_EMAIL
-        + '?subject=' + encodeURIComponent('Sponsorship enquiry — ' + data.business)
+        + '?subject=' + encodeURIComponent('Sponsorship enquiry — ' + (data.business || data.name))
         + '&body=' + encodeURIComponent(body);
 
       closeDialog();
-    });
+    }
   }
 
   /* ---------- sponsor payments ---------- */

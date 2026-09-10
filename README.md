@@ -52,6 +52,57 @@ These are placeholders. Search the project for `TODO` to find them all.
 | --- | --- |
 | `public/index.html` — Music section | Apple Music is linked as a **pre-add** — the single is not out until 20 September. On release day change the "Pre-add the single" label to "Listen on", and add Spotify and YouTube next to it as those links arrive, deleting the line underneath that says they are to follow. |
 | `public/data/gigs.json` | Add your live dates (see below). |
+| Cloudflare dashboard | Switch the enquiry emails on — see **The forms** below. Until you do, both forms fall back to opening the visitor's own email app. |
+
+## The forms
+
+There are two: **Book the Boyz** on the home page and **Become a sponsor** on
+the sponsors page. Both post to `/api/enquiry`, which is a small piece of code
+in `functions/api/enquiry.js`. Cloudflare runs it for you — there is no server
+to look after.
+
+It does two things with each enquiry:
+
+1. emails it to the band, with reply-to set to the sender, so hitting reply
+   answers them directly;
+2. emails the sender a confirmation, with a copy of what they filled in.
+
+### Switching the emails on
+
+This needs doing once, and it is the only part that is not already done.
+
+1. Make an account at **resend.com** (free for the volume a band gets) and add
+   `thelostboyz.uk` as a domain. Resend gives you three DNS records to add —
+   put them in Cloudflare DNS. This is what lets the emails arrive rather than
+   land in spam.
+2. Create an API key in Resend.
+3. In the Cloudflare dashboard go to **Workers & Pages → the-lost-boyz →
+   Settings → Variables and secrets** and add:
+
+   | Name | Type | Value |
+   | --- | --- | --- |
+   | `RESEND_API_KEY` | Secret | the key from step 2 |
+   | `BAND_EMAIL` | Text | where enquiries should land, e.g. `bookings@thelostboyz.uk` |
+   | `FROM_EMAIL` | Text | the sender, e.g. `The Lost Boyz <website@thelostboyz.uk>` |
+
+4. Redeploy (any push does it, or use "Retry deployment").
+
+**The key is a secret.** Add it in the dashboard, never in a file — everything
+in `public/` is served to the world, and anything committed to git stays in the
+history even after it is deleted.
+
+### What happens before you do that
+
+Nothing breaks. The endpoint answers "not switched on yet", and the page opens
+the visitor's own email app with the whole enquiry already written out. They
+send it themselves and it still reaches the band. The only thing missing is the
+automatic confirmation.
+
+### Spam
+
+Each form carries a hidden field that no person can see or tab to. Bots fill it
+in; when that happens the endpoint quietly says "thanks" and throws the message
+away, so whoever sent it learns nothing from having failed.
 
 ### Adding a video to Reelz
 
@@ -127,7 +178,7 @@ videos counted for Facebook's search ranking, not this site's.
 Owning the files makes all of that go away, and the code is a third of the size.
 
 
-### Adding gear to Geeks Corner
+### Adding gear to Geekz
 
 The page is at `/geeks-corner`, listed in the nav as **Gear** — the full name
 would not fit alongside eight other items. Edit `public/data/gear.json`:

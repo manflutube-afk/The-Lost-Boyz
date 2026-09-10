@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Geeks Corner — the gear The Lost Boyz play</title>
+<title>Geekz — the gear The Lost Boyz play</title>
 <meta name="description" content="The guitars, amps, drums and pedals behind The Lost Boyz — for anyone who wants to know what makes the noise.">
 <meta name="theme-color" content="#07040c">
 <link rel="canonical" href="https://thelostboyz.uk/geeks-corner">
@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://thelostboyz.uk/geeks-corner">
 <meta property="og:site_name" content="The Lost Boyz">
 <meta property="og:locale" content="en_GB">
-<meta property="og:title" content="Geeks Corner — the gear The Lost Boyz play">
+<meta property="og:title" content="Geekz — the gear The Lost Boyz play">
 <meta property="og:description" content="The guitars, amps, drums and pedals behind The Lost Boyz — for anyone who wants to know what makes the noise.">
 <meta property="og:image" content="https://thelostboyz.uk/images/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -43,7 +43,7 @@
     <a href="/reelz">Reelz</a>
     <a href="/#live">Live</a>
     <a href="/#gallery">Gallery</a>
-    <a href="/geeks-corner" aria-current="page">Gear</a>
+    <a href="/geeks-corner" aria-current="page">Geekz</a>
     <a href="/sponsors">Sponsors</a>
     <a href="/charities">Charities</a>
     <a href="/#booking">Booking</a>
@@ -54,15 +54,20 @@
   <section class="sec sec--page">
     <div class="wrap">
       <p class="eyebrow">For the ones who ask</p>
-      <h1 class="h2">Geeks Corner</h1>
+      <h1 class="h2">Geekz</h1>
       <p class="lead">Somebody at every gig wants to know what the guitar is, or what is in the
         pedalboard, or what those drums are. This is for them.</p>
 
-      <!-- Gear comes from /data/gear.json.
-           TODO: ask the band for the actual makes and models — guitars, amps,
-           pedals, drums, cymbals, PA, mics. Nothing here should be guessed at. -->
-      <div id="gear" class="gear" aria-live="polite">
-        <p class="gear__msg">Loading…</p>
+      <!--
+        The gear list is still with the band. Until it arrives this page says
+        so, plainly, rather than showing an empty shell — the renderer and
+        /data/gear.json are both still in place, so filling the file in is all
+        it takes to bring the list back.
+      -->
+      <div class="dreckly">
+        <p class="dreckly__word">Coming<br>Dreckly</p>
+        <p class="dreckly__sub">Every guitar, amp, pedal, skin and cymbal &mdash; the lot.
+          Darren and Andrew are writing the list.</p>
       </div>
 
       <p class="backlink"><a class="btn" href="/">Back to the site</a></p>
@@ -81,9 +86,9 @@
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Geeks Corner — the gear The Lost Boyz play",
+  "name": "Geekz — the gear The Lost Boyz play",
   "url": "https://thelostboyz.uk/geeks-corner",
-  "description": "The guitars, amps, drums and pedals behind The Lost Boyz.",
+  "description": "The guitars, amps, drums and pedals behind The Lost Boyz. Coming dreckly.",
   "isPartOf": {
     "@type": "WebSite",
     "name": "The Lost Boyz",
@@ -94,7 +99,7 @@
     "@type": "BreadcrumbList",
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://thelostboyz.uk/" },
-      { "@type": "ListItem", "position": 2, "name": "Geeks Corner", "item": "https://thelostboyz.uk/geeks-corner" }
+      { "@type": "ListItem", "position": 2, "name": "Geekz", "item": "https://thelostboyz.uk/geeks-corner" }
     ]
   }
 }
