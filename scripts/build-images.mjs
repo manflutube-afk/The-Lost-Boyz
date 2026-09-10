@@ -133,6 +133,128 @@ if (existsSync(DISC)) {
 }
 
 /*
+ * The "Read our story" button art.
+ *
+ * The artwork arrived as a PNG with no alpha channel — the transparency
+ * checkerboard had been flattened into the pixels, so the drum kit sat on a
+ * grid of grey and white squares. That grid is put back to transparent here
+ * so the button can sit on the page's dark panel.
+ *
+ * The squares are light and neutral; the artwork is dark and purple, so the
+ * two separate cleanly. The fill starts from the border and spreads inwards,
+ * which keeps the chrome on the cymbals and the pale lettering — both light,
+ * but both walled in by artwork — safely opaque.
+ */
+const STORY_BTN = `${SRC}/story button.png`;
+
+if (existsSync(STORY_BTN)) {
+  const { data: btn, info: btnInfo } = await sharp(STORY_BTN)
+    .removeAlpha().raw().toBuffer({ resolveWithObject: true });
+
+  const W = btnInfo.width, H = btnInfo.height, C = btnInfo.channels;
+  const isChecker = (i) => {
+    const r = btn[i * C], g = btn[i * C + 1], b = btn[i * C + 2];
+    const mx = Math.max(r, g, b);
+    return mx >= 215 && mx - Math.min(r, g, b) <= 18;
+  };
+
+  const bg = new Uint8Array(W * H);
+  const stack = [];
+  for (let x = 0; x < W; x++) { stack.push(x, (H - 1) * W + x); }
+  for (let y = 0; y < H; y++) { stack.push(y * W, y * W + W - 1); }
+
+  while (stack.length) {
+    const i = stack.pop();
+    if (bg[i] || !isChecker(i)) continue;
+    bg[i] = 1;
+    const x = i % W, y = (i / W) | 0;
+    if (x > 0) stack.push(i - 1);
+    if (x < W - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - W);
+    if (y < H - 1) stack.push(i + W);
+  }
+
+  /*
+   * The gap between the guitar neck and the cymbal is checkerboard as well,
+   * but it is walled in, so the border fill never reaches it. An island of
+   * light pixels is only really the checkerboard if it carries both of the
+   * grid's two tones — a chrome highlight is a smooth gradient and will not,
+   * which is what keeps this from punching holes in the drum hardware.
+   */
+  const seen = new Uint8Array(W * H);
+  for (let start = 0; start < W * H; start++) {
+    if (bg[start] || seen[start] || !isChecker(start)) continue;
+    const island = [];
+    const todo = [start];
+    seen[start] = 1;
+    let light = 0, mid = 0;
+
+    while (todo.length) {
+      const i = todo.pop();
+      island.push(i);
+      const mx = Math.max(btn[i * C], btn[i * C + 1], btn[i * C + 2]);
+      if (mx >= 248) light++; else if (mx <= 242) mid++;
+
+      const x = i % W, y = (i / W) | 0;
+      const near = [];
+      if (x > 0) near.push(i - 1);
+      if (x < W - 1) near.push(i + 1);
+      if (y > 0) near.push(i - W);
+      if (y < H - 1) near.push(i + W);
+      for (const j of near) {
+        if (!seen[j] && !bg[j] && isChecker(j)) { seen[j] = 1; todo.push(j); }
+      }
+    }
+
+    const both = light >= island.length * 0.15 && mid >= island.length * 0.15;
+    if (island.length >= 200 && both) { for (const i of island) bg[i] = 1; }
+  }
+
+  // Two pixels of the artwork side go with it, which takes the pale fringe
+  // where the art was blended into the squares. At 1716px across, that is
+  // nothing; left in, it shows as a light halo on a dark background.
+  for (let pass = 0; pass < 2; pass++) {
+    const grown = Uint8Array.from(bg);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        if (bg[i]) continue;
+        if ((x > 0 && bg[i - 1]) || (x < W - 1 && bg[i + 1]) ||
+            (y > 0 && bg[i - W]) || (y < H - 1 && bg[i + W])) grown[i] = 1;
+      }
+    }
+    bg.set(grown);
+  }
+
+  const btnRgba = Buffer.allocUnsafe(W * H * 4);
+  for (let i = 0; i < W * H; i++) {
+    const s = i * C, d = i * 4;
+    btnRgba[d] = btn[s];
+    btnRgba[d + 1] = btn[s + 1];
+    btnRgba[d + 2] = btn[s + 2];
+    btnRgba[d + 3] = bg[i] ? 0 : 255;
+  }
+
+  const cutout = await sharp(btnRgba, { raw: { width: W, height: H, channels: 4 } })
+    .trim({ threshold: 1 })
+    .png()
+    .toBuffer();
+
+  for (const w of [340, 460, 680, 920]) {
+    await sharp(cutout).resize({ width: w })
+      .webp({ quality: 84, alphaQuality: 90, effort: 6 })
+      .toFile(`${OUT}/story-button-${w}.webp`);
+  }
+  await sharp(cutout).resize({ width: 680 }).png({ compressionLevel: 9 })
+    .toFile(`${OUT}/story-button-680.png`);
+
+  const cutMeta = await sharp(cutout).metadata();
+  console.log(`story button: cut out at ${cutMeta.width}x${cutMeta.height}`);
+} else {
+  console.warn('skipping story button: source-images/story button.png not found');
+}
+
+/*
  * Gallery snaps (d1..d10). These arrive as 206px squares — Facebook-sized
  * thumbnails rather than full photos — so there is nothing to resize down to
  * and no point inventing pixels by scaling up. They are converted as they

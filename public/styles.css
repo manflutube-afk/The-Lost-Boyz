@@ -600,6 +600,79 @@ body.nav-open { overflow: hidden; }
 /* the call-out button row is centred by default; on a page of prose it is not */
 .cta-links--left { justify-content: flex-start; margin: 1.5rem 0 0; }
 
+/*
+ * The "Read our story" button on the home page.
+ *
+ * The artwork is a cut-out, so the shadow is a drop-shadow rather than a
+ * box-shadow: it follows the drum kit and the guitar instead of tracing a
+ * rectangle around them. Two shadows do the work — a dark one underneath
+ * that gives the thing height off the page, and a violet one behind it that
+ * ties it to the rest of the site.
+ *
+ * The three states read as a physical button. At rest it sits raised, with
+ * the glow breathing very slowly so the eye is drawn to it. Pointing at it
+ * lifts it further and the glow comes up. Pressing it drops it down and the
+ * shadow collapses underneath, which is what makes it feel pushed rather
+ * than merely clicked.
+ */
+.story-btn {
+  display: inline-block;
+  width: min(88vw, 440px);
+  line-height: 0;
+  border-radius: 18px;
+  -webkit-tap-highlight-color: transparent;
+  animation: story-btn-glow 4.5s ease-in-out infinite;
+  transition: transform .18s cubic-bezier(.2, .8, .3, 1), filter .18s ease;
+}
+
+.story-btn img { display: block; width: 100%; height: auto; }
+
+@keyframes story-btn-glow {
+  0%, 100% {
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .6))
+            drop-shadow(0 0 18px rgba(168, 85, 247, .3));
+  }
+  50% {
+    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .6))
+            drop-shadow(0 0 32px rgba(168, 85, 247, .55));
+  }
+}
+
+/* the idle breathing stops the moment it is being used, so the state the
+   pointer is asking for is the state it shows */
+.story-btn:hover,
+.story-btn:focus-visible,
+.story-btn:active { animation: none; }
+
+.story-btn:hover,
+.story-btn:focus-visible {
+  transform: translateY(-4px) scale(1.02);
+  filter: drop-shadow(0 20px 26px rgba(0, 0, 0, .65))
+          drop-shadow(0 0 34px rgba(168, 85, 247, .6));
+}
+
+.story-btn:active {
+  transform: translateY(3px) scale(.985);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .7))
+          drop-shadow(0 0 14px rgba(168, 85, 247, .45));
+  transition-duration: .06s;
+}
+
+.story-btn:focus-visible { outline: 3px solid var(--violet-hi); outline-offset: 8px; }
+
+/* no lifting or breathing for anyone who has asked for less movement — the
+   glow still answers the pointer, so the button is still obviously live */
+@media (prefers-reduced-motion: reduce) {
+  .story-btn,
+  .story-btn:hover,
+  .story-btn:focus-visible,
+  .story-btn:active { animation: none; transform: none; }
+  .story-btn {
+    filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .6))
+            drop-shadow(0 0 18px rgba(168, 85, 247, .3));
+  }
+}
+
 /* the thumbnail on the home page that opens /reelz */
 .teaser {
   position: relative;

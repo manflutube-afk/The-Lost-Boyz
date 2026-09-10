@@ -153,11 +153,19 @@
       whom lost their sons. The band exists because of them.</p>
 
     <p class="cta-links cta-links--left">
-      <a class="btn btn--solid" href="/our-story">Read our story</a>
+      <a class="story-btn" href="/our-story">
+        <picture>
+          <source type="image/webp"
+                  srcset="/images/story-button-340.webp 340w,
+                          /images/story-button-460.webp 460w,
+                          /images/story-button-680.webp 680w,
+                          /images/story-button-920.webp 920w"
+                  sizes="(min-width: 700px) 440px, min(88vw, 440px)">
+          <img src="/images/story-button-680.png" width="1716" height="844"
+               loading="lazy" decoding="async" alt="Read our story">
+        </picture>
+      </a>
     </p>
-
-    <!-- The stage photo that used to sit here has gone; a button is coming to
-         replace the plain "Read our story" link above. -->
   </div>
 </section>
 
