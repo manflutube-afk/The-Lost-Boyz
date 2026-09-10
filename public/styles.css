@@ -622,75 +622,128 @@ body.nav-open { overflow: hidden; }
 /*
  * The "Read our story" button on the home page.
  *
- * On a phone there is no pointer to hover with, so a button cannot wait to
- * be pointed at before it looks like a button. This one is built to read as
- * a physical object from the moment it appears: it hovers a little way off
- * the page, rising and falling slowly with a shadow on the ground beneath
- * it that tightens and spreads as it moves. Something floating above a
- * surface is something you can push down onto it.
+ * It used to drift slowly up and down, which was a mistake: on a phone,
+ * where nothing hovers, a thing that moves on its own reads as decoration —
+ * and the record above it is already turning, so the page just looked busy.
  *
- * Three layers do the work, because each needs its own transform:
- *   .story-btn        the ground, and the shadow puddle on it
+ * The idle movement is now a shine travelling across the artwork instead.
+ * A sweep of light across a surface is the language of a button top, not of
+ * something floating about, and it happens *to* the object rather than
+ * moving it. Under it sits a line of text with an arrow at each end pointing
+ * back up at the artwork, which says the thing outright.
+ *
+ * Three layers, because the ground, the push and the artwork each need their
+ * own transform:
+ *   .story-btn        the ground, and the shadow on it
  *   .story-btn__lift  the push — down when pressed, up when pointed at
- *   .story-btn__art   the idle float and glow
+ *   .story-btn__art   the artwork, with the shine over it
  */
 .story-btn {
   position: relative;
   display: inline-block;
   width: min(88vw, 440px);
-  padding-bottom: 22px; /* the ground the shadow falls on */
+  padding-bottom: 20px;
   line-height: 0;
+  text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* the shadow on the ground. Blurred and elliptical, so it reads as cast
-   rather than drawn, and it never moves — the button moves above it */
+/* the shadow the button sits on. It does not move — the button moves on it */
 .story-btn::before {
   content: "";
   position: absolute;
   left: 14%;
   right: 14%;
-  bottom: 4px;
+  top: calc(100% - 76px);
   height: 20px;
   border-radius: 50%;
   background: radial-gradient(ellipse at center,
-    rgba(0, 0, 0, .8) 0%, rgba(0, 0, 0, .45) 45%, transparent 72%);
+    rgba(0, 0, 0, .78) 0%, rgba(0, 0, 0, .42) 45%, transparent 72%);
   filter: blur(5px);
-  animation: story-btn-puddle 3.4s ease-in-out infinite;
   transition: transform .16s ease, opacity .16s ease;
 }
 
 .story-btn__lift {
+  position: relative;
   display: block;
   transition: transform .16s cubic-bezier(.2, .8, .3, 1);
 }
 
 .story-btn__art {
   display: block;
-  animation: story-btn-float 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, .55))
+          drop-shadow(0 0 22px rgba(168, 85, 247, .38));
 }
 
 .story-btn img { display: block; width: 100%; height: auto; }
 
-/* up and down, with the glow breathing in time with it */
-@keyframes story-btn-float {
-  0%, 100% {
-    transform: translateY(0);
-    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .5))
-            drop-shadow(0 0 16px rgba(168, 85, 247, .28));
-  }
-  50% {
-    transform: translateY(-7px);
-    filter: drop-shadow(0 16px 24px rgba(0, 0, 0, .55))
-            drop-shadow(0 0 32px rgba(168, 85, 247, .58));
-  }
+/*
+ * The shine. A narrow diagonal band of light slides across, clipped to the
+ * artwork's own silhouette by using the artwork as a mask — without that it
+ * would sweep across the empty corners too and give the cut-out away as a
+ * rectangle. Hidden entirely where masks are not supported, for the same
+ * reason.
+ */
+.story-btn__shine {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(102deg,
+    transparent 40%,
+    rgba(255, 255, 255, .5) 47%,
+    rgba(255, 255, 255, .88) 50%,
+    rgba(255, 255, 255, .5) 53%,
+    transparent 60%);
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  -webkit-mask-image: url(/images/story-button-680.webp);
+          mask-image: url(/images/story-button-680.webp);
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  animation: story-btn-shine 4.2s ease-in-out infinite;
 }
 
-/* the shadow tightens as the button rises away from it */
-@keyframes story-btn-puddle {
-  0%, 100% { transform: scale(1);        opacity: .9; }
-  50%      { transform: scale(.86, .75); opacity: .6; }
+@supports ((-webkit-mask-image: url(#m)) or (mask-image: url(#m))) {
+  .story-btn__shine { display: block; }
+}
+
+/* across, then wait off the far edge before coming round again */
+@keyframes story-btn-shine {
+  0%, 8%    { background-position: 150% 0; }
+  38%, 100% { background-position: -70% 0; }
+}
+
+/* ---- the line underneath that says what to do ---- */
+
+.story-btn__cue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  margin-top: .9rem;
+  font-family: var(--f-display);
+  font-size: .82rem;
+  line-height: 1.4;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--violet-hi);
+}
+
+/* the arrows point back up at the artwork, and nudge towards it */
+.story-btn__arrow {
+  font-size: .7em;
+  animation: story-btn-nudge 1.5s ease-in-out infinite;
+}
+.story-btn__arrow:last-child { animation-delay: .12s; }
+
+@keyframes story-btn-nudge {
+  0%, 100% { transform: translateY(2px); opacity: .55; }
+  50%      { transform: translateY(-2px); opacity: 1; }
 }
 
 /*
@@ -699,16 +752,10 @@ body.nav-open { overflow: hidden; }
  * apply it, others hold it long after the finger has gone. :active stays as
  * the fallback for anyone without JavaScript.
  *
- * The float stops so the press is not fighting it, the button drops nearly
- * onto the ground, and the shadow collapses tight underneath. The shadow
- * is what sells it: a thing that lands has a small hard shadow, a thing in
- * the air has a big soft one.
+ * The button drops nearly onto the ground and the shadow collapses tight
+ * underneath it. That is what sells the push: a thing that has landed has a
+ * small hard shadow, a thing in the air a big soft one.
  */
-.story-btn.is-pressing .story-btn__art,
-.story-btn:active .story-btn__art,
-.story-btn.is-pressing::before,
-.story-btn:active::before { animation: none; }
-
 .story-btn.is-pressing .story-btn__lift,
 .story-btn:active .story-btn__lift {
   transform: translateY(11px) scale(.965);
@@ -718,7 +765,7 @@ body.nav-open { overflow: hidden; }
 .story-btn.is-pressing .story-btn__art,
 .story-btn:active .story-btn__art {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .7))
-          drop-shadow(0 0 22px rgba(168, 85, 247, .75));
+          drop-shadow(0 0 26px rgba(168, 85, 247, .8));
 }
 
 .story-btn.is-pressing::before,
@@ -731,27 +778,27 @@ body.nav-open { overflow: hidden; }
 /* Pointing at it lifts it clear — but only on something with a real
    pointer, so a phone is never left holding a hover state after a tap. */
 @media (hover: hover) and (pointer: fine) {
-  .story-btn:hover .story-btn__art,
-  .story-btn:hover::before { animation-play-state: paused; }
   .story-btn:hover .story-btn__lift { transform: translateY(-6px) scale(1.025); }
-  .story-btn:hover::before { transform: scale(1.08, .9); opacity: .45; }
+  .story-btn:hover .story-btn__art {
+    filter: drop-shadow(0 20px 28px rgba(0, 0, 0, .6))
+            drop-shadow(0 0 36px rgba(168, 85, 247, .65));
+  }
+  .story-btn:hover::before { transform: scale(1.08, .9); opacity: .5; }
 }
 
 .story-btn:focus-visible { outline: 3px solid var(--violet-hi); outline-offset: 8px; border-radius: 18px; }
 .story-btn:focus-visible .story-btn__lift { transform: translateY(-6px) scale(1.025); }
 
 /*
- * Less movement for anyone who has asked for it: no float, no lift. The
- * shadow still snaps tight when it is pressed, which is the one cue worth
- * keeping — it answers the finger without anything drifting about.
+ * Less movement for anyone who has asked for it: no shine, no nudging
+ * arrows. The words and the arrows stay, which is the part that actually
+ * tells you it is a button — the movement was only ever there to catch the
+ * eye of people who would not read it.
  */
 @media (prefers-reduced-motion: reduce) {
-  .story-btn__art,
-  .story-btn::before { animation: none; }
-  .story-btn__art {
-    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .55))
-            drop-shadow(0 0 20px rgba(168, 85, 247, .35));
-  }
+  .story-btn__shine,
+  .story-btn__arrow { animation: none; }
+  .story-btn__arrow { opacity: 1; transform: none; }
   .story-btn .story-btn__lift,
   .story-btn:hover .story-btn__lift,
   .story-btn:focus-visible .story-btn__lift { transform: none; }
@@ -1680,6 +1727,73 @@ body.nav-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .shot:hover img { transform: none; }
+}
+
+/* ---------------- Where the gig is ---------------- */
+
+/*
+ * A fold-out map on each gig page. Closed to start with, so the page stays
+ * quick and no map is fetched for someone who already knows the way.
+ */
+.venue {
+  margin: 2rem 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.venue__head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem 1.15rem;
+  cursor: pointer;
+  font-family: var(--f-display);
+  font-size: 1rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--bone);
+  list-style: none;
+  transition: background .2s, color .2s;
+}
+.venue__head::-webkit-details-marker { display: none; }
+.venue__head:hover { background: rgba(168, 85, 247, .1); color: var(--violet-hi); }
+.venue__head:focus-visible { outline: 2px solid var(--violet-hi); outline-offset: -2px; }
+
+/* a chevron that turns over when the panel opens */
+.venue__head::after {
+  content: "";
+  width: .55rem;
+  height: .55rem;
+  margin-left: auto;
+  border-right: 2px solid var(--violet);
+  border-bottom: 2px solid var(--violet);
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform .25s ease;
+}
+.venue[open] .venue__head::after { transform: rotate(-135deg) translate(-2px, -2px); }
+
+.venue__body { padding: 0 1.15rem 1.15rem; }
+
+.venue__map {
+  aspect-ratio: 16 / 10;
+  /* never taller than the screen it is being read on */
+  max-height: calc(100svh - 220px);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0d0716;
+  border: 1px solid var(--line);
+}
+.venue__frame { display: block; width: 100%; height: 100%; border: 0; }
+
+.venue__addr { margin: .9rem 0 1rem; color: var(--muted); font-size: .95rem; }
+
+.venue__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: 0;
 }
 
 /* ---------------- Booking ---------------- */

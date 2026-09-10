@@ -73,6 +73,45 @@
       <p>Brake matters to the pair of us more than most causes do. They are the people who
         support families after a road crash, and this one is close to home.</p>
 
+
+      <!--
+        Where it is. Closed by default: the map is an iframe, and a lazy
+        iframe inside a closed <details> is not loaded until it is opened, so
+        nobody pays for a map they never look at and no third-party request
+        leaves the page unless they ask for one.
+
+        The map is OpenStreetMap rather than Google. Google's embed and its
+        static map images both need a billable API key, and the key has to be
+        published in the page on a site with no server; OpenStreetMap needs
+        neither, sets no cookies and costs nothing. The directions buttons
+        still hand off to whichever maps app the visitor actually uses.
+      -->
+      <details class="venue">
+        <summary class="venue__head">
+          <span>Where it is, and how to get there</span>
+        </summary>
+
+        <div class="venue__body">
+          <div class="venue__map">
+            <iframe class="venue__frame" loading="lazy"
+                    title="Map showing The Ship Inn, Lerryn"
+                    referrerpolicy="no-referrer"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=-4.625375,50.379938,-4.610375,50.386338&amp;layer=mapnik&amp;marker=50.3831382%2C-4.6178754"></iframe>
+          </div>
+
+          <p class="venue__addr">Fore Street, Lerryn, near Lostwithiel, Cornwall PL22 0PT</p>
+
+          <p class="venue__links">
+            <a class="btn btn--solid" target="_blank" rel="noopener"
+               href="https://www.google.com/maps/dir/?api=1&amp;destination=50.3831382%2C-4.6178754">Get directions</a>
+            <a class="btn" target="_blank" rel="noopener"
+               href="https://maps.apple.com/?daddr=50.3831382%2C-4.6178754&amp;q=The%20Ship%20Inn%2C%20Lerryn">Apple Maps</a>
+            <a class="btn" target="_blank" rel="noopener"
+               href="https://www.openstreetmap.org/?mlat=50.3831382&amp;mlon=-4.6178754#map=17/50.3831382/-4.6178754">Bigger map</a>
+          </p>
+        </div>
+      </details>
+
       <h2 class="h3">Coming along?</h2>
       <p>Let the lads know on Facebook so we have some idea of numbers, and if you cannot
         make the night itself you can still back Paul from wherever you are.</p>
@@ -115,7 +154,13 @@
       "addressRegion": "Cornwall",
       "postalCode": "PL22 0PT",
       "addressCountry": "GB"
-    }
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 50.3831382,
+      "longitude": -4.6178754
+    },
+    "hasMap": "https://www.openstreetmap.org/?mlat=50.3831382&mlon=-4.6178754#map=17/50.3831382/-4.6178754"
   },
   "performer": { "@id": "https://thelostboyz.uk/#band" },
   "organizer": { "@id": "https://thelostboyz.uk/#band" }
