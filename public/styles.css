@@ -2418,14 +2418,14 @@ body.nav-open { overflow: hidden; }
 .ftr__wing--l {
   clip-path: inset(0 70% 27% 0);
   transform-origin: 30% 52%;
-  animation: ftr-wing-l 5.5s ease-in-out infinite;
+  animation: ftr-wing-l 2.6s ease-in-out infinite;
 }
 
 /* right wing: the mirror of it */
 .ftr__wing--r {
   clip-path: inset(0 0 27% 70%);
   transform-origin: 70% 52%;
-  animation: ftr-wing-r 5.5s ease-in-out infinite;
+  animation: ftr-wing-r 2.6s ease-in-out infinite;
 }
 
 /*
@@ -2446,14 +2446,31 @@ body.nav-open { overflow: hidden; }
   );
 }
 
+/*
+ * A beat rather than a drift.
+ *
+ * The logo in the footer is only 84px across, so a few degrees of rotation
+ * moved the wingtips about two pixels and you could not tell they were doing
+ * anything at all. Twelve degrees moves them about six, which reads.
+ *
+ * The peak is at 35% rather than halfway, so the wings go up quicker than
+ * they come back down. An even up-and-down looks like a pendulum; a fast
+ * stroke and a slower recovery looks like a wing.
+ *
+ * Checked at 4, 8, 11 and 14 degrees with the animation stopped: the seam
+ * where the wing meets the lettering stays hidden throughout, so there is
+ * headroom above this if it is ever wanted bigger still.
+ */
 @keyframes ftr-wing-l {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(-4deg); }
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(-12deg); }
+  100% { transform: rotate(0deg); }
 }
 
 @keyframes ftr-wing-r {
-  0%, 100% { transform: rotate(0deg); }
-  50%      { transform: rotate(4deg); }
+  0%   { transform: rotate(0deg); }
+  35%  { transform: rotate(12deg); }
+  100% { transform: rotate(0deg); }
 }
 
 /* a still logo for anyone who has asked for less movement */
