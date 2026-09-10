@@ -1849,16 +1849,10 @@ body.nav-open { overflow: hidden; }
   background: #000;
 }
 
-.lb__cap {
-  max-width: 34ch;
-  font-size: .85rem;
-  line-height: 1.5;
-  color: var(--muted);
-  text-align: center;
-}
+/* the caption is now only the counter -- "3 of 26" and nothing else */
+.lb__cap { text-align: center; }
 .lb__count {
   display: block;
-  margin-bottom: .3rem;
   font-family: var(--f-display);
   font-size: .78rem;
   letter-spacing: .18em;

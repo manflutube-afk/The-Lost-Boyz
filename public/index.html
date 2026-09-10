@@ -379,7 +379,10 @@
   <button class="lb__nav lb__nav--prev" id="lbPrev" type="button" aria-label="Previous photo"></button>
   <figure class="lb__fig">
     <img class="lb__img" id="lbImg" alt="">
-    <figcaption class="lb__cap"><span class="lb__count" id="lbCount"></span><span id="lbAlt"></span></figcaption>
+    <!-- Only the counter. The photo's description lives on the image's alt
+         attribute, where a screen reader and a search engine will find it,
+         rather than being printed under the picture for everyone. -->
+    <figcaption class="lb__cap"><span class="lb__count" id="lbCount"></span></figcaption>
   </figure>
   <button class="lb__nav lb__nav--next" id="lbNext" type="button" aria-label="Next photo"></button>
 </dialog>

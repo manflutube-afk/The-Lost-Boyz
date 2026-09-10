@@ -1450,7 +1450,6 @@
   if (lb && shotsBox) {
     var shots = Array.prototype.slice.call(shotsBox.querySelectorAll('.shot'));
     var lbImg = document.getElementById('lbImg');
-    var lbAlt = document.getElementById('lbAlt');
     var lbCount = document.getElementById('lbCount');
     var shotIndex = 0;
     var lbOpener = null;
@@ -1476,8 +1475,13 @@
       var img = shots[shotIndex].querySelector('img');
       lbImg.style.width = '';   // drop the last photo's size before swapping
       lbImg.src = shots[shotIndex].dataset.full || img.src;
+      /*
+       * The description stays on the image itself and is no longer printed
+       * underneath it. It is there for anyone using a screen reader and for
+       * search engines; on screen it was just a paragraph of prose under
+       * every photograph, which is not what people opened the picture for.
+       */
       lbImg.alt = img.alt || '';
-      lbAlt.textContent = img.alt || '';
       lbCount.textContent = (shotIndex + 1) + ' of ' + shots.length;
       if (lbImg.complete) { sizeShot(); }   // cached images fire no load event
     };
