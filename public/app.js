@@ -227,16 +227,63 @@
       else { disc.addEventListener('load', go, { once: true }); }
     };
 
+    /*
+     * How much of the disc has to be on screen before it is allowed to spin.
+     *
+     * It used to be a third, which meant that jumping straight to the single
+     * on a short phone started the spin while the bottom of the disc was
+     * still below the fold — you watched half a record turn. It now waits
+     * until the whole thing is in the clear space under the header. If the
+     * disc is somehow taller than that space it settles for as much of it as
+     * can be shown, so the spin never simply fails to happen.
+     */
+    var spinThresholds = [];
+    for (var t = 0; t <= 20; t++) { spinThresholds.push(t / 20); }
+
+    var enoughOnScreen = function () {
+      var tall = disc.getBoundingClientRect().height || 1;
+      var header = document.getElementById('hdr');
+      var room = window.innerHeight - (header ? header.getBoundingClientRect().height : 0) - 8;
+      if (room < 1) { return 0.35; }
+      return tall <= room ? 0.95 : (room / tall) * 0.95;
+    };
+
     var discObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
-        if (e.isIntersecting && e.intersectionRatio >= 0.35) {
+        if (e.isIntersecting && e.intersectionRatio >= enoughOnScreen()) {
           discObserver.disconnect();
           spinDisc();
         }
       });
-    }, { threshold: [0.35] });
+    }, { threshold: spinThresholds });
 
     discObserver.observe(disc);
+  }
+
+  /* ---------- the story button presses ---------- */
+
+  /*
+   * :active is not dependable on a link on touch — some mobile browsers
+   * never apply it to an anchor at all, others leave it stuck on after the
+   * finger has lifted — so the pressed state is driven from the pointer
+   * events instead. The CSS keeps :active as the fallback for anyone
+   * without JavaScript.
+   */
+  var storyBtn = document.querySelector('.story-btn');
+
+  if (storyBtn && window.PointerEvent) {
+    var pressOn = function () { storyBtn.classList.add('is-pressing'); };
+    var pressOff = function () { storyBtn.classList.remove('is-pressing'); };
+
+    storyBtn.addEventListener('pointerdown', pressOn);
+    ['pointerup', 'pointercancel', 'pointerleave', 'blur', 'dragstart']
+      .forEach(function (name) { storyBtn.addEventListener(name, pressOff); });
+
+    // and for anyone arriving on it with the keyboard
+    storyBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { pressOn(); }
+    });
+    storyBtn.addEventListener('keyup', pressOff);
   }
 
   /* ---------- reels ---------- */
@@ -337,6 +384,9 @@
        */
       if (reel.width && reel.height) {
         shell.style.aspectRatio = reel.width + ' / ' + reel.height;
+        // the same ratio as a plain number, so the stylesheet can work out
+        // how wide the clip may be when the screen is too short for it
+        shell.style.setProperty('--reel-ratio', reel.width / reel.height);
       }
 
       var video = document.createElement('video');
