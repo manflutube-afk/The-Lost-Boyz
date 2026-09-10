@@ -501,10 +501,17 @@
 
   if (countdown) {
     var releaseAt = Date.parse(countdown.getAttribute('data-release'));
+    var cdDays = document.getElementById('cdDays');
+    var cdHours = document.getElementById('cdHours');
 
-    if (!isNaN(releaseAt)) {
-      var cdDays = document.getElementById('cdDays');
-      var cdHours = document.getElementById('cdHours');
+    /*
+     * The figures are checked for as well as the date. If the markup and this
+     * script ever fall out of step -- a stale copy of one against a fresh copy
+     * of the other -- reaching for a figure that is no longer there would
+     * throw, and the countdown would never appear with nothing to say why.
+     * Better that it stays hidden on purpose than breaks by accident.
+     */
+    if (!isNaN(releaseAt) && cdDays && cdHours) {
       var ticker = null;
 
       var tick = function () {
