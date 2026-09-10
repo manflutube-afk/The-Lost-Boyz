@@ -471,17 +471,162 @@ if (existsSync(PEOPLE_SRC)) {
   if (!files.length) { console.log('portraits: none to do'); }
 }
 
-// favicons / PWA icons — keep the black backing so the icon reads on any OS
-await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
-  .toFile(`${OUT}/icon-512.png`);
-await sharp(LOGO).resize(192, 192, { fit: 'cover' }).png()
-  .toFile(`${OUT}/icon-192.png`);
+/*
+ * Favicons, home-screen icons and the social sharing card.
+ *
+ * All three are built from the cut-out logo rather than the original file, so
+ * none of them carry the black square the artwork was drawn on.
+ */
 
 /*
- * Social sharing card, 1200x630 — the size Facebook, WhatsApp, X and the
- * rest crop to. Built from the cut-out logo on the site's own violet glow,
- * rather than a crop of the album art, so a shared link is recognisably the
- * band rather than an arbitrary slice of a picture.
+ * Paint the cut-out a flat colour, keeping the line-work as varying opacity.
+ * The alpha channel already carries the drawing -- it was made from the
+ * artwork's own brightness -- so replacing the colour underneath it leaves the
+ * feathers and lettering intact and simply changes what they are made of.
+ *
+ * `boost` multiplies that opacity. Fine ink that reads perfectly at 500px
+ * thins out to nothing at 32, so the small sizes are drawn heavier.
+ */
+async function paint(src, hex, boost = 1) {
+  const { data, info: shape } = await sharp(src).ensureAlpha().raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const count = shape.width * shape.height;
+  const out = Buffer.allocUnsafe(count * 4);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+
+  for (let i = 0; i < count; i++) {
+    const at = i * 4;
+    out[at] = r;
+    out[at + 1] = g;
+    out[at + 2] = b;
+    const alpha = data[at + 3] * boost;
+    out[at + 3] = alpha > 255 ? 255 : alpha | 0;
+  }
+
+  return sharp(out, { raw: { width: shape.width, height: shape.height, channels: 4 } })
+    .png().toBuffer();
+}
+
+/* Centre something in a transparent square, with air around it. */
+async function squareUp(buf, size, pad = 0.05) {
+  const inner = Math.round(size * (1 - pad * 2));
+  const fitted = await sharp(buf)
+    .resize({ width: inner, height: inner, fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png().toBuffer();
+  const m = await sharp(fitted).metadata();
+
+  return sharp({ create: { width: size, height: size, channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: fitted,
+      left: Math.round((size - m.width) / 2),
+      top: Math.round((size - m.height) / 2) }])
+    .png({ compressionLevel: 9 }).toBuffer();
+}
+
+const VIOLET = '#a855f7';
+const cutMeta = await sharp(cutoutPng).metadata();
+
+/*
+ * The tab icon is a pair of wings, not the whole logo.
+ *
+ * A browser tab gets 16 or 32 pixels. The full mark is wings, three lines of
+ * lettering and a ribbon of Cornish across the bottom; shrunk to 16px all of
+ * that turns into a violet smudge, which is what the old icon was -- and it
+ * had the black square from the original file behind it as well.
+ *
+ * So the small sizes take the left wing, mirror it, and set the two together.
+ * The wings are the part of the mark that carries the band anyway -- they are
+ * on the backdrop, the shirts and the drum head -- and as a shape they still
+ * read at 16 pixels where the lettering cannot.
+ */
+const oneWing = await sharp(cutoutPng)
+  .extract({ left: 0, top: 0,
+    width: Math.round(cutMeta.width * 0.30),
+    height: Math.round(cutMeta.height * 0.74) })
+  .trim({ threshold: 2 })
+  .png().toBuffer();
+
+const wingMeta = await sharp(oneWing).metadata();
+const wingGap = Math.round(wingMeta.width * 0.10);
+
+const wingPair = await sharp({
+  create: { width: wingMeta.width * 2 + wingGap, height: wingMeta.height,
+    channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+})
+  .composite([
+    { input: oneWing, left: 0, top: 0 },
+    { input: await sharp(oneWing).flop().png().toBuffer(),
+      left: wingMeta.width + wingGap, top: 0 },
+  ])
+  .png().toBuffer();
+
+const smallMark = await paint(wingPair, VIOLET, 2.0);
+
+for (const size of [16, 32, 48]) {
+  await sharp(await squareUp(smallMark, size, 0.04)).toFile(`${OUT}/icon-${size}.png`);
+}
+
+/*
+ * The big sizes are the whole logo, violet, on nothing. These are what a phone
+ * uses when the site is saved to a home screen and what a browser shows in a
+ * bookmark list, and at 192px and up every part of the mark is legible.
+ */
+const bigMark = await paint(cutoutPng, VIOLET, 1.35);
+
+for (const size of [192, 512]) {
+  await sharp(await squareUp(bigMark, size, 0.07)).toFile(`${OUT}/icon-${size}.png`);
+}
+
+/*
+ * Apple is the exception, and deliberately so. iOS does not honour
+ * transparency in a home-screen icon -- it fills whatever is see-through with
+ * black -- so rather than let it do that by accident this one is given the
+ * site's own violet ground on purpose, and the logo is left its natural bone
+ * colour against it.
+ */
+const APPLE = 180;
+const appleGround = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${APPLE}" height="${APPLE}">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="45%" r="72%">
+      <stop offset="0%"   stop-color="#54207f"/>
+      <stop offset="60%"  stop-color="#1d0f31"/>
+      <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="${APPLE}" height="${APPLE}" fill="url(#g)"/>
+</svg>`);
+
+const appleLogo = await sharp(cutoutPng)
+  .resize({ width: Math.round(APPLE * 0.82) }).png().toBuffer();
+const appleLogoMeta = await sharp(appleLogo).metadata();
+
+await sharp(appleGround)
+  .composite([{ input: appleLogo,
+    left: Math.round((APPLE - appleLogoMeta.width) / 2),
+    top: Math.round((APPLE - appleLogoMeta.height) / 2) }])
+  .png({ compressionLevel: 9 })
+  .toFile(`${OUT}/apple-touch-icon.png`);
+
+console.log('icons: 16/32/48 wings in violet, 192/512 full logo in violet, 180 for Apple');
+
+/*
+ * Social sharing card, 1200x630 -- the size Facebook, WhatsApp, X, LinkedIn
+ * and the rest crop to.
+ *
+ * Everything is kept well inside the frame, because each of them crops it
+ * differently and whatever is nearest an edge is the first thing to go. The
+ * vignette darkens the corners so the mark lifts off the ground, and the line
+ * of type underneath says what the band is -- a logo on its own tells someone
+ * scrolling past nothing at all.
+ *
+ * The wording is deliberately evergreen. Putting the single on here would
+ * date the card the day it comes out, and every link ever shared would still
+ * be carrying it.
  */
 const OG_W = 1200;
 const OG_H = 630;
@@ -489,33 +634,47 @@ const OG_H = 630;
 const ogBackground = Buffer.from(`
 <svg xmlns="http://www.w3.org/2000/svg" width="${OG_W}" height="${OG_H}">
   <defs>
-    <radialGradient id="glow" cx="50%" cy="44%" r="72%">
-      <stop offset="0%"   stop-color="#4a1878"/>
-      <stop offset="52%"  stop-color="#170b26"/>
+    <radialGradient id="glow" cx="50%" cy="42%" r="70%">
+      <stop offset="0%"   stop-color="#54207f"/>
+      <stop offset="48%"  stop-color="#1d0f31"/>
       <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="60%"  stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity=".55"/>
     </radialGradient>
   </defs>
   <rect width="${OG_W}" height="${OG_H}" fill="url(#glow)"/>
-  <rect x="0" y="0" width="${OG_W}" height="6" fill="#a855f7"/>
+  <rect width="${OG_W}" height="${OG_H}" fill="url(#vignette)"/>
+  <rect x="0" y="0" width="${OG_W}" height="7" fill="#a855f7"/>
+  <rect x="0" y="${OG_H - 7}" width="${OG_W}" height="7" fill="#a855f7"/>
 </svg>`);
 
-// Sized to leave clear air around the wingtips: social platforms crop these
-// cards differently, and anything tight to an edge is the first thing lost.
-const ogLogoWidth = 600;
+/*
+ * A plain system font, spaced out. The stylesheet's Oswald is fetched from
+ * Google at page load and is not here to draw with, and the alternative --
+ * committing a font file to the repository just to letter one picture -- is
+ * not worth it for a line this short.
+ */
+const ogStrapline = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${OG_W}" height="90">
+  <text x="${OG_W / 2}" y="52" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        letter-spacing="11" fill="#c890ff">CLASSIC ROCK DUO &#183; CORNWALL</text>
+</svg>`);
+
+const ogLogoWidth = 560;
 const ogLogo = await sharp(cutoutPng).resize({ width: ogLogoWidth }).png().toBuffer();
-const ogLogoMeta = await sharp(ogLogo).metadata();
 
 await sharp(ogBackground)
-  .composite([{
-    input: ogLogo,
-    left: Math.round((OG_W - ogLogoWidth) / 2),
-    top: Math.round((OG_H - ogLogoMeta.height) / 2),
-  }])
-  .jpeg({ quality: 88, mozjpeg: true })
+  .composite([
+    { input: ogLogo, left: Math.round((OG_W - ogLogoWidth) / 2), top: 46 },
+    { input: ogStrapline, left: 0, top: 500 },
+  ])
+  .jpeg({ quality: 90, mozjpeg: true })
   .toFile(`${OUT}/og.jpg`);
 
-console.log(`og card: ${OG_W}x${OG_H} from the logo`);
-
+console.log(`og card: ${OG_W}x${OG_H}, logo and strapline`);
 /*
  * The email header.
  *
