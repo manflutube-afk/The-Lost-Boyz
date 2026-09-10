@@ -956,18 +956,19 @@ body.nav-open { overflow: hidden; }
  * and out as you scrolled. Everything shares this now, so every left edge
  * lines up top to bottom.
  */
-.wrap--story { max-width: 960px; }
+.wrap--story { max-width: 1180px; }
 
 .story { margin-bottom: 1rem; }
 
 /*
- * The column is wide; the lines are not. Text set the full width of a 960px
- * page is genuinely hard to read — the eye loses its place coming back to
- * the start of the next line — so paragraphs stop at a comfortable measure
- * while headings and the memorial use the whole width.
+ * The column is wide; the lines are not quite as wide. Text set the full
+ * width of a 1180px page is genuinely hard to read — the eye loses its
+ * place coming back to the start of the next line — so paragraphs stop at
+ * a long but still readable measure while headings, the bios and the
+ * memorial rows use the whole width.
  */
 .story p,
-.bio__text p { margin: 0 0 1.15rem; max-width: 68ch; }
+.bio__text p { margin: 0 0 1.15rem; max-width: 78ch; }
 
 /* the closing line, given a little room to land */
 .story__end {
@@ -1004,6 +1005,7 @@ body.nav-open { overflow: hidden; }
 .memory__pair { display: grid; gap: 3rem; text-align: left; }
 
 .remember p { margin: 0 0 1.05rem; }
+.remember__text { min-width: 0; }
 
 .remember__photo {
   display: block;
@@ -1643,36 +1645,51 @@ body.nav-open { overflow: hidden; }
   .charities { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
   .kits { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
 
-  /* Kyle and Timmy side by side once there is room for two columns */
-  .memory__pair { grid-template-columns: 1fr 1fr; gap: 3.5rem; }
-
-  /*
-   * Both portraits are given the same box and the same height, so the two
-   * names below them sit on one line. The photographs are different shapes
-   * — one portrait, one nearly square — and left to themselves the names
-   * and the text underneath drift out of step with each other.
-   */
-  .remember__photo {
-    width: 100%;
-    max-width: 380px;
-    aspect-ratio: 4 / 5;
-  }
-  .remember__photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
   /* a bio only becomes two columns once it actually has a photo in it */
   .bio:has(.bio__photo) {
-    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
     align-items: start;
-    gap: 2rem;
+    gap: 2.5rem;
   }
 
   .gig { grid-template-columns: auto 1fr auto; }
   .gig__cta { grid-column: auto; margin-top: 0; }
+}
+
+/* ---- the memorial rows ---- */
+@media (min-width: 880px) {
+  /*
+   * Kyle and Timmy each get a full-width row rather than a column apiece:
+   * Kyle's photograph on the left with his words beside it, Timmy's on the
+   * right with his words to its left. Two tall columns side by side left
+   * both of them squeezed; a row lets each photograph be a decent size and
+   * the writing sit next to the face it is about.
+   */
+  .memory__pair { gap: 4.5rem; }
+
+  .remember {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  /*
+   * Because the rows alternate, the two photographs no longer have to match
+   * each other's height — so nothing is cropped. Both keep the shape they
+   * were taken in.
+   */
+  .remember__photo { width: 100%; max-width: 360px; margin: 0; }
+
+  /* Timmy's row runs the other way round */
+  .remember--reverse { grid-template-columns: minmax(0, 1fr) minmax(0, 360px); }
+  .remember--reverse .remember__photo { grid-area: 1 / 2; }
+  .remember--reverse .remember__text  { grid-area: 1 / 1; }
+
+  /* the name now heads the writing beside the photo, so it starts with it */
+  .remember__name { text-align: left; font-size: 1.9rem; }
+  .remember p { max-width: 62ch; }
+
 }
 
 @media (min-width: 900px) {
