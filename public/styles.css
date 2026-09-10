@@ -2085,24 +2085,41 @@ body.nav-open { overflow: hidden; }
   text-transform: uppercase;
 
   /*
-   * The shine: a bright band travelling across the letters. The gradient is
-   * clipped to the glyphs themselves, so the light runs through the word
-   * rather than over a box behind it.
+   * The shine: a bright band travelling across the letters, clipped to the
+   * glyphs themselves so the light runs through the word rather than over a
+   * box behind it.
+   *
+   * Two layers, not one. The lower layer is the word's own colour and never
+   * moves; the upper layer is just the band of light, and only that is
+   * animated. Doing it with a single gradient meant the letters changed
+   * colour as the light went past, which is why the run had to keep stopping
+   * to put itself right.
+   *
+   * The band is three times the width of the word, so at either end of the
+   * run it sits completely off the edge. That is what makes the loop
+   * seamless: it is out of sight at the moment it starts over, so there is
+   * nothing to see jump.
    */
-  background: linear-gradient(100deg,
-    #b98cf0 0%, #e9d8ff 38%, #ffffff 48%, #e9d8ff 58%, #a855f7 100%);
-  background-size: 260% 100%;
+  background-image:
+    linear-gradient(100deg,
+      rgba(255, 255, 255, 0) 44%,
+      rgba(255, 255, 255, .9) 50%,
+      rgba(255, 255, 255, 0) 56%),
+    linear-gradient(170deg, #e9d8ff 0%, #b98cf0 45%, #a855f7 100%);
+  background-size: 300% 100%, 100% 100%;
+  background-repeat: no-repeat;
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 4px 18px rgba(168, 85, 247, .55));
-  animation: dreckly-shine 5s ease-in-out infinite;
+  /* linear, so it crosses at one steady speed rather than easing to a halt */
+  animation: dreckly-shine 3s linear infinite;
 }
 
 @keyframes dreckly-shine {
-  0%, 10%   { background-position: 130% 0; }
-  55%, 100% { background-position: -30% 0; }
+  from { background-position: 100% 0, 0 0; }
+  to   { background-position: 0% 0, 0 0; }
 }
 
 .dreckly__sub {
@@ -2113,7 +2130,8 @@ body.nav-open { overflow: hidden; }
 
 /* the shine is decoration; the word must still be readable without it */
 @media (prefers-reduced-motion: reduce) {
-  .dreckly__word { animation: none; background-position: 50% 0; }
+  /* held still, with the light sitting across the middle of the word */
+  .dreckly__word { animation: none; background-position: 50% 0, 0 0; }
 }
 
 /* ---------------- Where the gig is ---------------- */
