@@ -8,13 +8,22 @@ one, so search engines only ever count the one address.
 
 ---
 
-## One thing still missing: www
+## www
 
-`thelostboyz.uk` is live, but `www.thelostboyz.uk` has no DNS record at all,
-so anybody who types the www out of habit — or follows an old link with it on
-— gets nothing. In the Cloudflare dashboard, add `www.thelostboyz.uk` as a
-second custom domain on the Pages project; Cloudflare creates the record and
-redirects it to the bare domain by itself.
+`www.thelostboyz.uk` is set up and redirects to `thelostboyz.uk`, keeping the
+path — so `www.thelostboyz.uk/sponsors` lands on the sponsors page.
+
+That redirect lives in `functions/_middleware.js` rather than in the Cloudflare
+dashboard. The dashboard is the better place for it: a redirect rule runs at
+the edge before Pages is involved and costs nothing, whereas this costs one
+Function invocation per request. It is here because the deploy credentials have
+no permission over the zone.
+
+**If you would rather move it**, in the dashboard go to **Rules → Redirect
+Rules → Create rule**: when `hostname equals www.thelostboyz.uk`, then a **301**
+to `https://thelostboyz.uk` with *preserve path and query* switched on. Then
+delete `functions/_middleware.js`. The "preserve path and query" part matters —
+without it every www address lands on the front page.
 
 ## Running it locally
 
