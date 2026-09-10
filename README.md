@@ -69,7 +69,23 @@ It does two things with each enquiry:
 
 ### Switching the emails on
 
-This needs doing once, and it is the only part that is not already done.
+**This is done.** `thelostboyz.uk` is verified in Resend, the API key is stored
+as a Cloudflare secret on both the production and preview environments, and the
+two addresses are in `wrangler.jsonc`. What follows is here so it can be redone
+if the key is ever replaced.
+
+To rotate the key: make a new one in Resend, run
+
+```
+npx wrangler pages secret put RESEND_API_KEY --project-name the-lost-boyz
+```
+
+paste it when prompted, repeat with `--env preview`, then delete the old key in
+Resend. Never put it in a file.
+
+<details>
+<summary>Setting it up from scratch</summary>
+
 
 1. Make an account at **resend.com** (free for the volume a band gets) and add
    `thelostboyz.uk` as a domain. Resend gives you three DNS records to add —
@@ -87,16 +103,26 @@ This needs doing once, and it is the only part that is not already done.
 
 4. Redeploy (any push does it, or use "Retry deployment").
 
-**The key is a secret.** Add it in the dashboard, never in a file — everything
-in `public/` is served to the world, and anything committed to git stays in the
-history even after it is deleted.
+**The key is a secret.** Add it in the dashboard or with `wrangler pages secret
+put`, never in a file — everything in `public/` is served to the world, and
+anything committed to git stays in the history even after it is deleted.
 
-### What happens before you do that
+</details>
+
+### If the key is ever missing or wrong
 
 Nothing breaks. The endpoint answers "not switched on yet", and the page opens
 the visitor's own email app with the whole enquiry already written out. They
 send it themselves and it still reaches the band. The only thing missing is the
 automatic confirmation.
+
+### One thing left to confirm
+
+`BAND_EMAIL` is `bookings@thelostboyz.uk`. Resend verifying the domain lets the
+site **send** as that domain; it does not create a mailbox that **receives**.
+Send yourself a test through the form and check it arrives. If it does not, set
+up Cloudflare Email Routing on the domain (free) to forward `bookings@` to
+wherever the band actually reads their email.
 
 ### Spam
 

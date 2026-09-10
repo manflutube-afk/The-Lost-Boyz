@@ -365,6 +365,13 @@ body.nav-open { overflow: hidden; }
   justify-content: center;
   min-height: 46px;
   padding: .7rem 1.4rem;
+  /*
+   * Set explicitly, because a <button> and an <a> do not agree on it by
+   * default — the browser gives the button "normal" while the link inherits
+   * the body's 1.65. Two buttons that should be identical came out 3px
+   * different in height.
+   */
+  line-height: 1.2;
   border: 1px solid var(--violet-dim);
   border-radius: 999px;
   background: rgba(20, 10, 32, .55);
@@ -1877,13 +1884,40 @@ body.nav-open { overflow: hidden; }
 
 /* ---------------- Booking, forms and the thank you ---------------- */
 
-.book-cta { margin: 0 0 1.5rem; }
+/*
+ * The two ways of getting hold of the band, as a matched pair.
+ *
+ * On a phone they stack full width and centred, both exactly the same size
+ * and shape — one is the thing to do, the other is the other thing to do,
+ * and neither should look like a different kind of control. Side by side on
+ * a wider screen, still matched, because the grid gives both columns the
+ * same width.
+ */
+.book-actions {
+  display: grid;
+  gap: .75rem;
+  justify-items: center;
+  margin: 0 0 1.5rem;
+}
 
-/* the one button the whole booking section is built around */
+.book-actions > * { width: 100%; max-width: 22rem; }
+
+@media (min-width: 560px) {
+  .book-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    max-width: 34rem;
+  }
+  .book-actions > * { max-width: none; }
+}
+
+/* the size both of them share */
 .btn--big {
-  padding: 1rem 2.1rem;
+  min-height: 58px;
+  padding: 1rem 1.6rem;
   font-size: 1.05rem;
   letter-spacing: .1em;
+  text-align: center;
 }
 
 /*

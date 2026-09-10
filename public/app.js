@@ -210,16 +210,34 @@
       document.removeEventListener('click', releaseScroll);
     }
 
+    /*
+     * Holding the page still is a mouse-only flourish now.
+     *
+     * On a phone it was the thing that made the site feel broken: the disc
+     * comes into view, touchmove is cancelled for a second and a half, and
+     * your swipe simply does nothing until it lets go and the page lurches.
+     * Measured at 1.64s of dead scrolling. A pause you did not ask for reads
+     * as a page that has stopped working, not as an effect.
+     *
+     * With a mouse it is fine — a wheel is not the same as dragging the page
+     * itself under your thumb, and the pause reads as deliberate — so it
+     * stays there, which is where the effect was asked for in the first
+     * place. The disc still spins on a phone; the page just does not stop.
+     */
+    var canHoldScroll = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
     var spinDisc = function () {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) { return; }
 
       var go = function () {
         disc.classList.add('is-spinning');
-        holdScroll();
-        disc.addEventListener('animationend', releaseScroll, { once: true });
-        // belt and braces, in case animationend never arrives
-        setTimeout(releaseScroll, SPIN_MS + 120);
+        if (canHoldScroll) {
+          holdScroll();
+          disc.addEventListener('animationend', releaseScroll, { once: true });
+          // belt and braces, in case animationend never arrives
+          setTimeout(releaseScroll, SPIN_MS + 120);
+        }
       };
 
       // the disc is lazy-loaded, so wait for the pixels before spinning them
