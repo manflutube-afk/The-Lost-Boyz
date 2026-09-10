@@ -107,18 +107,51 @@ a { color: var(--violet-hi); }
   gap: 1rem;
   padding: .6rem var(--pad);
   padding-top: max(.6rem, env(safe-area-inset-top));
+}
+
+/*
+ * The bar itself is painted by a pseudo-element, not by .hdr.
+ *
+ * backdrop-filter makes an element the containing block for any
+ * position:fixed descendant, and the nav drawer is a descendant of the
+ * header. With the blur on .hdr the drawer was being laid out inside the
+ * header box instead of the viewport: it came out 120px tall, so its
+ * background covered only the top two links and the rest of the menu sat
+ * straight on top of the page with nothing behind it. A pseudo-element
+ * carries the same blur without taking the drawer with it.
+ */
+.hdr::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /*
+   * Above the drawer, not below it. The menu is longer than a short phone,
+   * so it scrolls — and its links have to disappear behind the bar rather
+   * than slide up over the band name and the close button.
+   */
+  z-index: 1;
   background: rgba(7, 4, 12, .72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid transparent;
   transition: background .3s, border-color .3s;
 }
-.hdr.is-stuck {
+.hdr.is-stuck::before {
   background: rgba(7, 4, 12, .93);
+  border-bottom-color: var(--line);
+}
+/* solid while the menu is open: a link scrolling up behind a see-through
+   bar is worse than no bar at all */
+body.nav-open .hdr::before {
+  background: var(--ink-2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-bottom-color: var(--line);
 }
 
 .hdr__brand {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: .6rem;
@@ -137,6 +170,10 @@ a { color: var(--violet-hi); }
 }
 
 .hdr__toggle {
+  /* above the drawer, so the button that opened the menu is still there to
+     close it — it turns into a cross while the menu is open */
+  position: relative;
+  z-index: 2;
   display: grid;
   place-content: center;
   gap: 5px;
@@ -163,10 +200,27 @@ a { color: var(--violet-hi); }
 .nav {
   position: fixed;
   inset: 0 0 0 auto;
+  z-index: 0;
+  --nav-cap: max(5.5rem, calc(env(safe-area-inset-top) + 4.9rem));
   width: min(78vw, 320px);
-  padding: 5.5rem 1.75rem 2rem;
+  padding: var(--nav-cap) 1.75rem 2rem;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  /*
+   * Solid, and lifted off the page. The panel is opaque, the border down its
+   * left edge is a full violet rather than the faint line used elsewhere,
+   * and a deep shadow falls from it onto the page — so it reads as something
+   * sitting in front of the site rather than printed on top of it.
+   */
   background: var(--ink-2);
-  border-left: 1px solid var(--line);
+  box-shadow: -20px 0 44px rgba(0, 0, 0, .65);
+  border-left: 2px solid var(--violet);
+  /*
+   * Nine links do not fit on a short phone, so the drawer scrolls on its own
+   * — and keeps that scroll to itself rather than letting it run on into the
+   * page behind once it reaches the end.
+   */
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: .25rem;
@@ -177,6 +231,9 @@ a { color: var(--violet-hi); }
 .nav.is-open { transform: translateX(0); visibility: visible; }
 
 .nav a {
+  /* likewise: links must keep their full height rather than being squeezed
+     to fit a short screen — the drawer scrolls instead */
+  flex: 0 0 auto;
   padding: .85rem 0;
   color: var(--bone);
   text-decoration: none;
@@ -192,7 +249,7 @@ a { color: var(--violet-hi); }
   position: fixed;
   inset: 0;
   z-index: 99;
-  background: rgba(0, 0, 0, .6);
+  background: rgba(0, 0, 0, .72);
   opacity: 0;
   transition: opacity .3s;
 }
@@ -1574,13 +1631,16 @@ body.nav-open { overflow: hidden; }
   gap: .75rem;
   overflow-x: auto;
   /*
-   * "proximity", not "mandatory". With mandatory snapping, the sideways
-   * drift in an ordinary vertical thumb-swipe past the gallery was enough to
-   * capture the scroll and yank the strip to the nearest tile — the page
-   * appeared to wobble left and right. Proximity only snaps when a swipe was
-   * genuinely heading somewhere.
+   * Snapping is switched on by app.js only while a finger is actually on the
+   * strip, and switched off again once it lets go.
+   *
+   * A scroll-snap container re-snaps whenever the viewport is resized, and on
+   * a phone the address bar sliding away as you scroll down the page *is* a
+   * resize — so the strip kept jumping sideways while you were scrolling
+   * vertically past it, and the page never felt still. Proximity snapping
+   * softened that but did not stop it. Off unless it is being touched does.
    */
-  scroll-snap-type: x proximity;
+  scroll-snap-type: none;
   /* and keep that sideways scroll inside the strip rather than letting it
      chain out to the page or the browser's back gesture */
   overscroll-behavior-x: contain;
@@ -1589,6 +1649,7 @@ body.nav-open { overflow: hidden; }
   margin-inline: calc(var(--pad) * -1);
   padding: .25rem var(--pad) 1rem;
 }
+.shots.is-swiping { scroll-snap-type: x proximity; }
 .shots::-webkit-scrollbar { display: none; }
 
 .shot {

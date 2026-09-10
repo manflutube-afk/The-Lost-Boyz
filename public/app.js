@@ -260,6 +260,43 @@
     discObserver.observe(disc);
   }
 
+  /* ---------- the gallery strip only snaps while it is being swiped ---------- */
+
+  /*
+   * A scroll-snap container re-snaps every time the viewport is resized, and
+   * on a phone the address bar sliding away as you scroll *is* a resize. The
+   * gallery strip was therefore sliding sideways on its own while somebody
+   * was scrolling vertically past it, which made the whole page feel loose.
+   *
+   * So snapping is only on while a finger is actually on the strip. The delay
+   * before switching it off again lets the flick's momentum run out and the
+   * strip settle on a photo first.
+   */
+  var strip = document.getElementById('shots');
+
+  if (strip) {
+    var settle = null;
+
+    var snapOn = function () {
+      clearTimeout(settle);
+      strip.classList.add('is-swiping');
+    };
+
+    var snapOffSoon = function () {
+      clearTimeout(settle);
+      settle = setTimeout(function () { strip.classList.remove('is-swiping'); }, 700);
+    };
+
+    strip.addEventListener('touchstart', snapOn, { passive: true });
+    strip.addEventListener('pointerdown', snapOn);
+    ['touchend', 'touchcancel', 'pointerup', 'pointercancel']
+      .forEach(function (name) { strip.addEventListener(name, snapOffSoon, { passive: true }); });
+
+    // a mouse wheel or a keyboard on the strip deserves the same treatment
+    strip.addEventListener('wheel', function () { snapOn(); snapOffSoon(); }, { passive: true });
+    strip.addEventListener('keydown', function () { snapOn(); snapOffSoon(); });
+  }
+
   /* ---------- the story button presses ---------- */
 
   /*
