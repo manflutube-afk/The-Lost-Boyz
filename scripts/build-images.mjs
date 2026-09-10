@@ -14,7 +14,6 @@ const OUT = 'public/images';
 const JOBS = [
   ['hero',   'hero.jpg', [640, 1024, 1600]],
   ['live1',  '1.jpg',    [640, 1024]],
-  ['amps',   '2.jpg',    [640, 1024]],
   ['cover',  'A2.jpg',   [480, 800]],
   ['sleeve', 'a1.jpg',   [480, 800]],
   ['disc',   'cd.jpg',   [480, 800]],
@@ -268,6 +267,61 @@ for (let i = 1; i <= 10; i++) {
   snaps++;
 }
 console.log(`gallery snaps: ${snaps} converted`);
+
+/*
+ * The Sodfest photographs (g1..g10).
+ *
+ * Straight off a phone at 5712x4284, so unlike the little d1..d10 thumbnails
+ * these need resizing properly. Two sizes each: a square one for the gallery
+ * tile, which is square and crops to fill, and a wide one for the viewer that
+ * opens when a tile is tapped.
+ *
+ * .rotate() with no argument applies whatever the camera recorded in the
+ * file's EXIF orientation. Several of these were taken with the phone turned,
+ * and without it they come out on their side -- sharp reads the pixels as
+ * stored and does not apply the tag by itself.
+ */
+const SODFEST_OUT = OUT;
+const sodfest = [];
+
+{
+  const { readdirSync } = await import('node:fs');
+  const found = readdirSync(SRC)
+    .filter((f) => /^g\d+\.jpe?g$/i.test(f))
+    // g2 before g10: sorting these as text puts g10 second
+    .sort((a, b) => parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10));
+
+  for (const file of found) {
+    const name = file.replace(/\.[^.]+$/, '').toLowerCase();
+
+    // the gallery tile: square, cropped to fill, at twice its display size
+    await sharp(`${SRC}/${file}`)
+      .rotate()
+      .resize(640, 640, { fit: 'cover', position: 'centre' })
+      .webp({ quality: 80 })
+      .toFile(`${SODFEST_OUT}/${name}-640.webp`);
+
+    /*
+     * And the whole frame, for the viewer that opens on a tap.
+     *
+     * 1200 rather than 1600. These are grass, hedge and foliage, which webp
+     * compresses badly, and quality barely touches them -- going from 82 down
+     * to 68 saved a fifth, while dropping the width from 1600 to 1200 halved
+     * them. 1200 still has more detail than the viewer can show on any phone,
+     * and it is the difference between a 1.1MB tap and a 550KB one on mobile
+     * data.
+     */
+    await sharp(`${SRC}/${file}`)
+      .rotate()
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 76 })
+      .toFile(`${SODFEST_OUT}/${name}-1200.webp`);
+
+    sodfest.push(name);
+  }
+
+  console.log(`sodfest photos: ${sodfest.length ? sodfest.join(', ') : 'none to do'}`);
+}
 
 /*
  * Sponsor logos. Drop whatever a sponsor sends into source-images/sponsors/

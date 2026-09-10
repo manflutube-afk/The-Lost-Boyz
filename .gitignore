@@ -17,3 +17,11 @@ Thumbs.db
 source-images/*.mov
 source-images/*.MOV
 source-images/*.mp4
+
+# Gallery originals. These come straight off a phone at 5712x4284 and around
+# 8MB each -- 75MB for ten of them, against a repository that is already 88MB.
+# Only the built copies in public/images are ever served, and the 1600px one
+# is large enough to rebuild any smaller size from, so the originals stay out.
+# Keep your own backup of them.
+source-images/g*.jpeg
+source-images/g*.JPEG
