@@ -13,8 +13,18 @@
    * This is deliberately limited to reloads. Scroll restoration going *back*
    * to a page is the behaviour people expect — losing your place after
    * tapping back would be its own annoyance — so back and forward are left
-   * alone. A link with a #section on the end is left alone too: that is
-   * someone asking for a particular part of the page, refresh or not.
+   * alone.
+   *
+   * A #section left in the address bar used to be left alone as well, on the
+   * reasoning that it was someone asking for a particular part of the page.
+   * That was wrong in practice: tapping anything in the menu puts a #section
+   * in the address bar and it stays there, so every later refresh threw the
+   * visitor back down to whatever they had last tapped, and a refresh
+   * appeared to move the page on its own. On a reload the fragment is now
+   * dropped and the page starts at the top, whatever is in the address bar.
+   *
+   * Arriving on a shared link with a #section on the end still works — that
+   * is a fresh navigation, not a reload, and it is left alone.
    */
   (function () {
     if (!('scrollRestoration' in history)) { return; }
@@ -25,8 +35,16 @@
       // older browsers, where performance.navigation.type 1 means reload
       : (performance.navigation && performance.navigation.type === 1);
 
-    if (isReload && !window.location.hash) {
+    if (isReload) {
       history.scrollRestoration = 'manual';
+
+      // Drop the fragment, or the browser jumps straight back down to it and
+      // no amount of scrolling to the top will hold. replaceState rather than
+      // assignment, so this does not add a step to the back button.
+      if (window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+
       window.scrollTo(0, 0);
 
       /*
@@ -84,6 +102,37 @@
      * button, which is exactly what this is trying not to break.
      */
     history.scrollRestoration = 'auto';
+
+    /*
+     * Arriving on a shared link with a #section on the end: the browser
+     * scrolls to the section as soon as it can, which is before the images
+     * further up the page have arrived. They then load, the page grows
+     * underneath, and the section the visitor was sent to has moved. Landing
+     * two thousand pixels from the thing you were linked to is not much of a
+     * welcome, so it is put right once everything is in.
+     *
+     * Abandoned the moment the visitor touches anything, so it can never yank
+     * the page away from somebody already reading it.
+     */
+    if (window.location.hash) {
+      var wanted = document.getElementById(window.location.hash.slice(1));
+
+      if (wanted) {
+        var settled = false;
+        var giveUp = function () { settled = true; };
+        var nudges = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+
+        nudges.forEach(function (ev) {
+          window.addEventListener(ev, giveUp, { passive: true, once: true });
+        });
+
+        window.addEventListener('load', function () {
+          if (settled) { return; }
+          wanted.scrollIntoView();
+          nudges.forEach(function (ev) { window.removeEventListener(ev, giveUp); });
+        });
+      }
+    }
   })();
 
   /* ---------- mobile nav drawer ---------- */
