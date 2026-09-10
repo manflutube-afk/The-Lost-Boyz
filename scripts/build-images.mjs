@@ -186,6 +186,40 @@ if (existsSync(SPONSOR_SRC)) {
   if (!files.length) { console.log('sponsor logos: none to do'); }
 }
 
+/*
+ * Portraits for the Our Story page. Anything in source-images/people/ is
+ * resized to two widths so a phone and a retina screen each get a sensible
+ * file. Nothing is cropped: these are photographs of people, and deciding
+ * where to cut someone's head off is not a job for a script.
+ */
+const PEOPLE_SRC = `${SRC}/people`;
+const PEOPLE_OUT = `${OUT}/people`;
+
+if (existsSync(PEOPLE_SRC)) {
+  const { readdirSync } = await import('node:fs');
+  mkdirSync(PEOPLE_OUT, { recursive: true });
+
+  const files = readdirSync(PEOPLE_SRC).filter((f) => /\.(png|jpe?g|webp|tiff?)$/i.test(f));
+
+  for (const file of files) {
+    // "Kyle Endean.jpg" -> kyle-endean
+    const name = file.replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    for (const w of [480, 960]) {
+      await sharp(`${PEOPLE_SRC}/${file}`)
+        .resize({ width: w, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(`${PEOPLE_OUT}/${name}-${w}.webp`);
+    }
+    console.log(`portrait: ${file} -> people/${name}-{480,960}.webp`);
+  }
+
+  if (!files.length) { console.log('portraits: none to do'); }
+}
+
 // favicons / PWA icons — keep the black backing so the icon reads on any OS
 await sharp(LOGO).resize(512, 512, { fit: 'cover' }).png()
   .toFile(`${OUT}/icon-512.png`);
