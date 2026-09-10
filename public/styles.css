@@ -2122,27 +2122,64 @@ body.nav-open { overflow: hidden; }
  * A fold-out map on each gig page. Closed to start with, so the page stays
  * quick and no map is fetched for someone who already knows the way.
  */
+/*
+ * The same treatment as the sponsor and charity cards, and for the same
+ * reason: a dark panel inside a hairline border, on a dark page, melts into
+ * the background and stops looking like anything you can open. This one is
+ * worse than most, because it is closed to begin with — so if the header does
+ * not look like a control, nobody ever finds the map.
+ */
 .venue {
-  margin: 2rem 0;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  position: relative;
+  margin: 2.25rem 0;
+  background:
+    radial-gradient(ellipse at 50% -30%, rgba(124, 47, 212, .3), transparent 62%),
+    linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
+  border: 2px solid var(--violet-dim);
   border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 1px rgba(168, 85, 247, .12);
   overflow: hidden;
+  transition: border-color .22s, box-shadow .22s;
+}
+
+/* the bar across the top, as on the cards */
+.venue::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--violet-dim), var(--violet-hi) 50%, var(--violet-dim));
+}
+
+/* open, or being pointed at, it lights up properly */
+.venue[open],
+.venue:hover {
+  border-color: var(--violet);
+  box-shadow:
+    0 0 0 1px rgba(200, 144, 255, .3),
+    0 14px 38px rgba(124, 47, 212, .32);
 }
 
 .venue__head {
   display: flex;
   align-items: center;
   gap: .75rem;
-  padding: 1rem 1.15rem;
+  padding: 1.15rem 1.15rem 1.05rem;
   cursor: pointer;
   font-family: var(--f-display);
-  font-size: 1rem;
-  letter-spacing: .06em;
+  font-size: 1.05rem;
+  letter-spacing: .07em;
   text-transform: uppercase;
   color: var(--bone);
   list-style: none;
   transition: background .2s, color .2s;
+}
+
+/* a pin, so the row reads as being about a place before it is read at all */
+.venue__head > span:first-child::before {
+  content: "\01F4CD";
+  margin-right: .5rem;
+  font-size: .95em;
 }
 .venue__head::-webkit-details-marker { display: none; }
 .venue__head:hover { background: rgba(168, 85, 247, .1); color: var(--violet-hi); }
@@ -2337,11 +2374,92 @@ body.nav-open { overflow: hidden; }
   border-top: 1px solid var(--line);
   text-align: center;
 }
-.ftr__mark {
+/*
+ * The footer logo, with the wings flapping slowly.
+ *
+ * No new artwork: the same picture is drawn three times and each copy is
+ * clipped to a different part of it. The two wings are then rotated about the
+ * shoulder, where a real wing hinges, so the tips travel and the roots stay
+ * put.
+ *
+ * The order matters. The body is drawn last, on top, so that it covers the
+ * inner edge of each wing as it swings — otherwise a hairline of background
+ * opens up along the seam at the top of the stroke.
+ *
+ * The clips deliberately stop above the banner. The ribbon runs right across
+ * the bottom of the logo and through both wings; slicing straight down would
+ * have taken a piece of the ribbon with each wing and pulled the lettering
+ * apart.
+ */
+.ftr__logo {
+  position: relative;
+  display: block;
   width: 84px;
-  height: auto;
   margin: 0 auto .85rem;
   opacity: .8;
+  /* the wings swing outside the picture's own box */
+  overflow: visible;
+}
+
+.ftr__logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* wings sit under the body, and only the two of them move */
+.ftr__logo .ftr__wing {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+/* left wing: the left third, down as far as the banner */
+.ftr__wing--l {
+  clip-path: inset(0 70% 27% 0);
+  transform-origin: 30% 52%;
+  animation: ftr-wing-l 5.5s ease-in-out infinite;
+}
+
+/* right wing: the mirror of it */
+.ftr__wing--r {
+  clip-path: inset(0 0 27% 70%);
+  transform-origin: 70% 52%;
+  animation: ftr-wing-r 5.5s ease-in-out infinite;
+}
+
+/*
+ * The still part: the lettering between the wings, plus the full width of
+ * the banner underneath. Drawn over the wings so the seams never show.
+ */
+.ftr__body {
+  position: relative;
+  clip-path: polygon(
+    30% 0,
+    70% 0,
+    70% 73%,
+    100% 73%,
+    100% 100%,
+    0 100%,
+    0 73%,
+    30% 73%
+  );
+}
+
+@keyframes ftr-wing-l {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-4deg); }
+}
+
+@keyframes ftr-wing-r {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(4deg); }
+}
+
+/* a still logo for anyone who has asked for less movement */
+@media (prefers-reduced-motion: reduce) {
+  .ftr__wing--l,
+  .ftr__wing--r { animation: none; }
 }
 .ftr__c { margin: 0; font-size: .82rem; color: var(--muted); }
 
