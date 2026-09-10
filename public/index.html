@@ -87,32 +87,28 @@
   <div class="wrap">
     <!-- Release date confirmed against the Apple Music listing. -->
     <div class="single-head">
-      <div class="single-head__title">
-        <p class="eyebrow">The debut single</p>
+      <p class="eyebrow">The debut single</p>
+
+      <div class="single-head__row">
         <h2 class="h2">Two Lost Souls</h2>
-        <p class="release-date"><time datetime="2026-09-20">Out 20 September 2026</time></p>
+
+        <!--
+          The countdown, kept to days and hours so it sits on the same line as
+          the title instead of needing a row of its own. data-release is the
+          only thing to change if the date moves; midnight at the start of the
+          20th, British Summer Time, which is what the clocks are on in
+          September.
+
+          Hidden until app.js has something to put in it, so it never shows a
+          row of zeroes, and hidden from screen readers because the date is
+          written out in full directly underneath.
+        -->
+        <p class="countdown" id="countdown" data-release="2026-09-20T00:00:00+01:00"
+           aria-hidden="true" hidden><span class="countdown__n" id="cdDays">0</span> days
+          <span class="countdown__n" id="cdHours">0</span> hrs <span class="countdown__to">to go</span></p>
       </div>
 
-      <!--
-        The countdown. data-release is the only thing to change if the date
-        moves; midnight at the start of the 20th, British Summer Time, which
-        is what the clocks are on in September.
-
-        Hidden until app.js has something to put in it, so it never shows a
-        row of dashes, and hidden from screen readers because the date is
-        written out in full immediately to its left -- a number changing
-        every second is not worth reading aloud.
-      -->
-      <div class="countdown" id="countdown" data-release="2026-09-20T00:00:00+01:00"
-           aria-hidden="true" hidden>
-        <p class="countdown__label" id="countdownLabel">Out in</p>
-        <div class="countdown__units">
-          <span class="countdown__unit"><b id="cdDays">0</b><i>days</i></span>
-          <span class="countdown__unit"><b id="cdHours">0</b><i>hrs</i></span>
-          <span class="countdown__unit"><b id="cdMins">0</b><i>mins</i></span>
-          <span class="countdown__unit"><b id="cdSecs">0</b><i>secs</i></span>
-        </div>
-      </div>
+      <p class="release-date"><time datetime="2026-09-20">Out 20 September 2026</time></p>
     </div>
 
     <div class="release">

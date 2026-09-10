@@ -2052,73 +2052,68 @@ body.nav-open { overflow: hidden; }
 /* ---------------- Countdown to the single ---------------- */
 
 /*
- * The title on the left, the countdown on the right. They sit on one line
- * once there is room and stack on a phone, where a row of four number boxes
- * beside a heading would leave neither of them enough width.
+ * The countdown sits on the same line as the title, aligned to the same
+ * baseline, and drops onto its own line only when there is genuinely no room.
+ *
+ * It was a block of four boxes below the heading before, which pushed itself
+ * hard against the disc on a phone and against the track listing on a desktop.
+ * Days and hours are enough -- nobody is watching the seconds tick on a
+ * release that is still a week away -- and cutting it to two figures is what
+ * lets it share the line rather than needing one of its own.
  */
-.single-head { display: grid; gap: 1.5rem; }
-
-@media (min-width: 760px) {
-  .single-head {
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    gap: 2rem;
-  }
-  /* pull it level with the release date rather than the top of the eyebrow */
-  .countdown { padding-bottom: .15rem; }
+.single-head__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.1rem;
+  /* the row gap only applies when the pill wraps under the title, and it has
+     to clear the violet rule that sits below the heading */
+  row-gap: .8rem;
 }
 
-.countdown__label {
-  margin: 0 0 .5rem;
+/*
+ * The title's own bottom margin is dropped here and given back on the date
+ * underneath, so the gap below the heading is the same as it always was
+ * whether the countdown is beside it or wrapped under it.
+ */
+.single-head__row .h2 { margin-bottom: 0; }
+.single-head .release-date { margin-top: 1rem; }
+
+/* a quieter sibling of the date pill below it */
+.countdown {
+  margin: 0;
+  padding: .32rem .8rem;
+  background: rgba(168, 85, 247, .1);
+  border: 1px solid var(--violet-dim);
+  border-radius: 999px;
   font-family: var(--f-display);
   font-size: .72rem;
-  letter-spacing: .18em;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--violet-hi);
-}
-
-.countdown__units { display: flex; gap: .5rem; }
-
-.countdown__unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 3.6rem;
-  padding: .5rem .45rem .4rem;
-  background:
-    radial-gradient(ellipse at 50% -30%, rgba(124, 47, 212, .35), transparent 65%),
-    linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
-  border: 1px solid var(--violet-dim);
-  border-radius: 10px;
-}
-
-.countdown__unit b {
-  font-family: var(--f-display);
-  font-size: 1.5rem;
-  line-height: 1;
-  font-weight: 400;
-  color: var(--bone);
-  /* the seconds change every tick, so the box must not resize under them */
-  font-variant-numeric: tabular-nums;
-}
-
-.countdown__unit i {
-  margin-top: .25rem;
-  font-style: normal;
-  font-size: .6rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  white-space: nowrap;
   color: var(--muted);
 }
 
+.countdown__n {
+  font-size: 1.05rem;
+  color: var(--violet-hi);
+  /* so the pill does not twitch as the hours roll over */
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown__to { opacity: .7; }
+
 /* once the day arrives there is nothing left to count */
-.countdown.is-out .countdown__units { display: none; }
-.countdown.is-out .countdown__label {
-  margin: 0;
-  font-size: 1.35rem;
-  letter-spacing: .1em;
+.countdown.is-out {
+  background: rgba(168, 85, 247, .2);
+  border-color: var(--violet);
   color: var(--bone);
-  text-shadow: 0 3px 20px rgba(168, 85, 247, .6);
+  font-size: .8rem;
+}
+
+@media (min-width: 700px) {
+  .countdown { font-size: .78rem; padding: .36rem .95rem; }
+  .countdown__n { font-size: 1.15rem; }
 }
 
 /* ---------------- Coming dreckly ---------------- */

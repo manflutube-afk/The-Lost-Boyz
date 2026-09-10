@@ -486,10 +486,16 @@
    * The target comes from the markup, so moving the release date is a change
    * to one attribute in index.html and nothing else.
    *
+   * Days and hours only. Seconds meant a tick every second for a number
+   * nobody was watching, and four boxes of figures that would not fit beside
+   * the title. With two figures it sits on the same line as the heading, so
+   * it updates every half minute instead -- close enough to catch the hour
+   * rolling over, and near enough nothing to run.
+   *
    * The clock is the visitor's own, which cannot be helped on a site with no
    * server: somebody whose phone is set wrong will see the wrong number. That
-   * is why the date is also written out in full beside it -- the countdown is
-   * the flourish, the date is the fact.
+   * is why the date is also written out in full underneath -- the countdown
+   * is the flourish, the date is the fact.
    */
   var countdown = document.getElementById('countdown');
 
@@ -499,39 +505,32 @@
     if (!isNaN(releaseAt)) {
       var cdDays = document.getElementById('cdDays');
       var cdHours = document.getElementById('cdHours');
-      var cdMins = document.getElementById('cdMins');
-      var cdSecs = document.getElementById('cdSecs');
-      var cdLabel = document.getElementById('countdownLabel');
       var ticker = null;
-
-      var pad = function (n) { return n < 10 ? '0' + n : String(n); };
 
       var tick = function () {
         var left = releaseAt - Date.now();
 
         if (left <= 0) {
           countdown.classList.add('is-out');
-          cdLabel.textContent = 'Out now';
+          countdown.textContent = 'Out now';
           countdown.hidden = false;
           clearInterval(ticker);
           return;
         }
 
-        var secs = Math.floor(left / 1000);
-        cdDays.textContent = Math.floor(secs / 86400);
-        cdHours.textContent = pad(Math.floor(secs / 3600) % 24);
-        cdMins.textContent = pad(Math.floor(secs / 60) % 60);
-        cdSecs.textContent = pad(secs % 60);
+        var mins = Math.floor(left / 60000);
+        cdDays.textContent = Math.floor(mins / 1440);
+        cdHours.textContent = Math.floor(mins / 60) % 24;
         countdown.hidden = false;
       };
 
       tick();
-      ticker = setInterval(tick, 1000);
+      ticker = setInterval(tick, 30000);
 
       /*
        * A phone suspends timers when the page is put away, so the numbers come
        * back stale. Catching it on the way back means the first thing seen is
-       * right rather than a second or two behind.
+       * right rather than an hour behind.
        */
       document.addEventListener('visibilitychange', function () {
         if (!document.hidden) { tick(); }
