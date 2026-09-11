@@ -124,6 +124,17 @@ function fold(line) {
   return out.join('\r\n ');
 }
 
+/*
+ * HEAD is answered by the same handler. Without this, only GET is claimed and
+ * a HEAD falls past the Function to the static router, which has no file at
+ * this address and returns 404 -- so anything that checks a link before
+ * following it, and some download managers, would decide it was broken. The
+ * runtime drops the body for a HEAD by itself; the headers are what matter.
+ */
+export async function onRequestHead(context) {
+  return onRequestGet(context);
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
