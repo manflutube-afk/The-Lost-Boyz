@@ -239,6 +239,11 @@
         }
 
         viewNum.textContent = data.views.toLocaleString('en-GB');
+
+        // "1 views" is the sort of thing that makes a site look unfinished
+        var viewLabel = document.getElementById('viewCountL');
+        if (viewLabel) { viewLabel.textContent = data.views === 1 ? ' view' : ' views'; }
+
         viewBox.hidden = false;
       })
       .catch(function () {
