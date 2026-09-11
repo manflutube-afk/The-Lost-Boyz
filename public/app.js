@@ -220,7 +220,6 @@
 
   if (viewBox && 'fetch' in window) {
     var viewNum = document.getElementById('viewCountN');
-    var viewLabel = document.getElementById('viewCountL');
     var SEEN = 'lb-counted';
 
     /*
@@ -237,9 +236,10 @@
     var paint = function (n) {
       if (n === shownSoFar) { return; }
 
+      // The label is fixed wording in the markup now -- "view counter" reads
+      // the same whether the total is one or ten thousand, so there is no
+      // plural to keep in step.
       viewNum.textContent = n.toLocaleString('en-GB');
-      // "1 views" is the sort of thing that makes a site look unfinished
-      if (viewLabel) { viewLabel.textContent = n === 1 ? ' live view' : ' live views'; }
       viewBox.hidden = false;
 
       // a brief flash, but only on a change the visitor could have watched

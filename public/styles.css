@@ -234,6 +234,10 @@ body.nav-open .hdr::before {
   white-space: nowrap;
 }
 
+/* the wording sits before the figure now, so it needs a gap of its own
+   rather than the leading space the old label carried */
+.hdr__views-l { margin-right: .12rem; }
+
 .hdr__views-n {
   font-size: .92rem;
   color: var(--violet-hi);
@@ -284,19 +288,22 @@ body.nav-open .hdr::before {
  * matter.
  */
 @media (max-width: 480px) {
-  .hdr__views { padding: .24rem .45rem; }
+  .hdr__views { padding: .22rem .42rem; }
   .hdr__views-n { font-size: .78rem; }
-  .hdr__views-l { font-size: .5rem; }
-  .hdr__views-dot { width: .36rem; height: .36rem; }
+  /* the wording is tracked in as well as shrunk -- "view counter" is two
+     words longer than what was here before, and the spacing between the
+     letters was costing more width than the letters */
+  .hdr__views-l { font-size: .44rem; letter-spacing: .04em; }
+  .hdr__views-dot { width: .34rem; height: .34rem; }
 }
 
 /*
- * And on a really small one the word "views" goes too. The dot and the word
- * "live" carry it from there.
+ * And on a really small one the wording shortens rather than disappearing --
+ * a bare number in a pill says nothing at all about what it is counting.
  */
 @media (max-width: 360px) {
   .hdr__views-l { font-size: 0; }
-  .hdr__views-l::after { content: " live"; font-size: .5rem; }
+  .hdr__views-l::after { content: "Views"; font-size: .5rem; }
 }
 
 /* mobile drawer */
