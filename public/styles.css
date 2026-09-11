@@ -59,6 +59,18 @@ body {
  */
 html { overflow-x: clip; }
 
+/*
+ * The hidden attribute has to beat anything set here.
+ *
+ * It works through a browser rule of [hidden] { display: none }, which any
+ * class in this file setting a display will quietly outrank -- and then an
+ * element marked hidden in the markup shows anyway. That is exactly what
+ * happened to the view counter: it sets display:flex, so when the count could
+ * not be fetched it sat in the bar reading "View counter" with no number
+ * beside it.
+ */
+[hidden] { display: none !important; }
+
 img { max-width: 100%; height: auto; display: block; }
 
 a { color: var(--violet-hi); }
