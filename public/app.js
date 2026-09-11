@@ -212,48 +212,97 @@
    * magnitude below the daily allowance, which page-by-page counting would
    * chew through on a busy day.
    *
-   * The number is asked for either way, so the count shown is current even
-   * when this visit has already been counted.
+   * After that first count it keeps asking for the total every so often, so
+   * the number climbs while you are sat looking at it rather than only when
+   * the page is reloaded.
    */
   var viewBox = document.getElementById('viewCount');
 
   if (viewBox && 'fetch' in window) {
     var viewNum = document.getElementById('viewCountN');
+    var viewLabel = document.getElementById('viewCountL');
     var SEEN = 'lb-counted';
 
-    var alreadyCounted = false;
-    try { alreadyCounted = sessionStorage.getItem(SEEN) === '1'; } catch (e) {}
+    /*
+     * Twenty seconds. The store behind this is eventually consistent and can
+     * take up to a minute to agree with itself worldwide, so asking faster
+     * would be asking for the same answer twice -- and every ask costs a read
+     * against a daily allowance shared by the whole site.
+     */
+    var VIEWS_EVERY = 20000;
 
-    fetch('/api/views', {
-      method: alreadyCounted ? 'GET' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      // no body, but a POST with none upsets some proxies
-      body: alreadyCounted ? undefined : '{}',
-    })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (data) {
-        if (!data || typeof data.views !== 'number') { return; }
+    var shownSoFar = null;
+    var viewTimer = null;
 
-        if (data.counted) {
-          try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
-        }
+    var paint = function (n) {
+      if (n === shownSoFar) { return; }
 
-        viewNum.textContent = data.views.toLocaleString('en-GB');
+      viewNum.textContent = n.toLocaleString('en-GB');
+      // "1 views" is the sort of thing that makes a site look unfinished
+      if (viewLabel) { viewLabel.textContent = n === 1 ? ' live view' : ' live views'; }
+      viewBox.hidden = false;
 
-        // "1 views" is the sort of thing that makes a site look unfinished
-        var viewLabel = document.getElementById('viewCountL');
-        if (viewLabel) { viewLabel.textContent = data.views === 1 ? ' view' : ' views'; }
+      // a brief flash, but only on a change the visitor could have watched
+      if (shownSoFar !== null && n > shownSoFar) {
+        viewBox.classList.add('is-bumped');
+        setTimeout(function () { viewBox.classList.remove('is-bumped'); }, 700);
+      }
 
-        viewBox.hidden = false;
+      shownSoFar = n;
+    };
+
+    var askForTotal = function (count) {
+      return fetch('/api/views', {
+        method: count ? 'POST' : 'GET',
+        headers: count ? { 'Content-Type': 'application/json' } : undefined,
+        // no body, but a POST without one upsets some proxies
+        body: count ? '{}' : undefined,
       })
-      .catch(function () {
-        /*
-         * Left hidden. A counter that cannot count is worse than no counter:
-         * a zero in the corner of the page says something untrue about the
-         * band, and an error message says something nobody visiting cares
-         * about.
-         */
-      });
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!data || typeof data.views !== 'number') { return; }
+          if (data.counted) {
+            try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
+          }
+          paint(data.views);
+        })
+        .catch(function () {
+          /*
+           * Left as it was. A counter that cannot count is worse than no
+           * counter: a zero in the corner of the page says something untrue
+           * about the band, and an error says something nobody visiting
+           * cares about. If it has never loaded it simply stays hidden.
+           */
+        });
+    };
+
+    /*
+     * The timer always runs; it is the asking that is skipped while nobody is
+     * looking. A tab left open in the background would otherwise go on
+     * fetching all day for a number no one is reading, and it is the site's
+     * own daily allowance paying for it.
+     *
+     * Written this way round on purpose. Starting and stopping the timer on
+     * visibilitychange meant that a page which began life hidden -- a tab
+     * opened in the background, a link restored on a phone -- never started
+     * one at all, and then sat there never updating. This way there is no
+     * state to get wrong: the timer exists from the off and simply does
+     * nothing while the page is away.
+     */
+    viewTimer = setInterval(function () {
+      if (document.hidden) { return; }
+      askForTotal(false);
+    }, VIEWS_EVERY);
+
+    // and catch up the moment somebody comes back to the tab
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) { askForTotal(false); }
+    });
+
+    var counted = false;
+    try { counted = sessionStorage.getItem(SEEN) === '1'; } catch (e) {}
+
+    askForTotal(!counted);
   }
 
   /* ---------- footer year ---------- */

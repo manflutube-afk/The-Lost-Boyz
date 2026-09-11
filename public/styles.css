@@ -163,6 +163,9 @@ body.nav-open .hdr::before {
   align-items: center;
   gap: .6rem;
   margin-right: auto;
+  /* two lines of band name with a counter squeezing it looks broken, and on
+     a narrow bar that is exactly what happens without this */
+  white-space: nowrap;
   color: var(--bone);
   text-decoration: none;
   font-family: var(--f-display);
@@ -237,6 +240,30 @@ body.nav-open .hdr::before {
   /* the number grows a digit at a time; tabular figures stop the pill
      twitching as it does */
   font-variant-numeric: tabular-nums;
+  transition: color .2s;
+}
+
+/* the dot that says this is a running total rather than a printed one */
+.hdr__views-dot {
+  width: .42rem;
+  height: .42rem;
+  margin-right: .1rem;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, .6);
+  animation: views-pulse 2.4s ease-out infinite;
+}
+
+@keyframes views-pulse {
+  0%        { box-shadow: 0 0 0 0 rgba(74, 222, 128, .55); opacity: 1; }
+  70%, 100% { box-shadow: 0 0 0 .32rem rgba(74, 222, 128, 0); opacity: .75; }
+}
+
+/* a brief lift when the number actually changes, so a climb is noticed */
+.hdr__views.is-bumped .hdr__views-n { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hdr__views-dot { animation: none; }
 }
 
 /*
@@ -246,9 +273,30 @@ body.nav-open .hdr::before {
  * tells a visitor nothing at all. Below about 340px the sums stop working and
  * the number alone has to do.
  */
-@media (max-width: 340px) {
-  .hdr__views-l { display: none; }
-  .hdr__views { padding: .28rem .5rem; }
+/*
+ * Sizing on a phone, worked out by measuring rather than guessing.
+ *
+ * At 375px the bar has about 112px spare once the band name and the menu
+ * button have had their share. At the size the pill uses on a desktop,
+ * "482 live views" already needs 111 of it and five figures overflow into the
+ * band name. Dropped a couple of steps it comes to 95px at three figures and
+ * 104 at five, which leaves room to spare for as long as this is going to
+ * matter.
+ */
+@media (max-width: 480px) {
+  .hdr__views { padding: .24rem .45rem; }
+  .hdr__views-n { font-size: .78rem; }
+  .hdr__views-l { font-size: .5rem; }
+  .hdr__views-dot { width: .36rem; height: .36rem; }
+}
+
+/*
+ * And on a really small one the word "views" goes too. The dot and the word
+ * "live" carry it from there.
+ */
+@media (max-width: 360px) {
+  .hdr__views-l { font-size: 0; }
+  .hdr__views-l::after { content: " live"; font-size: .5rem; }
 }
 
 /* mobile drawer */
