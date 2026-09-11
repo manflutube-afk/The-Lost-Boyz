@@ -25,6 +25,35 @@ to `https://thelostboyz.uk` with *preserve path and query* switched on. Then
 delete `functions/_middleware.js`. The "preserve path and query" part matters —
 without it every www address lands on the front page.
 
+## After changing app.js or styles.css, run `npm run stamp`
+
+```
+npm run stamp
+```
+
+It puts a short hash of each file's contents on the end of its address in
+every page — `/app.js?v=3f81e5b9` — and it matters more than it looks.
+
+The custom domain tells browsers to keep those two files for **four hours**.
+Cloudflare Pages itself says not to cache them (the pages.dev address still
+says so), which means it is the zone rewriting the header on the way out, and
+nothing inside this project can override it.
+
+Four hours of held-onto JavaScript against a freshly deployed page is not a
+theoretical problem — it has already broken this site twice. The countdown
+disappeared when an old script went looking for figures the new page no longer
+had, and the sponsor cards stayed unclickable on a phone for the same reason.
+Both times the file on the server was perfectly correct.
+
+Because the stamp is a hash of the contents, it only changes when the file
+does. Nothing is re-downloaded for no reason.
+
+**The tidier fix is in the dashboard**: Caching → Configuration → Browser Cache
+TTL → *Respect Existing Headers*. Pages already sends sensible values and that
+stops the zone overriding them. It needs permissions the deploy credentials do
+not have, so it has to be done by hand. Once it is, `npm run stamp` is harmless
+but no longer necessary.
+
 ## Running it locally
 
 ```bash
