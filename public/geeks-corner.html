@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=0813f49a">
+<link rel="stylesheet" href="/styles.css?v=0d4d2e99">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -37,6 +37,14 @@
     <img src="/images/logo-96.webp" alt="" width="44" height="33" class="hdr__mark">
     <span>The Lost Boyz</span>
   </a>
+  <!--
+    Site view counter. Hidden until app.js has a real number, so it never
+    flashes a zero, and left out of the tab order because it is a readout
+    rather than something to interact with.
+  -->
+  <p class="hdr__views" id="viewCount" hidden>
+    <span class="hdr__views-n" id="viewCountN"></span><span class="hdr__views-l"> views</span>
+  </p>
   <button class="hdr__toggle" id="navToggle" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
@@ -114,6 +122,6 @@
 }
 </script>
 
-<script src="/app.js?v=3f81e5b9" defer></script>
+<script src="/app.js?v=d7ab6832" defer></script>
 </body>
 </html>

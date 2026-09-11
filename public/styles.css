@@ -203,6 +203,54 @@ body.nav-open .hdr::before {
 .hdr__toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .hdr__toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
+/*
+ * The view counter in the bar.
+ *
+ * Sits between the brand and the menu button on a phone, and out at the far
+ * right past the links on a desktop -- the order is flipped rather than the
+ * markup, so the same block of HTML serves both. Above the bar's own
+ * background, alongside the brand and the toggle, or the blurred panel would
+ * paint straight over it.
+ */
+.hdr__views {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: .2rem;
+  margin: 0;
+  padding: .3rem .6rem;
+  background: rgba(168, 85, 247, .12);
+  border: 1px solid var(--violet-dim);
+  border-radius: 999px;
+  font-family: var(--f-display);
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.hdr__views-n {
+  font-size: .92rem;
+  color: var(--violet-hi);
+  /* the number grows a digit at a time; tabular figures stop the pill
+     twitching as it does */
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * The word only goes on a genuinely tiny screen. Measured at 375px there is
+ * 132px between the brand and the burger, and the pill needs 100 of it even
+ * showing six figures -- so the label stays, because a bare number in a pill
+ * tells a visitor nothing at all. Below about 340px the sums stop working and
+ * the number alone has to do.
+ */
+@media (max-width: 340px) {
+  .hdr__views-l { display: none; }
+  .hdr__views { padding: .28rem .5rem; }
+}
+
 /* mobile drawer */
 .nav {
   position: fixed;
@@ -2807,6 +2855,9 @@ body.nav-open { overflow: hidden; }
     border-bottom: 2px solid transparent;
   }
   .nav a:hover { border-bottom-color: var(--violet); }
+
+  /* past the links rather than before them, once there are links to be past */
+  .hdr__views { order: 1; margin-left: .35rem; }
 
   .release {
     grid-template-columns: minmax(0, 420px) minmax(0, 1fr);

@@ -203,6 +203,54 @@
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
+  /* ---------- how many have been round ---------- */
+
+  /*
+   * A visit is counted once per browser session, not once per page. Somebody
+   * reading four pages is one visit, which is what a counter like this is
+   * normally taken to mean -- and it keeps the writes to the store an order of
+   * magnitude below the daily allowance, which page-by-page counting would
+   * chew through on a busy day.
+   *
+   * The number is asked for either way, so the count shown is current even
+   * when this visit has already been counted.
+   */
+  var viewBox = document.getElementById('viewCount');
+
+  if (viewBox && 'fetch' in window) {
+    var viewNum = document.getElementById('viewCountN');
+    var SEEN = 'lb-counted';
+
+    var alreadyCounted = false;
+    try { alreadyCounted = sessionStorage.getItem(SEEN) === '1'; } catch (e) {}
+
+    fetch('/api/views', {
+      method: alreadyCounted ? 'GET' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // no body, but a POST with none upsets some proxies
+      body: alreadyCounted ? undefined : '{}',
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || typeof data.views !== 'number') { return; }
+
+        if (data.counted) {
+          try { sessionStorage.setItem(SEEN, '1'); } catch (e) {}
+        }
+
+        viewNum.textContent = data.views.toLocaleString('en-GB');
+        viewBox.hidden = false;
+      })
+      .catch(function () {
+        /*
+         * Left hidden. A counter that cannot count is worse than no counter:
+         * a zero in the corner of the page says something untrue about the
+         * band, and an error message says something nobody visiting cares
+         * about.
+         */
+      });
+  }
+
   /* ---------- footer year ---------- */
 
   var year = document.getElementById('year');

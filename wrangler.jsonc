@@ -23,6 +23,19 @@
     "FROM_EMAIL": "The Lost Boyz <website@thelostboyz.uk>",
     // where the logo in the emails is fetched from. The domain is pointed at
     // the site now, so this is the live address rather than the pages.dev one.
-    "SITE_URL": "https://thelostboyz.uk"
-  }
+    "SITE_URL": "https://thelostboyz.uk",
+    // Views the site had before the counter existed, added to the live total.
+    // Set this to a real figure from Cloudflare's analytics if there is one --
+    // it is a plain number here so nobody has to touch the code to change it.
+    "VIEWS_SEED": "0"
+  },
+
+  // Where the view count is kept. One key, read on every page and written
+  // once per visit.
+  "kv_namespaces": [
+    {
+      "binding": "VIEWS",
+      "id": "35f076d047884cc1b65538035e2b9b60"
+    }
+  ]
 }

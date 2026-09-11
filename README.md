@@ -54,6 +54,41 @@ stops the zone overriding them. It needs permissions the deploy credentials do
 not have, so it has to be done by hand. Once it is, `npm run stamp` is harmless
 but no longer necessary.
 
+## The view counter
+
+The number in the header. It lives in `functions/api/views.js` and keeps its
+total in a Cloudflare KV store bound as `VIEWS`.
+
+**A visit is counted once per browser session, not once per page.** Somebody
+reading four pages is one visit, which is what a counter like this is normally
+taken to mean — and it keeps the writes well inside the free daily allowance,
+which counting every page would chew through on a busy day. Obvious crawlers
+are turned away, and anything that does not run JavaScript never reaches the
+endpoint at all.
+
+### Folding in the views from before
+
+`VIEWS_SEED` in `wrangler.jsonc` is added to the live count. It is **0** right
+now because there is no record of what came before — the counter can only
+count from the day it was built, and nothing was keeping a tally until then.
+
+If Cloudflare's analytics has a figure you trust, put it in:
+
+```jsonc
+"VIEWS_SEED": "4200"
+```
+
+Changing it only shifts the total. It never touches the stored count, so you
+can correct it later without losing a single view.
+
+### What it cannot do
+
+KV has no atomic increment, so the count is read and written back. Two visits
+landing in the same instant can come out as one. At this site's traffic that is
+a rounding error, and the alternative is a great deal of machinery for a badge
+in a header — but it is worth knowing the number is a good count rather than an
+exact one.
+
 ## Running it locally
 
 ```bash
