@@ -496,6 +496,23 @@ Commit and push after editing — Pages redeploys on its own.
 
 ---
 
+#### The Add to calendar button
+
+Every gig gets one automatically. It points at `/calendar?date=...`, which is
+`functions/calendar.js` -- that reads this same `gigs.json`, so adding a date to
+the file is still the only thing anyone has to do.
+
+Two things it works out for itself, and one you can set:
+
+- **The time** is read from whatever you wrote: "8pm", "7.30pm", "Doors 7pm"
+  and "20:00" are all understood. If it cannot make sense of it, the gig goes
+  in as an all-day entry rather than being given a start time nobody said.
+- **Summer time** is handled. An 8pm gig in October goes in the file as 19:00
+  UTC and one in January as 20:00 UTC, so both show as 8pm in somebody's diary.
+- **How long it runs** defaults to three hours, which is a guess. Put
+  `"durationHours": 2` on a gig to change it.
+
+
 ## SEO
 
 The site is set up for search engines:

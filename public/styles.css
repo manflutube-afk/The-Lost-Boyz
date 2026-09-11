@@ -397,6 +397,14 @@ body.nav-open { overflow: hidden; }
 }
 .btn:active { transform: translateY(1px); }
 
+/* a quieter, smaller button for a secondary action sat next to a main one */
+.btn--small {
+  min-height: 38px;
+  padding: .45rem 1rem;
+  font-size: .8rem;
+  letter-spacing: .08em;
+}
+
 .btn--solid {
   background: linear-gradient(135deg, var(--violet) 0%, #7c2fd4 100%);
   border-color: transparent;
@@ -1715,7 +1723,19 @@ body.nav-open { overflow: hidden; }
   color: var(--violet-hi);
 }
 
-.gig__cta { grid-column: 1 / -1; margin-top: .9rem; }
+/*
+ * The buttons on a gig row. One wrapper rather than two loose children, so
+ * the card stays [date][details][buttons] whether there is one button or two.
+ */
+.gig__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .9rem;
+}
+.gig__cal { white-space: nowrap; }
 
 /* ---------------- Gallery ---------------- */
 
@@ -2636,7 +2656,7 @@ body.nav-open { overflow: hidden; }
   }
 
   .gig { grid-template-columns: auto 1fr auto; }
-  .gig__cta { grid-column: auto; margin-top: 0; }
+  .gig__actions { grid-column: auto; margin-top: 0; justify-content: flex-end; }
 }
 
 /*

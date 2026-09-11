@@ -1712,12 +1712,15 @@
        * Not every gig sells tickets either, so the label is settable — a free
        * pub night should not have a button promising something to buy.
        */
+      var actions = document.createElement('div');
+      actions.className = 'gig__actions';
+
       if (g.infoUrl) {
         var info = document.createElement('a');
         info.className = 'btn gig__cta';
         info.href = g.infoUrl;
         info.textContent = g.linkLabel || 'More info';
-        card.appendChild(info);
+        actions.appendChild(info);
       } else if (g.ticketUrl) {
         var a = document.createElement('a');
         a.className = 'btn gig__cta';
@@ -1725,8 +1728,28 @@
         a.rel = 'noopener';
         a.target = '_blank';
         a.textContent = g.linkLabel || 'Tickets';
-        card.appendChild(a);
+        actions.appendChild(a);
       }
+
+      /*
+       * Add to calendar. An ordinary link to /calendar, which hands back a
+       * calendar file built from this same gig -- so it is the phone or the
+       * computer that puts it in the diary, and there is nothing here to go
+       * wrong if the JavaScript that draws these cards ever changes.
+       *
+       * No download attribute: the file already arrives marked as one, and
+       * leaving it off is what lets a phone offer to open it in the calendar
+       * rather than just dropping it in the downloads folder.
+       */
+      var cal = document.createElement('a');
+      cal.className = 'btn btn--small gig__cal';
+      cal.href = '/calendar?date=' + encodeURIComponent(g.date)
+        + (g.venue ? '&venue=' + encodeURIComponent(g.venue) : '');
+      cal.rel = 'nofollow';
+      cal.textContent = 'Add to calendar';
+      actions.appendChild(cal);
+
+      card.appendChild(actions);
 
       frag.appendChild(card);
     });

@@ -8,7 +8,8 @@
     "note": "optional - a line about what makes the night different",
     "linkLabel": "optional - button text, defaults to \"Tickets\"",
     "ticketUrl": "https://example.com/tickets",
-    "infoUrl": "optional - a page on this site with the full details; wins over ticketUrl"
+    "infoUrl": "optional - a page on this site with the full details; wins over ticketUrl",
+    "durationHours": "optional - how long to put in someone's calendar when they tap Add to calendar. Defaults to 3."
   },
   "gigs": [
     {
