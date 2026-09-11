@@ -2605,6 +2605,32 @@ body.nav-open { overflow: hidden; }
 }
 .ftr__c { margin: 0; font-size: .82rem; color: var(--muted); }
 
+/*
+ * Who built it. Quieter than the band's own line above it, because this is a
+ * credit rather than part of the site's own voice -- and an ordinary link, not
+ * a nofollow one, since being found through the sites they build is the whole
+ * point of a credit like this.
+ */
+.ftr__by {
+  margin: .5rem 0 0;
+  font-size: .74rem;
+  letter-spacing: .04em;
+  color: var(--muted);
+  opacity: .8;
+}
+.ftr__by a {
+  color: var(--violet-hi);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s, color .2s;
+}
+.ftr__by a:hover,
+.ftr__by a:focus-visible { color: #fff; border-bottom-color: var(--violet); }
+
+/* the 404 has no logo or copyright line, just the credit */
+.ftr--bare { padding: 1.75rem 0 calc(1.75rem + env(safe-area-inset-bottom)); }
+.ftr--bare .ftr__by { margin: 0; }
+
 /* ============================================================
    Larger screens
    ============================================================ */
