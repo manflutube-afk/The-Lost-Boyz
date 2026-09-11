@@ -932,13 +932,23 @@
 
       list.forEach(function (s) {
         var card = document.createElement('article');
-        card.className = 'sponsor';
+        /*
+         * A card with a website behind it is clickable anywhere -- logo,
+         * name, tier, blurb, the lot. The link itself is still only round the
+         * name; the stylesheet spreads it over the whole card with a
+         * pseudo-element. Wrapping everything in one anchor would have worked
+         * for a mouse and been miserable with a screen reader, which would
+         * then read the whole card out as the name of one link.
+         */
+        card.className = s.url ? 'sponsor sponsor--linked' : 'sponsor';
 
         if (s.logo) {
           var img = document.createElement('img');
           img.className = 'sponsor__logo';
           img.src = s.logo;
-          img.alt = s.name;
+          // The name is written out directly underneath, so the logo is
+          // decoration -- alt text here would only say it all over again.
+          img.alt = '';
           img.loading = 'lazy';
           card.appendChild(img);
         }

@@ -1311,7 +1311,44 @@ body.nav-open { overflow: hidden; }
   color: var(--bone);
 }
 .sponsor__name a { color: inherit; text-decoration: none; }
-.sponsor__name a:hover { color: var(--violet-hi); }
+
+/*
+ * The whole card is the link.
+ *
+ * The anchor stays round the name, and this pseudo-element spreads its
+ * clickable area over the card behind everything else -- so the logo, the
+ * tier and the blurb all work as the link too, while a screen reader still
+ * hears one link called "Kernow Pages" rather than the entire card read out
+ * as the name of it.
+ */
+.sponsor--linked { cursor: pointer; transition: border-color .22s, box-shadow .22s, transform .22s; }
+
+.sponsor--linked .sponsor__name a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.sponsor--linked:hover,
+.sponsor--linked:focus-within {
+  border-color: var(--violet);
+  box-shadow:
+    0 0 0 1px rgba(200, 144, 255, .3),
+    0 16px 40px rgba(124, 47, 212, .34);
+  transform: translateY(-2px);
+}
+.sponsor--linked:hover .sponsor__name,
+.sponsor--linked:focus-within .sponsor__name { color: var(--violet-hi); }
+
+/* the ring goes round the whole card, since the whole card is the target */
+.sponsor--linked:focus-within { outline: 2px solid var(--violet-hi); outline-offset: 3px; }
+.sponsor--linked .sponsor__name a:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sponsor--linked:hover,
+  .sponsor--linked:focus-within { transform: none; }
+}
 .sponsor__tier {
   margin: 0 0 .5rem;
   font-family: var(--f-display);
