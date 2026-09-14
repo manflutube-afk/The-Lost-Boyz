@@ -388,12 +388,19 @@
     var list = $('diaryList');
     list.replaceChildren();
 
-    var coming = events.filter(function (e) { return !isPast(e.date); });
-    var gone = events.filter(function (e) { return isPast(e.date); }).reverse();
+    // Sorted here as well as on the way out of the store. The order these are
+    // read in is the store's business, and the diary should not go strange if
+    // it ever changes its mind about it.
+    var inOrder = events.slice().sort(function (a, b) {
+      return String(a.date).localeCompare(String(b.date));
+    });
+
+    var coming = inOrder.filter(function (e) { return !isPast(e.date); });
+    var gone = inOrder.filter(function (e) { return isPast(e.date); }).reverse();
 
     $('count').textContent = coming.length + ' coming up';
 
-    if (!events.length) {
+    if (!inOrder.length) {
       say('diaryMsg', 'Nothing in the diary yet. Add your first booking below.', 'quiet');
     }
 
