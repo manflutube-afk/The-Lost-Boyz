@@ -3026,19 +3026,30 @@ body.nav-open { overflow: hidden; }
    button and the button onto three more rows below it. */
 .install__words { flex: 1 1 0; min-width: 0; }
 
+/*
+ * --bone, not --ink. On this site --ink is the darkest background colour, not
+ * the text colour, so `color: var(--ink)` painted this heading in #07040c on a
+ * near-black panel -- about 1.1:1, which is to say invisible. The text tokens
+ * are --bone, --text and --muted, brightest first.
+ */
 .install__title {
   margin: 0;
   font-family: var(--f-display);
-  font-size: .95rem;
-  letter-spacing: .02em;
-  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  line-height: 1.2;
+  color: var(--bone);
 }
 
+/* --text rather than --muted: this is the line that explains what the button
+   does, read at arm's length on a phone, and grey-on-dark at twelve pixels was
+   asking too much of it. */
 .install__sub {
-  margin: .12rem 0 0;
-  font-size: .74rem;
-  line-height: 1.4;
-  color: var(--muted);
+  margin: .2rem 0 0;
+  font-size: .8rem;
+  line-height: 1.45;
+  color: var(--text);
 }
 
 /* the iOS share glyph, sitting on the line of the sentence it belongs to */
@@ -3074,7 +3085,7 @@ body.nav-open { overflow: hidden; }
   cursor: pointer;
 }
 
-.install__x:hover { color: var(--ink); }
+.install__x:hover { color: var(--bone); }
 
 /* Narrow phones: the button drops under the words rather than squeezing them
    into two characters a line. */
