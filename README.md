@@ -702,6 +702,13 @@ so:
 Enquiries that arrived before this was built are not in here. They are in the
 band's email, where they always were.
 
+One quirk worth knowing if you ever go poking at this with curl: the listing is
+cached at Cloudflare's edge for about a minute, so an enquiry deleted a moment
+ago can still show up in `/api/admin/enquiries` for a little while even though
+it is genuinely gone. The diary page does not show that, because it takes the
+row off the screen itself rather than asking for the list again -- and it does
+the same after saving a gig, for the same reason.
+
 ---
 
 ## SEO

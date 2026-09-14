@@ -485,9 +485,27 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-      .then(function () {
+      .then(function (body) {
+        /*
+         * The saved row comes back in the answer, so it goes straight into the
+         * list here rather than the page asking the server again.
+         *
+         * That is not a shortcut, it is the fix for a real problem: the store
+         * behind this is eventually consistent, so a read taken a moment after
+         * a write can still hand back the old version. Fetching again would
+         * occasionally redraw the diary without the change that had just been
+         * made, which looks exactly like the save having failed.
+         */
+        if (editingNow) {
+          events = events.map(function (e) {
+            return e.id === body.event.id ? body.event : e;
+          });
+        } else {
+          events = events.concat([body.event]);
+        }
         sheet.close();
-        load();
+        say('diaryMsg', '');
+        draw();
       })
       .catch(function (err) { say('formMsg', err.message, 'bad'); })
       .then(function () { $('saveBtn').disabled = false; });
@@ -498,7 +516,12 @@
     if (!window.confirm('Delete ' + what + '? This cannot be undone.')) { return; }
 
     api('/api/admin/events?id=' + encodeURIComponent(event.id), { method: 'DELETE' })
-      .then(load)
+      .then(function () {
+        // Taken out here for the same reason a save is put in here: asking the
+        // store again straight away can hand back a copy that still has it.
+        events = events.filter(function (e) { return e.id !== event.id; });
+        draw();
+      })
       .catch(function (err) { say('diaryMsg', err.message, 'bad'); });
   }
 
@@ -549,7 +572,16 @@
     del.addEventListener('click', function () {
       if (!window.confirm('Delete this enquiry for good?')) { return; }
       api('/api/admin/enquiries?id=' + encodeURIComponent(summary.id), { method: 'DELETE' })
-        .then(loadEnquiries)
+        .then(function () {
+          // The listing this page was drawn from is cached at the edge for
+          // about a minute, so asking for it again here would very likely
+          // bring the deleted one back and make it look as though the delete
+          // had not worked. It is gone; the card goes with it.
+          card.remove();
+          if (!$('enqList').childElementCount) {
+            say('enqMsg', 'Nothing left in the list.', 'quiet');
+          }
+        })
         .catch(function (err) { say('enqMsg', err.message, 'bad'); });
     });
 
