@@ -1772,6 +1772,23 @@
     var WAIT_MS = 10000;
     var QUIET_DAYS = 60;
 
+    var bar = null;
+
+    function remember() {
+      try { window.localStorage.setItem(REMEMBER, String(Date.now())); } catch (e) {}
+    }
+
+    function close() {
+      if (!bar) { return; }
+      remember();
+      bar.classList.remove('is-up');
+      // let it slide back down before it goes
+      window.setTimeout(function () {
+        if (bar && bar.parentNode) { bar.parentNode.removeChild(bar); }
+        bar = null;
+      }, 260);
+    }
+
     /*
      * Held from beforeinstallprompt. Caught out here rather than inside the
      * timer, because the event fires early and once; miss it and the offer is
@@ -1782,6 +1799,14 @@
       // Without this Chrome shows its own bar, and the visitor gets asked twice
       e.preventDefault();
       offer = e;
+      // It can arrive after the bar is already up, so the button is told.
+      if (bar) { bar.classList.add('is-ready'); }
+    });
+
+    /* Installed. Put the bar away and never ask again. */
+    window.addEventListener('appinstalled', function () {
+      remember();
+      close();
     });
 
     // Already living on somebody's home screen: nothing to sell them.
@@ -1804,33 +1829,18 @@
     var isApple = /iphone|ipad|ipod/i.test(navigator.userAgent)
       || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-    function remember() {
-      try { window.localStorage.setItem(REMEMBER, String(Date.now())); } catch (e) {}
-    }
-
-    var bar = null;
-
-    function close() {
-      if (!bar) { return; }
-      remember();
-      bar.classList.remove('is-up');
-      // let it slide back down before it goes
-      window.setTimeout(function () {
-        if (bar && bar.parentNode) { bar.parentNode.removeChild(bar); }
-        bar = null;
-      }, 260);
-    }
-
-    /* The iPhone answer: show the taps rather than pretend to do it. */
+    /*
+     * The iPhone answer.
+     *
+     * There is no automatic path here and no amount of code makes one: Safari
+     * exposes nothing like beforeinstallprompt, and iOS will not let a website
+     * put itself on the home screen. So this is as small as it can honestly be
+     * -- one short line under the heading that already said what it is for,
+     * with the share glyph drawn rather than named.
+     */
     function showAppleSteps(words) {
-      words.replaceChildren();
-
-      var title = document.createElement('p');
-      title.className = 'install__title';
-      title.textContent = 'Two taps and it is done';
-
-      var steps = document.createElement('p');
-      steps.className = 'install__sub';
+      var steps = words.querySelector('.install__sub');
+      steps.replaceChildren();
       steps.appendChild(document.createTextNode('Tap '));
 
       // the iOS share glyph, drawn rather than described, because "the share
@@ -1848,9 +1858,7 @@
       steps.appendChild(glyph);
 
       steps.appendChild(document.createTextNode(
-        ' at the bottom of Safari, then “Add to Home Screen”.'));
-
-      words.append(title, steps);
+        ' below, then “Add to Home Screen”.'));
     }
 
     function build() {

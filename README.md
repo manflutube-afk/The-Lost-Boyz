@@ -747,22 +747,33 @@ screen, if the screen is wider than 780px, or if they have said no in the last
 phone). It waits if the menu or a photo is open, and gives up after a minute of
 waiting. Once per visit, never twice.
 
-### The button does two different things
+### The button installs it. Except on iPhone, where it cannot.
 
 This is the part worth understanding before anybody reports it as broken.
 
-**On Android**, Chrome offers the page its own install prompt, and the button
-sets it off -- one tap, a proper system dialog, done.
+**On Android it is automatic.** Chrome offers the page its own install prompt,
+the button fires it, and the phone puts the site on the home screen. One tap, a
+proper system dialog, no instructions. Everything Chrome asks for before it will
+make that offer is in place: the manifest with an `id`, a `scope`, 192px and
+512px icons and a maskable one, HTTPS, and a service worker.
 
-**On an iPhone there is no such thing.** Apple gives a website no way to add
-itself to the home screen; it can only be done by the person, through Share ->
-Add to Home Screen. So on iOS the button does not pretend: pressing it replaces
-the wording with those two taps and draws the share glyph, because "the share
-button" means nothing until you have seen which one it is.
+**On an iPhone it is impossible, and not for want of trying.** Safari exposes no
+equivalent of `beforeinstallprompt`, and iOS will not let a website put itself on
+the home screen under any circumstances -- there is no API, no permission to ask
+for, and no workaround. Only the person can do it, through Share -> Add to Home
+Screen.
+
+So on iOS the button does the smallest honest thing instead: one short line and
+the share glyph drawn rather than named, because "the share button" means
+nothing until you have seen which one it is. The alternative was a button that
+looks like it will work and then does nothing at all.
+
+If that is not wanted, the fix is to not show the bar on iPhones -- the `isApple`
+check in `app.js` already knows which they are. That trade is real either way:
+no bar means no iPhone visitor ever finds out they could.
 
 **Anywhere else**, or on an Android that Chrome decided did not qualify, it
-falls back to naming the menu item. A button that does nothing at all would be
-worse than a button that tells you where to look.
+falls back to naming the menu item.
 
 ### Why there is a service worker
 

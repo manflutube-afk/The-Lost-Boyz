@@ -582,6 +582,44 @@ for (const size of [192, 512]) {
 }
 
 /*
+ * A maskable icon, for the Android home screen.
+ *
+ * When a site is installed, Android cuts the icon to whatever shape the
+ * launcher uses -- a circle, a squircle, a rounded square. Given a plain icon
+ * it does not dare crop it, so it drops the whole thing into a white rounded
+ * tile instead, and a pale violet logo on white is not what this site looks
+ * like. A maskable icon says "crop me": it carries its own ground and keeps
+ * everything that matters inside the middle 80%, the safe zone every launcher
+ * shape is guaranteed to leave alone.
+ *
+ * Hence the logo at 55% rather than 82% -- it looks over-padded as a square
+ * and correct once the launcher has taken the corners off.
+ */
+const MASK = 512;
+const maskGround = Buffer.from(`
+<svg xmlns="http://www.w3.org/2000/svg" width="${MASK}" height="${MASK}">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="45%" r="72%">
+      <stop offset="0%"   stop-color="#54207f"/>
+      <stop offset="60%"  stop-color="#1d0f31"/>
+      <stop offset="100%" stop-color="#07040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="${MASK}" height="${MASK}" fill="url(#g)"/>
+</svg>`);
+
+const maskLogo = await sharp(cutoutPng)
+  .resize({ width: Math.round(MASK * 0.55) }).png().toBuffer();
+const maskLogoMeta = await sharp(maskLogo).metadata();
+
+await sharp(maskGround)
+  .composite([{ input: maskLogo,
+    left: Math.round((MASK - maskLogoMeta.width) / 2),
+    top: Math.round((MASK - maskLogoMeta.height) / 2) }])
+  .png({ compressionLevel: 9 })
+  .toFile(`${OUT}/icon-maskable-512.png`);
+
+/*
  * Apple is the exception, and deliberately so. iOS does not honour
  * transparency in a home-screen icon -- it fills whatever is see-through with
  * black -- so rather than let it do that by accident this one is given the
