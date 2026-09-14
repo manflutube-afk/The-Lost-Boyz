@@ -1781,7 +1781,7 @@
     /* Shown the steps already this visit -- forgotten when the tab closes. */
     var THIS_VISIT = 'lb-install-shown';
     var WAIT_MS = 10000;
-    var QUIET_DAYS = 60;
+    var QUIET_DAYS = 30;
 
     var bar = null;
 

@@ -622,7 +622,20 @@ cursor.
 
 - **See what is coming up**, soonest first, with past dates tucked away at the
   bottom under "Been and gone".
-- **Add a booking.** It needs a date and either a venue or something to call
+- **Add a booking, and choose there and then whether the world sees it.** The
+  form asks straight out: *Private -- just the two of you*, or *Live on the
+  website*. Pick the second and it is in Live Dates the moment Save is pressed;
+  there is no publishing step and nothing to push. Pick the first and it stays
+  in Backstage. Either way the page says which of the two just happened rather
+  than leaving it to be checked, and a public gig gets a "See it on the site"
+  button on its card.
+
+  Private is preselected, because of which mistake costs more: a private do that
+  quietly appears on the website cannot be taken back once somebody has seen it,
+  whereas a gig that should have been public and is not is fixed by opening the
+  form again.
+
+  It needs a date and either a venue or something to call
   it -- a private do often goes in the diary as "Shane's Summer Bash, 10 July"
   months before anybody knows which hall it is in. That name is the headline in
   Backstage and never reaches the website, whatever the switch says.
@@ -745,13 +758,13 @@ It does not appear at all if the site is already running from somebody's home
 screen, or if the screen is wider than 780px. It waits if the menu or a photo is
 open, and gives up after a minute of waiting.
 
-**Tapping the x means no for 60 days.** That is the only thing that buys a long
+**Tapping the x means no for 30 days.** That is the only thing that buys a long
 silence, and it is remembered in that browser's own storage, so it never leaves
 their phone.
 
 **Tapping the button does not**, on an iPhone. It only showed them where the
 Share button is, and they may never have followed through -- silencing the offer
-for two months on the strength of a glance at the instructions is the wrong
+for a month on the strength of a glance at the instructions is the wrong
 reading of that tap. So it goes quiet for the rest of that visit only, and asks
 again tomorrow. It stops for good once they actually add the site, because a
 page opened from the home screen never gets that far. On Android the button

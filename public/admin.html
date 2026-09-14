@@ -247,12 +247,24 @@
     </fieldset>
 
     <fieldset>
-      <legend>On the website</legend>
+      <legend>Who sees it</legend>
+      <!--
+        A straight choice of two, not a checkbox to notice or miss. Private is
+        picked to begin with because of which mistake costs more: a private do
+        that quietly appears on the website cannot be taken back once somebody
+        has seen it, whereas a gig that should have been public and is not is
+        fixed by opening this form again.
+      -->
       <label class="switch">
-        <input type="checkbox" name="onSite" id="onSite">
-        <span>Show this one in Live Dates
-          <small>Leave it off for a private do &mdash; a wedding, a party, a company night.
-            It stays in here where only you two can see it.</small></span>
+        <input type="radio" name="onSite" value="no" checked>
+        <span>Private &mdash; just the two of you
+          <small>A wedding, a party, a works night. It stays in Backstage. Nothing
+            about it reaches the website.</small></span>
+      </label>
+      <label class="switch">
+        <input type="radio" name="onSite" value="yes">
+        <span>Live on the website
+          <small>It appears in Live Dates the moment you save this.</small></span>
       </label>
       <div id="publicBits">
         <label><span>Line under the venue</span><input type="text" name="note" placeholder="Martin's 60th birthday bash"></label>
@@ -396,6 +408,16 @@
     cal.href = '/calendar?id=' + encodeURIComponent(event.id);
     acts.appendChild(cal);
 
+    // Only on the ones that are actually on the website, so the link never
+    // promises a page that is not there.
+    if (event.onSite) {
+      var see = el('a', 'btn', 'See it on the site');
+      see.href = event.infoUrl || '/#live';
+      see.target = '_blank';
+      see.rel = 'noopener';
+      acts.appendChild(see);
+    }
+
     var del = el('button', 'danger', 'Delete');
     del.addEventListener('click', function () { remove(event); });
     acts.appendChild(del);
@@ -468,20 +490,24 @@
         .forEach(function (name) {
           if (form.elements[name]) { form.elements[name].value = event[name] || ''; }
         });
-      form.elements.onSite.checked = !!event.onSite;
+      form.elements.onSite.value = event.onSite ? 'yes' : 'no';
     } else {
       // A new one is private until somebody says otherwise. Getting that the
       // wrong way round would put a private party on the website by accident,
       // which is the one mistake here that cannot be taken back.
-      form.elements.onSite.checked = false;
+      form.elements.onSite.value = 'no';
     }
 
     showPublicBits();
     sheet.showModal();
   }
 
+  function goingLive() {
+    return form.elements.onSite.value === 'yes';
+  }
+
   function showPublicBits() {
-    $('publicBits').hidden = !form.elements.onSite.checked;
+    $('publicBits').hidden = !goingLive();
   }
 
   function save() {
@@ -489,7 +515,7 @@
     ['date', 'occasion', 'time', 'arrive', 'venue', 'town', 'address', 'contact',
      'fee', 'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
       .forEach(function (name) { data[name] = form.elements[name].value.trim(); });
-    data.onSite = form.elements.onSite.checked;
+    data.onSite = goingLive();
 
     if (!data.date) { say('formMsg', 'It needs a date.', 'bad'); return; }
     if (!data.venue && !data.occasion) {
@@ -527,8 +553,19 @@
           events = events.concat([body.event]);
         }
         sheet.close();
-        say('diaryMsg', '');
         draw();
+
+        /*
+         * Saving is not the end of the question -- "has that gone on the
+         * website or not" is exactly what somebody wants to know at this
+         * moment, so it is answered rather than left to be checked.
+         */
+        var what = body.event.occasion || body.event.venue || 'That';
+        if (body.event.onSite) {
+          say('diaryMsg', what + ' is live on the website now.', 'ok');
+        } else {
+          say('diaryMsg', what + ' is saved here, private. It is not on the website.', 'ok');
+        }
       })
       .catch(function (err) { say('formMsg', err.message, 'bad'); })
       .then(function () { $('saveBtn').disabled = false; });
@@ -650,7 +687,11 @@
   $('addBtn').addEventListener('click', function () { open(null); });
   $('cancelBtn').addEventListener('click', function () { sheet.close(); });
   $('saveBtn').addEventListener('click', save);
-  form.elements.onSite.addEventListener('change', showPublicBits);
+  /* A radio group is a list of elements, not one element, so the listener goes
+     on the form and picks out the ones that matter. */
+  form.addEventListener('change', function (e) {
+    if (e.target && e.target.name === 'onSite') { showPublicBits(); }
+  });
 
   load();
 })();

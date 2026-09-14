@@ -42,7 +42,18 @@ export async function onRequestGet(context) {
   });
 }
 
+/*
+ * HEAD is answered by the same handler. Without it only GET is claimed, and a
+ * HEAD -- which is what link checkers and uptime monitors send -- fell through
+ * to a 405, making a perfectly healthy endpoint look broken. The runtime drops
+ * the body for a HEAD by itself; the headers are the point.
+ */
+export async function onRequestHead(context) {
+  return onRequestGet(context);
+}
+
 export async function onRequest(context) {
-  if (context.request.method === 'GET') { return onRequestGet(context); }
+  const method = context.request.method;
+  if (method === 'GET' || method === 'HEAD') { return onRequestGet(context); }
   return new Response('Send this a GET.', { status: 405 });
 }
