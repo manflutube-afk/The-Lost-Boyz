@@ -591,9 +591,10 @@ Two things it works out for itself, and one you can set:
   `"durationHours": 2` on a gig to change it.
 
 
-## The band diary at /admin
+## Backstage, at /admin
 
-Darren and Andrew have their own page at **thelostboyz.uk/admin**. It holds
+Darren and Andrew have their own page at **thelostboyz.uk/admin**, called
+Backstage. It holds
 every booking they have -- the public gigs that show in Live Dates, and the
 private ones that do not. A wedding, a works do, a birthday party: it goes in
 here with the address, what time to turn up, who to ask for and what the fee is,
