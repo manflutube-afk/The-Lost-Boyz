@@ -9,6 +9,14 @@
  * held as a Cloudflare secret and never appears in the repository or in
  * anything the browser can see.
  *
+ * It also keeps a copy in the band's diary store, so the band can look back
+ * through their enquiries at /admin instead of hunting in a mailbox. That copy
+ * holds what somebody typed into the form -- their name, their email address,
+ * possibly their phone number -- so it is only ever readable by a signed-in
+ * request, and the diary page has a delete button for clearing one out. If the
+ * store is unreachable the enquiry still emails: the email is the part that
+ * matters, and nothing here is allowed to stand in its way.
+ *
  * Configure in the Cloudflare dashboard under
  * Workers & Pages -> the-lost-boyz -> Settings -> Variables and Secrets:
  *
@@ -269,6 +277,31 @@ export async function onRequestPost(context) {
     });
   } catch (e) {
     return json({ ok: false, error: 'That did not send. Please try again in a moment.' }, 502);
+  }
+
+  /*
+   * The band's copy is away, so this one is worth keeping. Done after the send
+   * rather than before it, so the list in the diary is enquiries that actually
+   * reached them, not ones that fell over on the way.
+   *
+   * One key each rather than a single growing list: enquiries arrive from the
+   * public, two can land in the same second, and read-modify-write on one key
+   * would eventually lose one. The summary goes in the key's metadata so the
+   * diary can draw the whole list from a single listing call, and the full
+   * message is only read when somebody opens it.
+   */
+  if (env.DIARY) {
+    try {
+      const at = new Date().toISOString();
+      const id = 'enq:' + at + '-' + Math.random().toString(36).slice(2, 8);
+      await env.DIARY.put(
+        id,
+        JSON.stringify({ id, at, kind, fields }),
+        { metadata: { at, kind, name: name.slice(0, 80), email: email.slice(0, 120) } }
+      );
+    } catch (e) {
+      /* Not worth failing an enquiry over -- it is already in their inbox. */
+    }
   }
 
   // Their receipt. A failure here must not tell them the enquiry failed,

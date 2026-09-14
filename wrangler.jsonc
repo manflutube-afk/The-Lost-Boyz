@@ -30,12 +30,31 @@
     "VIEWS_SEED": "0"
   },
 
-  // Where the view count is kept. One key, read on every page and written
-  // once per visit.
+  // Storage.
+  //
+  // VIEWS  the view count. One key, read on every page and written once per
+  //        visit.
+  //
+  // DIARY  the band's bookings, public and private, plus the enquiries that
+  //        have come in through the website. Read by the admin area at /admin
+  //        and, for the public gigs only, by /api/gigs and /calendar.
+  //
+  // The password for /admin is NOT here and must never be. It is a Cloudflare
+  // secret:
+  //
+  //   npx wrangler pages secret put ADMIN_PASSWORD
+  //
+  // run once for production and once with --preview. Until it is set, /admin
+  // says so plainly and lets nobody in. Changing it signs everybody out,
+  // because the cookie is signed with a key derived from it.
   "kv_namespaces": [
     {
       "binding": "VIEWS",
       "id": "35f076d047884cc1b65538035e2b9b60"
+    },
+    {
+      "binding": "DIARY",
+      "id": "12c3d7e9e6c549f6b3a2ecff4dabdd2b"
     }
   ]
 }

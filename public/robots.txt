@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
+# The band's own diary. It is already behind a password and every page of it
+# says noindex, so this is only here to stop well-behaved crawlers knocking.
+Disallow: /admin
+Disallow: /api/
+
 Sitemap: https://thelostboyz.uk/sitemap.xml

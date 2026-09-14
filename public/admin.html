@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#07040c">
+<title>Band diary &mdash; The Lost Boyz</title>
+
+<!--
+  The band's diary. Everything they have booked, public and private.
+
+  This file sits in public/ like any other page, which would normally mean
+  anybody could read it. It is not readable, because functions/_middleware.js
+  runs before the static files are reached and turns an unauthenticated request
+  for /admin into the sign-in page. The endpoints it talks to check the cookie
+  for themselves as well, so a mistake in that gate could not spill the diary.
+
+  The styles and the script are written into this one file rather than being
+  pulled from /styles.css and /app.js. The reason is cache: the custom domain
+  tells browsers to hold those two files for four hours, which is why the rest
+  of the site has to stamp them with a content hash on every build. Nothing is
+  shared here, so nothing can go stale, and the band are never looking at
+  yesterday's diary because a phone kept an old script.
+
+  It is built phone-first on purpose. This gets read in a van and in a car park
+  before a gig far more often than it gets read at a desk.
+-->
+
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #efeaf6;
+    --dim: #a99fbd;
+    --bg: #07040c;
+    --card: #150c24;
+    --card-2: #1c1130;
+    --line: #34244f;
+    --brand: #7b3ff2;
+    --brand-lift: #8d55ff;
+    --warn: #ffc9d6;
+    --warn-bg: #3a1020;
+    --warn-line: #7d2540;
+    --good: #7ff2c2;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.55 system-ui, "Segoe UI", Arial, sans-serif;
+    /* room for the home bar on a phone */
+    padding: 0 0 max(28px, env(safe-area-inset-bottom));
+  }
+
+  .bar {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: #0d0718;
+    border-bottom: 1px solid var(--line);
+  }
+  .bar h1 { flex: 1; margin: 0; font-size: 17px; letter-spacing: .02em; }
+  .bar form { margin: 0; }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+
+  .tabs { display: flex; gap: 8px; padding: 14px 16px 0; max-width: 760px; margin: 0 auto; }
+  .tab {
+    flex: 1; padding: 10px 8px; text-align: center; cursor: pointer;
+    background: none; border: 1px solid var(--line); border-radius: 10px 10px 0 0;
+    border-bottom: 0; color: var(--dim); font: inherit; font-size: 14px;
+  }
+  .tab[aria-selected="true"] { background: var(--card); color: var(--ink); font-weight: 600; }
+
+  .panel { padding: 18px 0 0; }
+
+  button, .btn {
+    font: inherit; font-size: 14px; cursor: pointer; border-radius: 9px;
+    padding: 9px 14px; border: 1px solid var(--line);
+    background: var(--card-2); color: var(--ink); text-decoration: none;
+    display: inline-block;
+  }
+  button:hover, .btn:hover { border-color: var(--brand); }
+  .primary { background: var(--brand); border-color: var(--brand); font-weight: 600; }
+  .primary:hover { background: var(--brand-lift); }
+  .danger { color: var(--warn); border-color: var(--warn-line); }
+  .danger:hover { background: var(--warn-bg); border-color: var(--warn-line); }
+
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .spread { justify-content: space-between; }
+
+  h2 { font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+       color: var(--dim); margin: 26px 0 10px; font-weight: 600; }
+  h2:first-of-type { margin-top: 6px; }
+
+  .gig {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px; margin: 0 0 10px;
+  }
+  .gig.is-private { border-left: 3px solid var(--brand); }
+  .gig.is-past { opacity: .62; }
+
+  .when { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .when b { font-size: 17px; }
+  .when .time { color: var(--dim); font-size: 14px; }
+
+  .tag {
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 99px; border: 1px solid var(--line);
+    color: var(--dim); white-space: nowrap;
+  }
+  .tag.on { color: var(--good); border-color: #1d5c46; }
+  .tag.off { color: #ffb4c8; border-color: var(--warn-line); }
+
+  .venue { font-size: 16px; font-weight: 600; margin: 6px 0 2px; }
+  .facts { margin: 6px 0 0; font-size: 14px; color: var(--dim); }
+  .facts div { margin: 2px 0; }
+  .facts b { color: var(--ink); font-weight: 600; }
+  .note { margin: 8px 0 0; font-size: 14px; }
+  .note.private { color: #d9c7ff; }
+
+  .acts { margin: 12px 0 0; gap: 8px; }
+
+  .msg { padding: 14px; border-radius: 10px; font-size: 14px; margin: 0 0 14px; }
+  .msg.bad { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn); }
+  .msg.ok { background: #0d2a20; border: 1px solid #1d5c46; color: var(--good); }
+  .msg.quiet { background: var(--card); border: 1px solid var(--line); color: var(--dim); }
+
+  /* ---- the add / edit form ---- */
+  dialog {
+    width: min(560px, calc(100vw - 24px)); padding: 0; border: 1px solid var(--line);
+    border-radius: 14px; background: var(--card); color: var(--ink);
+  }
+  dialog::backdrop { background: rgba(4, 2, 8, .72); }
+  .sheet { padding: 18px; }
+  .sheet h3 { margin: 0 0 14px; font-size: 17px; }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+  legend { font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+           color: var(--dim); padding: 0; margin: 0 0 8px; }
+
+  label { display: block; margin: 0 0 10px; font-size: 13px; color: var(--dim); }
+  label span { display: block; margin: 0 0 4px; }
+  input[type="text"], input[type="date"], input[type="url"], input[type="number"], textarea, select {
+    width: 100%; padding: 10px 12px; font: inherit; font-size: 16px;
+    color: var(--ink); background: #100920; border: 1px solid var(--line);
+    border-radius: 9px;
+  }
+  textarea { min-height: 74px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+
+  .switch { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 6px;
+            padding: 12px; border: 1px solid var(--line); border-radius: 10px;
+            background: var(--card-2); color: var(--ink); font-size: 14px; }
+  .switch input { margin: 2px 0 0; width: 18px; height: 18px; flex: none; }
+  .switch small { display: block; color: var(--dim); font-size: 13px; margin: 2px 0 0; }
+
+  .hint { font-size: 13px; color: var(--dim); margin: -4px 0 14px; }
+
+  /* ---- enquiries ---- */
+  .enq { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+         padding: 12px 14px; margin: 0 0 8px; }
+  .enq .who { font-weight: 600; }
+  .enq .meta { font-size: 13px; color: var(--dim); }
+  .enq dl { margin: 10px 0 0; font-size: 14px; display: grid;
+            grid-template-columns: auto 1fr; gap: 4px 12px; }
+  .enq dt { color: var(--dim); }
+  .enq dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+  a { color: #b98cff; }
+
+  @media (max-width: 460px) {
+    .pair { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1>Band diary</h1>
+  <a class="btn" href="/">Website</a>
+  <form method="post" action="/api/admin/logout"><button type="submit">Sign out</button></form>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" id="tabDiary" role="tab" aria-selected="true" aria-controls="panelDiary">Diary</button>
+  <button class="tab" id="tabEnq" role="tab" aria-selected="false" aria-controls="panelEnq">Enquiries</button>
+</div>
+
+<main class="wrap">
+
+  <section class="panel" id="panelDiary" role="tabpanel" aria-labelledby="tabDiary">
+    <div id="diaryMsg"></div>
+    <p class="row spread">
+      <button class="primary" id="addBtn">Add a booking</button>
+      <span class="tag" id="count"></span>
+    </p>
+    <div id="diaryList"></div>
+  </section>
+
+  <section class="panel" id="panelEnq" role="tabpanel" aria-labelledby="tabEnq" hidden>
+    <div id="enqMsg"></div>
+    <div id="enqList"></div>
+  </section>
+
+</main>
+
+<dialog id="sheet">
+  <form class="sheet" id="form" method="dialog">
+    <h3 id="sheetTitle">Add a booking</h3>
+    <div id="formMsg"></div>
+
+    <fieldset>
+      <legend>When and where</legend>
+      <div class="pair">
+        <label><span>Date</span><input type="date" name="date" required></label>
+        <label><span>Start time</span><input type="text" name="time" placeholder="8pm, or TBC"></label>
+      </div>
+      <div class="pair">
+        <label><span>Be there by</span><input type="text" name="arrive" placeholder="6.30pm"></label>
+        <label><span>How long (hours)</span><input type="number" name="durationHours" min="1" max="24" step="1" placeholder="3"></label>
+      </div>
+      <label><span>Venue</span><input type="text" name="venue" required placeholder="The Ship Inn"></label>
+      <label><span>Town</span><input type="text" name="town" placeholder="Lerryn"></label>
+      <label><span>Full address</span><textarea name="address" placeholder="Fore Street, Lerryn, Cornwall PL22 0PT"></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Just for you</legend>
+      <label><span>Who to ask for</span><input type="text" name="contact" placeholder="Sue behind the bar, 01726 000000"></label>
+      <label><span>Fee</span><input type="text" name="fee" placeholder="&pound;250, cash on the night"></label>
+      <label><span>Notes</span><textarea name="privateNote" placeholder="Park round the back. Small stage, bring the short leads."></textarea></label>
+      <p class="hint">Nothing in this box ever goes on the website.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>On the website</legend>
+      <label class="switch">
+        <input type="checkbox" name="onSite" id="onSite">
+        <span>Show this one in Live Dates
+          <small>Leave it off for a private do &mdash; a wedding, a party, a company night.
+            It stays in here where only you two can see it.</small></span>
+      </label>
+      <div id="publicBits">
+        <label><span>Line under the venue</span><input type="text" name="note" placeholder="Martin's 60th birthday bash"></label>
+        <label><span>Page on the site</span><input type="text" name="infoUrl" placeholder="/ship-inn-lerryn-oct-2026"></label>
+        <div class="pair">
+          <label><span>Button says</span><input type="text" name="linkLabel" placeholder="More info"></label>
+          <label><span>Tickets or Facebook</span><input type="url" name="ticketUrl" placeholder="https://..."></label>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="row spread">
+      <button type="button" id="cancelBtn">Cancel</button>
+      <button type="button" class="primary" id="saveBtn">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var sheet = $('sheet');
+  var form = $('form');
+  var events = [];
+  var editing = null;
+
+  /* ---------- odds and ends ---------- */
+
+  function say(where, text, kind) {
+    var box = $(where);
+    box.replaceChildren();
+    if (!text) { return; }
+    var p = document.createElement('p');
+    p.className = 'msg ' + (kind || 'quiet');
+    p.textContent = text;
+    box.appendChild(p);
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) { node.className = className; }
+    // textContent throughout: some of what is shown here was typed by a
+    // stranger into a form on the website, and none of it is markup.
+    if (text != null) { node.textContent = text; }
+    return node;
+  }
+
+  function prettyDate(iso) {
+    var parts = String(iso).split('-');
+    var d = new Date(Date.UTC(+parts[0], +parts[1] - 1, +parts[2]));
+    if (isNaN(d)) { return iso; }
+    return DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' '
+      + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  }
+
+  function isPast(iso) {
+    var today = new Date();
+    var stamp = today.getFullYear() + '-'
+      + String(today.getMonth() + 1).padStart(2, '0') + '-'
+      + String(today.getDate()).padStart(2, '0');
+    return String(iso) < stamp;
+  }
+
+  /*
+   * Every call goes through here so that one thing is handled in one place: a
+   * session that has quietly lapsed. The answer to that is to reload, because
+   * the middleware will then hand back the sign-in page.
+   */
+  function api(url, options) {
+    return fetch(url, Object.assign({ credentials: 'same-origin' }, options || {}))
+      .then(function (r) {
+        if (r.status === 401) { window.location.reload(); throw new Error('signed out'); }
+        return r.json().then(function (body) {
+          if (!r.ok || body.ok === false) {
+            throw new Error(body.error || ('Something went wrong (' + r.status + ').'));
+          }
+          return body;
+        });
+      });
+  }
+
+  /* ---------- the diary ---------- */
+
+  function gigCard(event) {
+    var card = el('article', 'gig'
+      + (event.onSite ? '' : ' is-private')
+      + (isPast(event.date) ? ' is-past' : ''));
+
+    var when = el('div', 'when');
+    when.appendChild(el('b', null, prettyDate(event.date)));
+    if (event.time) { when.appendChild(el('span', 'time', event.time)); }
+    when.appendChild(el('span', 'tag ' + (event.onSite ? 'on' : 'off'),
+      event.onSite ? 'On the website' : 'Private'));
+    card.appendChild(when);
+
+    card.appendChild(el('p', 'venue',
+      [event.venue, event.town].filter(Boolean).join(', ')));
+
+    var facts = el('div', 'facts');
+    function fact(label, value) {
+      if (!value) { return; }
+      var line = el('div');
+      line.appendChild(el('b', null, label + ': '));
+      line.appendChild(document.createTextNode(value));
+      facts.appendChild(line);
+    }
+    fact('Be there by', event.arrive);
+    fact('Address', event.address);
+    fact('Ask for', event.contact);
+    fact('Fee', event.fee);
+    if (facts.childNodes.length) { card.appendChild(facts); }
+
+    if (event.note) { card.appendChild(el('p', 'note', event.note)); }
+    if (event.privateNote) { card.appendChild(el('p', 'note private', event.privateNote)); }
+
+    var acts = el('div', 'row acts');
+
+    var edit = el('button', null, 'Edit');
+    edit.addEventListener('click', function () { open(event); });
+    acts.appendChild(edit);
+
+    var cal = el('a', 'btn', 'Add to calendar');
+    cal.href = '/calendar?id=' + encodeURIComponent(event.id);
+    acts.appendChild(cal);
+
+    var del = el('button', 'danger', 'Delete');
+    del.addEventListener('click', function () { remove(event); });
+    acts.appendChild(del);
+
+    card.appendChild(acts);
+    return card;
+  }
+
+  function draw() {
+    var list = $('diaryList');
+    list.replaceChildren();
+
+    var coming = events.filter(function (e) { return !isPast(e.date); });
+    var gone = events.filter(function (e) { return isPast(e.date); }).reverse();
+
+    $('count').textContent = coming.length + ' coming up';
+
+    if (!events.length) {
+      say('diaryMsg', 'Nothing in the diary yet. Add your first booking below.', 'quiet');
+    }
+
+    if (coming.length) {
+      list.appendChild(el('h2', null, 'Coming up'));
+      coming.forEach(function (e) { list.appendChild(gigCard(e)); });
+    }
+
+    if (gone.length) {
+      var head = el('details');
+      var summary = el('summary');
+      summary.appendChild(el('h2', null, 'Been and gone (' + gone.length + ')'));
+      head.appendChild(summary);
+      gone.forEach(function (e) { head.appendChild(gigCard(e)); });
+      list.appendChild(head);
+    }
+  }
+
+  function load() {
+    say('diaryMsg', 'Fetching the diary...', 'quiet');
+    api('/api/admin/events')
+      .then(function (body) {
+        events = body.events || [];
+        say('diaryMsg', '');
+        if (body.imported) {
+          say('diaryMsg', 'Brought in ' + body.imported
+            + ' dates that were already on the website.', 'ok');
+        }
+        draw();
+      })
+      .catch(function (err) { say('diaryMsg', err.message, 'bad'); });
+  }
+
+  /* ---------- adding and changing ---------- */
+
+  function open(event) {
+    editing = event || null;
+    $('sheetTitle').textContent = event ? 'Edit this booking' : 'Add a booking';
+    say('formMsg', '');
+    form.reset();
+
+    if (event) {
+      ['date', 'time', 'arrive', 'venue', 'town', 'address', 'contact', 'fee',
+       'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
+        .forEach(function (name) {
+          if (form.elements[name]) { form.elements[name].value = event[name] || ''; }
+        });
+      form.elements.onSite.checked = !!event.onSite;
+    } else {
+      // A new one is private until somebody says otherwise. Getting that the
+      // wrong way round would put a private party on the website by accident,
+      // which is the one mistake here that cannot be taken back.
+      form.elements.onSite.checked = false;
+    }
+
+    showPublicBits();
+    sheet.showModal();
+  }
+
+  function showPublicBits() {
+    $('publicBits').hidden = !form.elements.onSite.checked;
+  }
+
+  function save() {
+    var data = {};
+    ['date', 'time', 'arrive', 'venue', 'town', 'address', 'contact', 'fee',
+     'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
+      .forEach(function (name) { data[name] = form.elements[name].value.trim(); });
+    data.onSite = form.elements.onSite.checked;
+
+    if (!data.date) { say('formMsg', 'It needs a date.', 'bad'); return; }
+    if (!data.venue) { say('formMsg', 'It needs somewhere to be.', 'bad'); return; }
+
+    var editingNow = editing;
+    if (editingNow) { data.id = editingNow.id; }
+
+    $('saveBtn').disabled = true;
+    say('formMsg', 'Saving...', 'quiet');
+
+    api('/api/admin/events', {
+      method: editingNow ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+      .then(function () {
+        sheet.close();
+        load();
+      })
+      .catch(function (err) { say('formMsg', err.message, 'bad'); })
+      .then(function () { $('saveBtn').disabled = false; });
+  }
+
+  function remove(event) {
+    var what = [event.venue, prettyDate(event.date)].filter(Boolean).join(', ');
+    if (!window.confirm('Delete ' + what + '? This cannot be undone.')) { return; }
+
+    api('/api/admin/events?id=' + encodeURIComponent(event.id), { method: 'DELETE' })
+      .then(load)
+      .catch(function (err) { say('diaryMsg', err.message, 'bad'); });
+  }
+
+  /* ---------- enquiries ---------- */
+
+  function enquiryCard(summary) {
+    var card = el('article', 'enq');
+
+    var top = el('div', 'row spread');
+    var who = el('div');
+    who.appendChild(el('div', 'who', summary.name || 'Someone'));
+    who.appendChild(el('div', 'meta',
+      (summary.kind === 'sponsor' ? 'Sponsor enquiry' : 'Booking enquiry')
+      + (summary.at ? ' · ' + prettyDate(String(summary.at).slice(0, 10)) : '')));
+    top.appendChild(who);
+
+    var acts = el('div', 'row');
+    var read = el('button', null, 'Read');
+    var del = el('button', 'danger', 'Delete');
+    acts.appendChild(read);
+    acts.appendChild(del);
+    top.appendChild(acts);
+    card.appendChild(top);
+
+    var body = el('div');
+    body.hidden = true;
+    card.appendChild(body);
+
+    read.addEventListener('click', function () {
+      if (!body.hidden) { body.hidden = true; read.textContent = 'Read'; return; }
+      read.disabled = true;
+      api('/api/admin/enquiries?id=' + encodeURIComponent(summary.id))
+        .then(function (res) {
+          var dl = el('dl');
+          (res.enquiry.fields || []).forEach(function (pair) {
+            if (!pair[1]) { return; }
+            dl.appendChild(el('dt', null, pair[0]));
+            dl.appendChild(el('dd', null, pair[1]));
+          });
+          body.replaceChildren(dl);
+          body.hidden = false;
+          read.textContent = 'Hide';
+        })
+        .catch(function (err) { say('enqMsg', err.message, 'bad'); })
+        .then(function () { read.disabled = false; });
+    });
+
+    del.addEventListener('click', function () {
+      if (!window.confirm('Delete this enquiry for good?')) { return; }
+      api('/api/admin/enquiries?id=' + encodeURIComponent(summary.id), { method: 'DELETE' })
+        .then(loadEnquiries)
+        .catch(function (err) { say('enqMsg', err.message, 'bad'); });
+    });
+
+    return card;
+  }
+
+  var enquiriesLoaded = false;
+
+  function loadEnquiries() {
+    say('enqMsg', 'Fetching...', 'quiet');
+    api('/api/admin/enquiries')
+      .then(function (body) {
+        enquiriesLoaded = true;
+        var list = $('enqList');
+        list.replaceChildren();
+        if (!body.enquiries.length) {
+          say('enqMsg', 'Nothing has come in through the website yet. '
+            + 'Enquiries sent before this was built are in the band email, not here.', 'quiet');
+          return;
+        }
+        say('enqMsg', '');
+        body.enquiries.forEach(function (e) { list.appendChild(enquiryCard(e)); });
+      })
+      .catch(function (err) { say('enqMsg', err.message, 'bad'); });
+  }
+
+  /* ---------- tabs ---------- */
+
+  function showTab(which) {
+    var diary = which === 'diary';
+    $('tabDiary').setAttribute('aria-selected', String(diary));
+    $('tabEnq').setAttribute('aria-selected', String(!diary));
+    $('panelDiary').hidden = !diary;
+    $('panelEnq').hidden = diary;
+    if (!diary && !enquiriesLoaded) { loadEnquiries(); }
+  }
+
+  /* ---------- wiring ---------- */
+
+  $('tabDiary').addEventListener('click', function () { showTab('diary'); });
+  $('tabEnq').addEventListener('click', function () { showTab('enq'); });
+  $('addBtn').addEventListener('click', function () { open(null); });
+  $('cancelBtn').addEventListener('click', function () { sheet.close(); });
+  $('saveBtn').addEventListener('click', save);
+  form.elements.onSite.addEventListener('change', showPublicBits);
+
+  load();
+})();
+</script>
+</body>
+</html>

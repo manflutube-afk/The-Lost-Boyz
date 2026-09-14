@@ -591,6 +591,119 @@ Two things it works out for itself, and one you can set:
   `"durationHours": 2` on a gig to change it.
 
 
+## The band diary at /admin
+
+Darren and Andrew have their own page at **thelostboyz.uk/admin**. It holds
+every booking they have -- the public gigs that show in Live Dates, and the
+private ones that do not. A wedding, a works do, a birthday party: it goes in
+here with the address, what time to turn up, who to ask for and what the fee is,
+and none of that ever reaches the website.
+
+It is built for a phone, because that is where it gets read: in a van, or in a
+car park half an hour before a soundcheck.
+
+### What they can do
+
+- **See what is coming up**, soonest first, with past dates tucked away at the
+  bottom under "Been and gone".
+- **Add a booking.** New ones are private until the "Show this one in Live
+  Dates" switch is turned on. That way round on purpose: putting a private
+  party on the website by accident is the one mistake here that cannot be
+  taken back.
+- **Change or delete** anything.
+- **Add to calendar** on any row, including the private ones -- and a private
+  booking's calendar entry carries the address, the arrival time, the contact
+  and the fee, which a public gig's does not.
+- **Read enquiries** that have come in through the booking and sponsor forms,
+  and delete them.
+
+### Setting the password
+
+One password, shared by both of them. It is a Cloudflare secret, never a file:
+
+```
+npx wrangler pages secret put ADMIN_PASSWORD
+```
+
+That sets it for production, which is what thelostboyz.uk serves. Preview
+deployments -- the ones a branch other than `main` produces -- keep their own
+separate set of secrets, and this version of Wrangler has no flag for them, so
+if you ever need the diary to open on a preview build, add ADMIN_PASSWORD by
+hand under Workers & Pages -> the-lost-boyz -> Settings -> Variables and
+Secrets, with the environment set to Preview.
+
+Until it is set, /admin says so plainly and lets nobody in, so there is no
+window where it is sitting there unprotected.
+
+**Changing it signs everybody out.** The session cookie is signed with a key
+worked out from the password, so an old cookie stops verifying the moment the
+password changes. That is the way to lock somebody out if a phone goes missing.
+
+### How the lock works, and what it is not
+
+Getting the password right once exchanges it for a signed cookie that lasts a
+fortnight; every request after that is judged on the cookie, so the password
+crosses the wire once rather than on every page. Ten wrong guesses from one
+address in a quarter of an hour and that address is turned away for a while.
+
+Two honest limitations:
+
+- It is **one password for two people**, so it cannot tell you which of them
+  changed something.
+- A cookie copied off a device stays good until it lapses. Changing the
+  password is what revokes it.
+
+If that is ever not enough, **Cloudflare Access** can go in front of /admin
+without touching any of this code. In the Zero Trust dashboard: Access →
+Applications → Add a self-hosted application, path `thelostboyz.uk/admin`, with
+a policy allowing Darren's and Andrew's email addresses. They then each sign in
+with a code sent to their own address, and the password here stays as a second
+lock behind it. Free for up to 50 people.
+
+### Where the bookings are kept
+
+In Cloudflare KV, in the `DIARY` namespace, under one key called `events`.
+
+The public gig list is served from there too, through `/api/gigs`, which is
+what the home page reads now. Only the gigs with the switch turned on come out
+of it, and that endpoint rebuilds each gig from a named list of fields rather
+than stripping the private ones out -- so a field added to the diary later
+cannot leak by having been forgotten.
+
+**`public/data/gigs.json` is still there, and still matters.** It is the safety
+net: if the diary cannot be reached, the site falls back to that file rather
+than Live Dates going blank. It is also what the diary was first filled in
+from -- the first time the band opened /admin, the dates already on the website
+were imported so they found their gigs rather than an empty page.
+
+The practical upshot is that **adding a gig no longer needs a commit**. Doing it
+in the diary is now the normal way. Editing `gigs.json` still works and is worth
+keeping in step if you want the fallback to stay current, but nothing breaks if
+it drifts.
+
+One thing to know: the whole list is saved as a single record, so if both of
+them happened to save a change in the same few seconds, one change could be
+overwritten. With two people and a handful of gigs a year this is not worth
+engineering around, but it is the reason not to hand the password to a dozen
+people.
+
+### The enquiries
+
+Every enquiry that reaches the band through the website is now also kept, so
+they can look back through them instead of hunting in a mailbox. This is real
+personal data -- somebody's name, their email address, often a phone number --
+so:
+
+- it is only ever readable by a signed-in request;
+- there is a delete button on each one, and it really deletes;
+- nothing expires on its own, so if the band want a tidy-up habit, that is a
+  conversation worth having with them.
+
+Enquiries that arrived before this was built are not in here. They are in the
+band's email, where they always were.
+
+---
+
 ## SEO
 
 The site is set up for search engines:
@@ -702,7 +815,8 @@ public/            everything served to the browser
   404.html         not-found page
   styles.css       mobile-first, breakpoints at 700px and 900px
   app.js           nav drawer, reels, sponsors, the sponsor form, gigs
-  data/gigs.json   live dates — the one file you edit regularly
+  data/gigs.json   live dates — the fallback list, and what the diary was seeded from
+  admin.html       the band's diary; only reachable signed in
   data/reels.json  Facebook reel links for the Reelz page
   data/sponsors.json  businesses listed on the Sponsors page
   sitemap.xml      / robots.txt for search engines

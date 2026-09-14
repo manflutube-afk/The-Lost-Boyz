@@ -1869,11 +1869,22 @@
     box.replaceChildren(frag);
   }
 
-  fetch('/data/gigs.json', { cache: 'no-cache' })
-    .then(function (r) {
+  /*
+   * The dates come from the band's diary now, so one added on a phone shows up
+   * here without anybody touching the code. /data/gigs.json is still there as
+   * the fallback: if the diary cannot be reached the old list is shown rather
+   * than this section going empty, and that file is what the diary was first
+   * filled in from.
+   */
+  function load(url) {
+    return fetch(url, { cache: 'no-cache' }).then(function (r) {
       if (!r.ok) { throw new Error('HTTP ' + r.status); }
       return r.json();
-    })
+    });
+  }
+
+  load('/api/gigs')
+    .catch(function () { return load('/data/gigs.json'); })
     .then(function (data) {
       render(Array.isArray(data) ? data : (data.gigs || []));
     })
