@@ -171,9 +171,16 @@ export async function onRequestGet(context) {
   const where = [gig.venue, gig.town].filter(Boolean).join(', ');
   const summary = 'The Lost Boyz' + (gig.venue ? ' at ' + gig.venue : '');
 
+  /*
+   * A gig whose time is not settled yet carries "TBC" rather than a blank, so
+   * the site can say so plainly. Writing "Starts TBC" into somebody's calendar
+   * reads like a typo; saying it in full does not. Anything readTime could not
+   * make sense of is treated the same way, since that is exactly the case where
+   * no hour is going into the entry either.
+   */
   const details = [
     gig.note || '',
-    gig.time ? 'Starts ' + gig.time : '',
+    gig.time ? (at ? 'Starts ' + gig.time : 'Start time to be confirmed') : '',
     gig.infoUrl ? 'https://thelostboyz.uk' + gig.infoUrl : (gig.ticketUrl || ''),
   ].filter(Boolean).join('\n');
 

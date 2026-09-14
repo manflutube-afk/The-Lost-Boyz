@@ -1,10 +1,10 @@
 {
-  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Dates in the past disappear from the site automatically, and the list sorts itself soonest-first, so you can just add to the bottom.",
+  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Every gig should also get its own page on the site, with infoUrl pointing at it - see Adding a gig in the README. If the start time is not settled yet, write TBC rather than leaving it out. Dates in the past disappear from the site automatically, and the list sorts itself soonest-first, so you can just add to the bottom.",
   "_example": {
     "date": "2026-10-17",
     "venue": "The Dolphin Inn",
     "town": "Penzance",
-    "time": "9pm",
+    "time": "9pm - or TBC if it is not settled yet",
     "note": "optional - a line about what makes the night different",
     "linkLabel": "optional - button text, defaults to \"Tickets\"",
     "ticketUrl": "https://example.com/tickets",
@@ -45,21 +45,27 @@
       "date": "2026-11-20",
       "venue": "The Welcome Home Inn",
       "town": "Par",
-      "linkLabel": "Venue info",
+      "time": "TBC",
+      "infoUrl": "/welcome-home-par-nov-2026",
+      "linkLabel": "More info",
       "ticketUrl": "https://www.welcomehomepar.co.uk/"
     },
     {
       "date": "2027-02-19",
       "venue": "The Welcome Home Inn",
       "town": "Par",
-      "linkLabel": "Venue info",
+      "time": "TBC",
+      "infoUrl": "/welcome-home-par-feb-2027",
+      "linkLabel": "More info",
       "ticketUrl": "https://www.welcomehomepar.co.uk/"
     },
     {
       "date": "2027-06-25",
       "venue": "The Welcome Home Inn",
       "town": "Par",
-      "linkLabel": "Venue info",
+      "time": "TBC",
+      "infoUrl": "/welcome-home-par-jun-2027",
+      "linkLabel": "More info",
       "ticketUrl": "https://www.welcomehomepar.co.uk/"
     }
   ]

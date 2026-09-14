@@ -544,12 +544,26 @@ Optional extras: `note` for a line about what makes the night different,
 with the full story. `infoUrl` wins over `ticketUrl` and opens in the same tab,
 the way an internal link should; `ticketUrl` opens in a new one.
 
-**A gig with its own page.** `pauls-big-shave.html` is the pattern: a single
-event page with the date, venue, what is on and links out. It carries `Event`
-structured data, which is what puts a gig into Google's event listings, so copy
-that block and change the details rather than starting from scratch. Add the new
-page to `sitemap.xml` too. These pages are deliberately **not** in the main nav —
-they are reached from the gig on the home page, and the nav is full enough.
+**Every gig gets its own page.** This is the house rule, not an optional extra:
+each date has a page here, and `infoUrl` points at it. `welcome-home-par-nov-2026.html`
+is the pattern to copy — the date and full address, a few lines of copy, a fold-out
+"Where it is, and how to get there" with a photo of the venue, a map and directions
+buttons, then links out. It carries `Event` structured data, which is what puts a gig
+into Google's event listings, so copy that block and change the details rather than
+starting from scratch. Add the new page to `sitemap.xml` too. These pages are
+deliberately **not** in the main nav — they are reached from the gig on the home
+page, and the nav is full enough.
+
+Linking the button straight out to the venue's own website instead is not the way to
+do it, even as a stopgap.
+
+**When you do not know something yet, write `TBC`.** A start time that has not been
+settled goes in as `"time": "TBC"` rather than being left out. The card then reads
+"Par · TBC", the page says "time TBC", and Add to calendar puts the gig in as an
+all-day entry with "Start time to be confirmed" in the notes. That tells the reader
+the band know about it and the answer is coming, which an empty line does not — and
+it is a great deal better than guessing an hour nobody has confirmed. Fill the real
+time in later and everything picks it up.
 
 Only `date` (as `YYYY-MM-DD`) and `venue` are required. The site sorts the list
 soonest-first and hides anything already in the past, so you can just keep adding
