@@ -731,6 +731,56 @@ the same after saving a gig, for the same reason.
 
 ---
 
+## The "Never miss a gig" bar
+
+Ten seconds into a visit on a phone, a strip slides up along the bottom offering
+to put the site on the home screen. It is built by `app.js` rather than written
+into all twelve pages, so the wording lives in one place, and it is a bar rather
+than a pop-up on purpose -- nothing is blocked, and scrolling past it is a
+perfectly good answer.
+
+### It stays out of the way
+
+It does not appear at all if the site is already running from somebody's home
+screen, if the screen is wider than 780px, or if they have said no in the last
+**60 days** (remembered in that browser's own storage, so it never leaves their
+phone). It waits if the menu or a photo is open, and gives up after a minute of
+waiting. Once per visit, never twice.
+
+### The button does two different things
+
+This is the part worth understanding before anybody reports it as broken.
+
+**On Android**, Chrome offers the page its own install prompt, and the button
+sets it off -- one tap, a proper system dialog, done.
+
+**On an iPhone there is no such thing.** Apple gives a website no way to add
+itself to the home screen; it can only be done by the person, through Share ->
+Add to Home Screen. So on iOS the button does not pretend: pressing it replaces
+the wording with those two taps and draws the share glyph, because "the share
+button" means nothing until you have seen which one it is.
+
+**Anywhere else**, or on an Android that Chrome decided did not qualify, it
+falls back to naming the menu item. A button that does nothing at all would be
+worse than a button that tells you where to look.
+
+### Why there is a service worker
+
+`public/sw.js` exists for one reason: Chrome will not offer the install prompt
+without one. It **caches nothing**, and that is deliberate -- this site already
+fights a four-hour browser cache on the stylesheet and the script (see
+`npm run stamp`), and a service worker keeping its own copy of anything would
+add a third layer of staleness that outlives a hard refresh. Its fetch handler
+is empty, so every request goes to the network exactly as it would if the file
+were not there. There is no offline mode, which is honest: a site whose job is
+telling you whether tonight's gig is on would be worse than useless serving
+yesterday's answer.
+
+If it ever needs removing, deleting the file is not enough -- the file itself
+explains what to do instead.
+
+---
+
 ## SEO
 
 The site is set up for search engines:

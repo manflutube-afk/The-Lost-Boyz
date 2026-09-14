@@ -2968,3 +2968,133 @@ body.nav-open { overflow: hidden; }
   }
   .grid__item:hover img { transform: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Never miss a gig: the home screen bar
+
+   A strip along the bottom of a phone, ten seconds in. Built by app.js rather
+   than written into all twelve pages, so the wording lives in one place and a
+   visitor with no JavaScript is never shown a bar that could not work anyway.
+
+   It is deliberately a bar and not a modal. Nothing is blocked, nothing has to
+   be dismissed before the site can be read, and scrolling past it is a
+   perfectly good answer -- which matters, because most people who see this did
+   not come to install anything, they came to find out when the band are on.
+--------------------------------------------------------------------------- */
+.install {
+  position: fixed;
+  left: .6rem;
+  right: .6rem;
+  /* clear of the home bar on a phone that has one */
+  bottom: calc(.6rem + env(safe-area-inset-bottom, 0px));
+  z-index: 60;
+
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .75rem .8rem;
+
+  background: rgba(23, 11, 38, .96);
+  border: 1px solid var(--violet-dim);
+  border-radius: 14px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .55);
+
+  /* starts below the fold and slides up once app.js adds .is-up */
+  transform: translateY(130%);
+  opacity: 0;
+  transition: transform .28s ease, opacity .28s ease;
+}
+
+.install.is-up {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* A backdrop-filter here would make this the containing block for anything
+   fixed inside it -- the same trap the header fell into -- so the panel is
+   simply opaque instead. */
+
+.install__mark {
+  flex: none;
+  width: 2.1rem;
+  height: auto;
+}
+
+/* Basis 0, not auto: sized from what is left over rather than from how long
+   the sentence is. With auto it measured itself against the full width of the
+   text, decided it needed a row of its own, and pushed the logo, the close
+   button and the button onto three more rows below it. */
+.install__words { flex: 1 1 0; min-width: 0; }
+
+.install__title {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: .95rem;
+  letter-spacing: .02em;
+  color: var(--ink);
+}
+
+.install__sub {
+  margin: .12rem 0 0;
+  font-size: .74rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* the iOS share glyph, sitting on the line of the sentence it belongs to */
+.install__glyph {
+  width: 1em;
+  height: 1em;
+  vertical-align: -.16em;
+  margin: 0 .1em;
+  color: var(--violet-hi);
+}
+
+.install__go {
+  flex: none;
+  white-space: nowrap;
+}
+
+.install__x {
+  flex: none;
+  /* a proper 44px target, without a 44px box drawn round it */
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: -.5rem -.4rem -.5rem 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.install__x:hover { color: var(--ink); }
+
+/* Narrow phones: the button drops under the words rather than squeezing them
+   into two characters a line. */
+/* Narrow phones: the logo, the words and the close button hold their row, and
+   the button takes one of its own underneath rather than being squeezed into
+   two characters a line. The order is spelled out because leaving it to the
+   markup is what let the row come apart. */
+@media (max-width: 420px) {
+  .install {
+    flex-wrap: wrap;
+    row-gap: .55rem;
+    padding: .7rem .75rem;
+  }
+  .install__mark  { order: 1; }
+  .install__words { order: 2; }
+  .install__x     { order: 3; margin-bottom: -.5rem; }
+  .install__go    { order: 4; flex: 1 1 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install { transition: opacity .2s ease; transform: none; }
+  .install.is-up { transform: none; }
+}

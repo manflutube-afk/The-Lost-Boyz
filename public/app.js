@@ -1723,6 +1723,237 @@
     }, { passive: true });
   }
 
+  /* ---------- the service worker, such as it is ---------- */
+
+  /*
+   * Registered only so Chrome will offer the one-tap install behind the
+   * "Add to home screen" button. public/sw.js caches nothing whatsoever and
+   * explains at length why not.
+   *
+   * Left until after load so it never competes with the page for bandwidth,
+   * and wrapped up so that a browser without support, or a refusal in a
+   * private window, is simply a site with no install button rather than an
+   * error in the console.
+   */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('/sw.js').catch(function () {
+        /* No install prompt for this visitor. Nothing else changes. */
+      });
+    });
+  }
+
+  /* ---------- never miss a gig: the home screen prompt ---------- */
+
+  /*
+   * A quiet bar along the bottom of a phone, ten seconds in, offering to put
+   * the site on the home screen.
+   *
+   * Two very different things are hiding behind one button.
+   *
+   * On Android, Chrome hands the page its own install prompt through
+   * beforeinstallprompt, and the button sets that off -- one tap, a proper
+   * system dialog, done. The event has to be caught and held the moment it
+   * fires, because it only comes once and calling prompt() later is the only
+   * way to use it.
+   *
+   * On an iPhone there is no such thing. Apple gives a website no way to add
+   * itself to the home screen, so the honest answer is to show the two taps it
+   * actually takes -- Share, then Add to Home Screen -- rather than a button
+   * that looks like it will do it and then does nothing. That is why the
+   * button can turn into a set of instructions instead of an action.
+   *
+   * It stays out of the way: not if the site is already running from the home
+   * screen, not on a desktop, not for two months after somebody has said no,
+   * and never twice in one visit.
+   */
+  (function () {
+    var REMEMBER = 'lb-install-asked';
+    var WAIT_MS = 10000;
+    var QUIET_DAYS = 60;
+
+    /*
+     * Held from beforeinstallprompt. Caught out here rather than inside the
+     * timer, because the event fires early and once; miss it and the offer is
+     * gone for the rest of the visit.
+     */
+    var offer = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      // Without this Chrome shows its own bar, and the visitor gets asked twice
+      e.preventDefault();
+      offer = e;
+    });
+
+    // Already living on somebody's home screen: nothing to sell them.
+    var standalone = (window.matchMedia
+      && window.matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+    if (standalone) { return; }
+
+    // The ask is for phones. A desktop has bookmarks and does not need this.
+    if (!window.matchMedia || !window.matchMedia('(max-width: 780px)').matches) { return; }
+
+    /* Somebody who has said no is not asked again for two months. Reading
+       storage can throw outright in a locked-down browser, so it is guarded
+       and a failure simply means they get asked. */
+    try {
+      var asked = parseInt(window.localStorage.getItem(REMEMBER), 10);
+      if (asked && Date.now() - asked < QUIET_DAYS * 86400000) { return; }
+    } catch (e) { /* no memory available; carry on */ }
+
+    var isApple = /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    function remember() {
+      try { window.localStorage.setItem(REMEMBER, String(Date.now())); } catch (e) {}
+    }
+
+    var bar = null;
+
+    function close() {
+      if (!bar) { return; }
+      remember();
+      bar.classList.remove('is-up');
+      // let it slide back down before it goes
+      window.setTimeout(function () {
+        if (bar && bar.parentNode) { bar.parentNode.removeChild(bar); }
+        bar = null;
+      }, 260);
+    }
+
+    /* The iPhone answer: show the taps rather than pretend to do it. */
+    function showAppleSteps(words) {
+      words.replaceChildren();
+
+      var title = document.createElement('p');
+      title.className = 'install__title';
+      title.textContent = 'Two taps and it is done';
+
+      var steps = document.createElement('p');
+      steps.className = 'install__sub';
+      steps.appendChild(document.createTextNode('Tap '));
+
+      // the iOS share glyph, drawn rather than described, because "the share
+      // button" means nothing until you have seen which one it is
+      var glyph = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      glyph.setAttribute('class', 'install__glyph');
+      glyph.setAttribute('viewBox', '0 0 24 24');
+      glyph.setAttribute('aria-hidden', 'true');
+      glyph.innerHTML =
+        '<path d="M12 3v11M12 3l-3.2 3.2M12 3l3.2 3.2" fill="none" stroke="currentColor"'
+        + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<path d="M7 10H5.5A1.5 1.5 0 0 0 4 11.5v7A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0'
+        + ' 1.5-1.5v-7A1.5 1.5 0 0 0 18.5 10H17" fill="none" stroke="currentColor"'
+        + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+      steps.appendChild(glyph);
+
+      steps.appendChild(document.createTextNode(
+        ' at the bottom of Safari, then “Add to Home Screen”.'));
+
+      words.append(title, steps);
+    }
+
+    function build() {
+      bar = document.createElement('aside');
+      bar.className = 'install';
+      bar.setAttribute('role', 'dialog');
+      bar.setAttribute('aria-label', 'Add The Lost Boyz to your home screen');
+
+      var mark = document.createElement('img');
+      mark.className = 'install__mark';
+      mark.src = '/images/logo-96.webp';
+      mark.width = 44;
+      mark.height = 33;
+      mark.alt = '';
+
+      var words = document.createElement('div');
+      words.className = 'install__words';
+
+      var title = document.createElement('p');
+      title.className = 'install__title';
+      title.textContent = 'Never miss a gig';
+
+      var sub = document.createElement('p');
+      sub.className = 'install__sub';
+      sub.textContent = 'Put us on your home screen and the dates are always a tap away.';
+
+      words.append(title, sub);
+
+      var go = document.createElement('button');
+      go.className = 'btn btn--solid btn--small install__go';
+      go.type = 'button';
+      go.textContent = 'Add to home screen';
+
+      var shut = document.createElement('button');
+      shut.className = 'install__x';
+      shut.type = 'button';
+      shut.setAttribute('aria-label', 'No thanks');
+      shut.textContent = '×';
+
+      go.addEventListener('click', function () {
+        if (offer) {
+          // Chrome's own dialog. Whatever they choose, they have been asked.
+          remember();
+          offer.prompt();
+          offer = null;
+          close();
+          return;
+        }
+        if (isApple) {
+          showAppleSteps(words);
+          go.remove();
+          remember();
+          return;
+        }
+        /*
+         * Neither: some other browser, or one where Chrome decided the site
+         * did not qualify. The menu is where it lives in all of them, so say
+         * that rather than leaving the button doing nothing at all.
+         */
+        sub.textContent = 'Open your browser’s menu and choose '
+          + '“Add to home screen” or “Install”.';
+        go.remove();
+        remember();
+      });
+
+      shut.addEventListener('click', close);
+
+      bar.append(mark, words, go, shut);
+      document.body.appendChild(bar);
+
+      // on the next frame, so the slide up actually animates
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () { bar.classList.add('is-up'); });
+      });
+    }
+
+    /*
+     * Nothing pops up over an open menu, or over a photograph somebody is
+     * looking at full screen -- it waits until they are done. Given up on
+     * after a minute of waiting, because by then the offer has stopped being
+     * timely and has started being a nuisance.
+     */
+    var waited = 0;
+    function whenFree() {
+      var busy = document.body.classList.contains('nav-open')
+        || !!document.querySelector('dialog[open]');
+
+      if (!busy) { build(); return; }
+      waited += 4000;
+      if (waited <= 60000) { window.setTimeout(whenFree, 4000); }
+    }
+
+    window.setTimeout(whenFree, WAIT_MS);
+  })();
+
+  /*
+   * Anything new goes ABOVE this line.
+   *
+   * The block below bails out with a bare `return` on any page that has no gig
+   * list, and that returns from this whole function -- so code added after it
+   * would quietly never run on Our Story, Reelz, Sponsors or any of the gig
+   * pages. It is the last block for that reason.
+   */
   /* ---------- gig dates ---------- */
 
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
