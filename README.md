@@ -841,6 +841,60 @@ explains what to do instead.
 
 ---
 
+### The Visitors tab
+
+A third tab in Backstage, showing how many people are coming and roughly where
+from. It is built from the visit the counter already records, so it costs no
+extra requests and nothing was added to the pages visitors load.
+
+It shows the all-time total, the last 7, 30 or 90 days as a bar a day, which
+page people arrived on, what they came from (Facebook, Google, typed it in),
+which country, and phone against desktop.
+
+**What is kept, and what deliberately is not.** One record a day, holding
+nothing but counts:
+
+```
+stats:2026-09-15  { visits, pages:{}, countries:{}, from:{}, devices:{} }
+```
+
+The shape is the privacy policy. There is no row per person to join up, because
+there are no rows per person -- a visit adds one to four tallies and is then
+indistinguishable from every other visit that day. No IP addresses, no
+identifiers, no third-party scripts, no cookies beyond the flag already in the
+visitor's own browser that stops them being counted twice. Referring URLs are
+cut down to a bare host before anything is written, because a full one can carry
+a search somebody typed or the name of a private group. Countries come from
+Cloudflare, which knows them anyway from routing the request, and are kept as a
+two-letter code. Days expire on their own after about a year.
+
+The band learn that eleven people came from Facebook on Saturday and nine of
+them were on phones. They do not learn who, and neither does anyone who ever
+gets hold of the store.
+
+**Three things it is honest about.**
+
+*Arrived on* is the first page of each visit, not every page read. A visit is
+counted once per browser session -- counting every page would multiply the
+writes by five for a number nobody was asking for.
+
+*The ceiling is around 500 visits a day.* KV allows a limited number of writes a
+day on the free plan and each visit now spends two. Well past anything this site
+will see, but it is the number to watch if a gig ever goes viral.
+
+*Two visits in the same instant can count as one*, because the daily record is
+read-modify-write. A rounding error at this traffic, and the same trade the view
+counter already makes.
+
+**If it ever needs to be properly accurate**, Cloudflare Web Analytics is free,
+already available on the account, filters bots far better than a regex, and
+misses nothing to races. The reason it is not what is shown here is that pulling
+its figures into this page needs an account-scoped API token to manage, and for
+a band's website this was the smaller thing to own. Switching later would not
+disturb anything else in Backstage.
+
+---
+
 ## SEO
 
 The site is set up for search engines:

@@ -24,6 +24,8 @@
  * magnitude below anything that would run out.
  */
 
+import { record, deviceFrom, sourceFrom, pageFrom } from '../../lib/stats.js';
+
 const KEY = 'total';
 
 /*
@@ -66,6 +68,30 @@ export async function onRequestPost(context) {
   // A crawler, or no store bound: hand back the total without adding to it.
   if (!ok || BOTS.test(agent)) {
     return json({ views: seed + counted, counted: false, configured: ok });
+  }
+
+  /*
+   * The same visit, tallied into today's record: which page they came in on,
+   * which country, what they came from, phone or not. Counts only -- lib/stats.js
+   * explains what is deliberately not kept.
+   *
+   * Wrapped separately from the total below, and failing quietly, because the
+   * number in the header is the part visitors see. A day's tally going astray
+   * is a gap in a chart only the band look at; the counter refusing to count
+   * would be on every page of the site.
+   */
+  try {
+    let body = {};
+    try { body = await request.clone().json(); } catch (e) { /* no body sent */ }
+
+    await record(env, {
+      page: pageFrom(body.page),
+      source: sourceFrom(body.from, new URL(request.url).hostname),
+      country: (request.cf && request.cf.country) || 'unknown',
+      device: deviceFrom(agent),
+    });
+  } catch (e) {
+    /* Not worth failing the count over. */
   }
 
   const next = counted + 1;

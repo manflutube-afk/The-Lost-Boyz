@@ -251,12 +251,29 @@
       shownSoFar = n;
     };
 
+    /*
+     * Sent only on the one POST that counts the visit, not on the reads that
+     * follow it: which page they came in on, and what they came from. The
+     * server turns the second into a bare host before anything is written --
+     * lib/stats.js explains why the full URL never gets stored.
+     */
+    var arrival = function () {
+      try {
+        return JSON.stringify({
+          page: window.location.pathname,
+          from: document.referrer || '',
+        });
+      } catch (e) {
+        return '{}';
+      }
+    };
+
     var askForTotal = function (count) {
       return fetch('/api/views', {
         method: count ? 'POST' : 'GET',
         headers: count ? { 'Content-Type': 'application/json' } : undefined,
-        // no body, but a POST without one upsets some proxies
-        body: count ? '{}' : undefined,
+        // no body on a read, but a POST without one upsets some proxies
+        body: count ? arrival() : undefined,
       })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (data) {

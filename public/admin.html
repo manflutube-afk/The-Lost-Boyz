@@ -179,6 +179,41 @@
 
   a { color: #b98cff; }
 
+  /* ---- visitors ---- */
+  .big { display: flex; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
+  .big div { flex: 1 1 130px; background: var(--card); border: 1px solid var(--line);
+             border-radius: 12px; padding: 12px 14px; }
+  .big b { display: block; font-size: 24px; line-height: 1.1; }
+  .big span { font-size: 12px; color: var(--dim); }
+
+  .span { display: flex; gap: 6px; margin: 0 0 16px; }
+  .span button[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); }
+
+  /* A bar chart of the last n days. Bars are divs rather than a drawing
+     library: it is a row of rectangles, and the page already knows the
+     numbers. */
+  .chart { display: flex; align-items: flex-end; gap: 2px; height: 110px;
+           padding: 10px 12px; margin: 0 0 6px; background: var(--card);
+           border: 1px solid var(--line); border-radius: 12px; }
+  .chart i { flex: 1 1 0; min-width: 2px; background: var(--brand);
+             border-radius: 2px 2px 0 0; min-height: 2px; opacity: .85; }
+  .chart i.none { background: var(--line); }
+  .chart i:hover { opacity: 1; }
+  .chartKey { display: flex; justify-content: space-between; font-size: 12px;
+              color: var(--dim); margin: 0 2px 20px; }
+
+  .list { background: var(--card); border: 1px solid var(--line);
+          border-radius: 12px; padding: 4px 14px; margin: 0 0 16px; }
+  .list div { display: flex; justify-content: space-between; gap: 12px;
+              padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .list div:last-child { border-bottom: 0; }
+  .list span { color: var(--dim); overflow: hidden; text-overflow: ellipsis;
+               white-space: nowrap; }
+  .list b { font-variant-numeric: tabular-nums; }
+
+  .fineprint { font-size: 12px; line-height: 1.5; color: var(--dim);
+               margin: 24px 0 0; }
+
   @media (max-width: 460px) {
     .pair { grid-template-columns: 1fr; }
   }
@@ -195,6 +230,7 @@
 <div class="tabs" role="tablist">
   <button class="tab" id="tabDiary" role="tab" aria-selected="true" aria-controls="panelDiary">Diary</button>
   <button class="tab" id="tabEnq" role="tab" aria-selected="false" aria-controls="panelEnq">Enquiries</button>
+  <button class="tab" id="tabStats" role="tab" aria-selected="false" aria-controls="panelStats">Visitors</button>
 </div>
 
 <main class="wrap">
@@ -211,6 +247,17 @@
   <section class="panel" id="panelEnq" role="tabpanel" aria-labelledby="tabEnq" hidden>
     <div id="enqMsg"></div>
     <div id="enqList"></div>
+  </section>
+
+  <section class="panel" id="panelStats" role="tabpanel" aria-labelledby="tabStats" hidden>
+    <div id="statsMsg"></div>
+    <div id="statsBody"></div>
+    <p class="fineprint">
+      Counts only. Nothing here can be traced to a person &mdash; no addresses,
+      no names, no way to follow one visitor from page to page. The country
+      comes from the network the request arrived on; &ldquo;arrived on&rdquo; is
+      the first page of each visit, not every page they read.
+    </p>
   </section>
 
 </main>
@@ -741,21 +788,139 @@
       .catch(function (err) { say('enqMsg', err.message, 'bad'); });
   }
 
+  /* ---------- visitors ---------- */
+
+  var COUNTRIES = {
+    GB: 'United Kingdom', IE: 'Ireland', US: 'United States', CA: 'Canada',
+    AU: 'Australia', NZ: 'New Zealand', FR: 'France', DE: 'Germany',
+    ES: 'Spain', NL: 'Netherlands', PT: 'Portugal', IT: 'Italy',
+    PL: 'Poland', SE: 'Sweden', NO: 'Norway', DK: 'Denmark', BE: 'Belgium',
+    CH: 'Switzerland', AT: 'Austria', IN: 'India', ZA: 'South Africa',
+    unknown: 'Somewhere unknown',
+  };
+
+  var statsSpan = 30;
+  var statsLoaded = false;
+
+  function table(into, title, rows, naming) {
+    if (!rows.length) { return; }
+    into.appendChild(el('h2', null, title));
+    var box = el('div', 'list');
+    rows.forEach(function (row) {
+      var line = el('div');
+      line.appendChild(el('span', null, naming ? naming(row.name) : row.name));
+      line.appendChild(el('b', null, row.count.toLocaleString('en-GB')));
+      box.appendChild(line);
+    });
+    into.appendChild(box);
+  }
+
+  function drawStats(data) {
+    var body = $('statsBody');
+    body.replaceChildren();
+
+    /* The two figures worth seeing first. */
+    var big = el('div', 'big');
+    function figure(n, label) {
+      var cell = el('div');
+      cell.appendChild(el('b', null, n.toLocaleString('en-GB')));
+      cell.appendChild(el('span', null, label));
+      big.appendChild(cell);
+    }
+    figure(data.allTime, 'visits all time');
+    figure(data.visits, 'in the last ' + data.span + ' days');
+    body.appendChild(big);
+
+    /* How long a run to show. */
+    var picker = el('div', 'span');
+    [7, 30, 90].forEach(function (n) {
+      var b = el('button', null, n + ' days');
+      b.setAttribute('aria-pressed', String(n === statsSpan));
+      b.addEventListener('click', function () {
+        statsSpan = n;
+        loadStats();
+      });
+      picker.appendChild(b);
+    });
+    body.appendChild(picker);
+
+    /*
+     * A bar per day. Heights are a share of the busiest day rather than an
+     * absolute scale, because a band's traffic is a quiet line with a spike
+     * the day after a gig, and an absolute scale would flatten every other
+     * day to nothing.
+     */
+    var most = data.days.reduce(function (m, d) { return Math.max(m, d.visits); }, 0);
+    var chart = el('div', 'chart');
+    data.days.forEach(function (d) {
+      var bar = el('i', d.visits ? null : 'none');
+      bar.style.height = most ? Math.max(2, Math.round((d.visits / most) * 100)) + '%' : '2px';
+      bar.title = prettyDate(d.date) + ': ' + d.visits
+        + (d.visits === 1 ? ' visit' : ' visits');
+      chart.appendChild(bar);
+    });
+    body.appendChild(chart);
+
+    var key = el('div', 'chartKey');
+    key.appendChild(el('span', null, prettyDate(data.days[0].date)));
+    key.appendChild(el('span', null, most ? 'busiest day: ' + most : 'nothing yet'));
+    key.appendChild(el('span', null, prettyDate(data.days[data.days.length - 1].date)));
+    body.appendChild(key);
+
+    table(body, 'Arrived on', data.pages);
+    table(body, 'Came from', data.from, function (n) {
+      return n === 'direct' ? 'Typed it in, or a bookmark' : n;
+    });
+    table(body, 'Where in the world', data.countries, function (n) {
+      return COUNTRIES[n] || n;
+    });
+    table(body, 'On what', data.devices, function (n) {
+      return n.charAt(0).toUpperCase() + n.slice(1);
+    });
+
+    if (!data.visits) {
+      say('statsMsg', 'No visits recorded in this stretch yet. The counting '
+        + 'started the day this was built, so there is nothing from before then.',
+        'quiet');
+    } else {
+      say('statsMsg', '');
+    }
+  }
+
+  function loadStats() {
+    say('statsMsg', 'Counting up...', 'quiet');
+    api('/api/admin/stats?days=' + statsSpan)
+      .then(function (body) {
+        statsLoaded = true;
+        drawStats(body);
+      })
+      .catch(function (err) { say('statsMsg', err.message, 'bad'); });
+  }
+
   /* ---------- tabs ---------- */
 
+  var TABS = [
+    { name: 'diary', tab: 'tabDiary', panel: 'panelDiary' },
+    { name: 'enq', tab: 'tabEnq', panel: 'panelEnq' },
+    { name: 'stats', tab: 'tabStats', panel: 'panelStats' },
+  ];
+
   function showTab(which) {
-    var diary = which === 'diary';
-    $('tabDiary').setAttribute('aria-selected', String(diary));
-    $('tabEnq').setAttribute('aria-selected', String(!diary));
-    $('panelDiary').hidden = !diary;
-    $('panelEnq').hidden = diary;
-    if (!diary && !enquiriesLoaded) { loadEnquiries(); }
+    TABS.forEach(function (t) {
+      var on = t.name === which;
+      $(t.tab).setAttribute('aria-selected', String(on));
+      $(t.panel).hidden = !on;
+    });
+    // fetched the first time each is opened, not on every switch
+    if (which === 'enq' && !enquiriesLoaded) { loadEnquiries(); }
+    if (which === 'stats' && !statsLoaded) { loadStats(); }
   }
 
   /* ---------- wiring ---------- */
 
-  $('tabDiary').addEventListener('click', function () { showTab('diary'); });
-  $('tabEnq').addEventListener('click', function () { showTab('enq'); });
+  TABS.forEach(function (t) {
+    $(t.tab).addEventListener('click', function () { showTab(t.name); });
+  });
   $('addBtn').addEventListener('click', function () { open(null); });
   $('cancelBtn').addEventListener('click', function () { sheet.close(); });
   $('saveBtn').addEventListener('click', save);
