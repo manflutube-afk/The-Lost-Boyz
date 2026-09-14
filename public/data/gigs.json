@@ -40,6 +40,27 @@
       "infoUrl": "/ship-inn-lerryn-jan-2027",
       "linkLabel": "More info",
       "ticketUrl": "https://www.facebook.com/events/864433786644022/"
+    },
+    {
+      "date": "2026-11-20",
+      "venue": "The Welcome Home Inn",
+      "town": "Par",
+      "linkLabel": "Venue info",
+      "ticketUrl": "https://www.welcomehomepar.co.uk/"
+    },
+    {
+      "date": "2027-02-19",
+      "venue": "The Welcome Home Inn",
+      "town": "Par",
+      "linkLabel": "Venue info",
+      "ticketUrl": "https://www.welcomehomepar.co.uk/"
+    },
+    {
+      "date": "2027-06-25",
+      "venue": "The Welcome Home Inn",
+      "town": "Par",
+      "linkLabel": "Venue info",
+      "ticketUrl": "https://www.welcomehomepar.co.uk/"
     }
   ]
 }
