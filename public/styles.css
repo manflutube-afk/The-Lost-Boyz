@@ -244,6 +244,25 @@ body.nav-open .hdr::before {
   text-transform: uppercase;
   color: var(--muted);
   white-space: nowrap;
+
+  /*
+   * It is a link now -- the band's way through to Backstage from any page --
+   * but it must go on looking like the readout it also is. No underline, no
+   * borrowed link colour, and no pointer cursor, because a visitor pressing it
+   * only to meet a password prompt is a worse experience than not noticing it
+   * at all. It still takes focus from the keyboard, and still says what it does
+   * to a screen reader; being quiet is not the same as being concealed.
+   */
+  text-decoration: none;
+  cursor: default;
+}
+
+/* Only when somebody has deliberately tabbed to it does it admit to being a
+   link -- which is exactly when they need to know. */
+.hdr__views:focus-visible {
+  outline: 2px solid var(--violet-hi);
+  outline-offset: 2px;
+  cursor: pointer;
 }
 
 /* the wording sits before the figure now, so it needs a gap of its own

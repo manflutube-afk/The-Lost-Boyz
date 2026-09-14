@@ -603,12 +603,31 @@ and none of that ever reaches the website.
 It is built for a phone, because that is where it gets read: in a van, or in a
 car park half an hour before a soundcheck.
 
+### Getting to it
+
+There is no "Members" button in the menu, because the website is for the public
+and a link nobody else can use only raises questions. **The view counter in the
+header is the way in** -- it is an ordinary link to /admin wearing no badge of
+office, so the band can reach Backstage from any page and a visitor has no
+reason to press it.
+
+Nothing is hidden by being secret, which matters: /admin is behind a password
+whoever finds it, robots.txt asks crawlers not to follow it, and the link's
+accessible name says plainly where it goes, so a screen reader user is not the
+only person kept in the dark. It takes a keyboard focus ring like any other
+link; it simply does not advertise itself with an underline or a pointer
+cursor.
+
 ### What they can do
 
 - **See what is coming up**, soonest first, with past dates tucked away at the
   bottom under "Been and gone".
-- **Add a booking.** New ones are private until the "Show this one in Live
-  Dates" switch is turned on. That way round on purpose: putting a private
+- **Add a booking.** It needs a date and either a venue or something to call
+  it -- a private do often goes in the diary as "Shane's Summer Bash, 10 July"
+  months before anybody knows which hall it is in. That name is the headline in
+  Backstage and never reaches the website, whatever the switch says.
+  New bookings are private until the "Show this one in Live Dates" switch is
+  turned on. That way round on purpose: putting a private
   party on the website by accident is the one mistake here that cannot be
   taken back.
 - **Change or delete** anything.

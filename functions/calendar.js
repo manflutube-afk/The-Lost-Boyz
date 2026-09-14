@@ -211,8 +211,15 @@ export async function onRequestGet(context) {
     ? gig.address
     : [gig.venue, gig.town].filter(Boolean).join(', ');
 
-  const summary = (found.private ? 'The Lost Boyz (private)' : 'The Lost Boyz')
-    + (gig.venue ? ' at ' + gig.venue : '');
+  /*
+   * What this says in somebody's calendar. A private do is known by what it is,
+   * so "Shane's Summer Bash" leads and the band's name follows; a public gig is
+   * the other way round, because that is how it reads on the website.
+   */
+  const summary = found.private && gig.occasion
+    ? gig.occasion + ' — The Lost Boyz'
+    : (found.private ? 'The Lost Boyz (private)' : 'The Lost Boyz')
+      + (gig.venue ? ' at ' + gig.venue : '');
 
   /*
    * A gig whose time is not settled yet carries "TBC" rather than a blank, so
@@ -275,7 +282,7 @@ export async function onRequestGet(context) {
 
   const body = lines.map(fold).join('\r\n') + '\r\n';
 
-  const slug = [gig.venue, gig.town].filter(Boolean).join('-')
+  const slug = [gig.venue || gig.occasion, gig.town].filter(Boolean).join('-')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'gig';
 
   return new Response(body, {

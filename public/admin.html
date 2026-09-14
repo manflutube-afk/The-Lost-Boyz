@@ -216,6 +216,14 @@
     <div id="formMsg"></div>
 
     <fieldset>
+      <legend>What it is</legend>
+      <label><span>Call it what you like</span>
+        <input type="text" name="occasion" placeholder="Shane's Summer Bash"></label>
+      <p class="hint">For a private do this is the name you will recognise it by.
+        It never goes on the website, whatever the switch below says.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>When and where</legend>
       <div class="pair">
         <label><span>Date</span><input type="date" name="date" required></label>
@@ -225,7 +233,7 @@
         <label><span>Be there by</span><input type="text" name="arrive" placeholder="6.30pm"></label>
         <label><span>How long (hours)</span><input type="number" name="durationHours" min="1" max="24" step="1" placeholder="3"></label>
       </div>
-      <label><span>Venue</span><input type="text" name="venue" required placeholder="The Ship Inn"></label>
+      <label><span>Venue</span><input type="text" name="venue" placeholder="The Ship Inn, or leave it until you know"></label>
       <label><span>Town</span><input type="text" name="town" placeholder="Lerryn"></label>
       <label><span>Full address</span><textarea name="address" placeholder="Fore Street, Lerryn, Cornwall PL22 0PT"></textarea></label>
     </fieldset>
@@ -347,8 +355,19 @@
       event.onSite ? 'On the website' : 'Private'));
     card.appendChild(when);
 
-    card.appendChild(el('p', 'venue',
-      [event.venue, event.town].filter(Boolean).join(', ')));
+    var place = [event.venue, event.town].filter(Boolean).join(', ');
+
+    /*
+     * A private do is known by what it is, so that leads. The venue goes
+     * underneath it, and reads as the only line when there is no occasion --
+     * which is every public gig.
+     */
+    if (event.occasion) {
+      card.appendChild(el('p', 'venue', event.occasion));
+      if (place) { card.appendChild(el('p', 'facts', place)); }
+    } else {
+      card.appendChild(el('p', 'venue', place || 'Somewhere, to be confirmed'));
+    }
 
     var facts = el('div', 'facts');
     function fact(label, value) {
@@ -444,8 +463,8 @@
     form.reset();
 
     if (event) {
-      ['date', 'time', 'arrive', 'venue', 'town', 'address', 'contact', 'fee',
-       'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
+      ['date', 'occasion', 'time', 'arrive', 'venue', 'town', 'address', 'contact',
+       'fee', 'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
         .forEach(function (name) {
           if (form.elements[name]) { form.elements[name].value = event[name] || ''; }
         });
@@ -467,13 +486,16 @@
 
   function save() {
     var data = {};
-    ['date', 'time', 'arrive', 'venue', 'town', 'address', 'contact', 'fee',
-     'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
+    ['date', 'occasion', 'time', 'arrive', 'venue', 'town', 'address', 'contact',
+     'fee', 'privateNote', 'note', 'infoUrl', 'linkLabel', 'ticketUrl', 'durationHours']
       .forEach(function (name) { data[name] = form.elements[name].value.trim(); });
     data.onSite = form.elements.onSite.checked;
 
     if (!data.date) { say('formMsg', 'It needs a date.', 'bad'); return; }
-    if (!data.venue) { say('formMsg', 'It needs somewhere to be.', 'bad'); return; }
+    if (!data.venue && !data.occasion) {
+      say('formMsg', 'Give it a venue, or something to call it.', 'bad');
+      return;
+    }
 
     var editingNow = editing;
     if (editingNow) { data.id = editingNow.id; }
@@ -513,7 +535,8 @@
   }
 
   function remove(event) {
-    var what = [event.venue, prettyDate(event.date)].filter(Boolean).join(', ');
+    var what = [event.occasion || event.venue, prettyDate(event.date)]
+      .filter(Boolean).join(', ');
     if (!window.confirm('Delete ' + what + '? This cannot be undone.')) { return; }
 
     api('/api/admin/events?id=' + encodeURIComponent(event.id), { method: 'DELETE' })

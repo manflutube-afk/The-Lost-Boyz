@@ -25,6 +25,15 @@ const json = (body, status) =>
   });
 
 const notYou = () => json({ ok: false, error: 'Sign in first.' }, 401);
+
+/*
+ * A booking has to be recognisable, but not necessarily by its venue. A private
+ * function often gets into the diary as "Shane's Summer Bash, 10 July" months
+ * before anybody knows which hall it is in, and refusing that would push the
+ * band back to writing it on the back of an envelope.
+ */
+const named = (body) =>
+  !!(String(body.venue || '').trim() || String(body.occasion || '').trim());
 const noStore = () =>
   json({ ok: false, error: 'The diary store is not set up yet. See the README.' }, 503);
 
@@ -80,8 +89,8 @@ export async function onRequestPost(context) {
   if (!isDate(body.date)) {
     return json({ ok: false, error: 'That needs a date, as YYYY-MM-DD.' }, 400);
   }
-  if (!String(body.venue || '').trim()) {
-    return json({ ok: false, error: 'That needs somewhere to be.' }, 400);
+  if (!named(body)) {
+    return json({ ok: false, error: 'That needs a venue, or something to call it.' }, 400);
   }
 
   const events = (await readAll(env)) || [];
@@ -108,8 +117,8 @@ export async function onRequestPut(context) {
   if (!isDate(body.date)) {
     return json({ ok: false, error: 'That needs a date, as YYYY-MM-DD.' }, 400);
   }
-  if (!String(body.venue || '').trim()) {
-    return json({ ok: false, error: 'That needs somewhere to be.' }, 400);
+  if (!named(body)) {
+    return json({ ok: false, error: 'That needs a venue, or something to call it.' }, 400);
   }
 
   const events = (await readAll(env)) || [];
