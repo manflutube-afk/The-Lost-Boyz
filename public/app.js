@@ -1768,7 +1768,18 @@
    * and never twice in one visit.
    */
   (function () {
-    var REMEMBER = 'lb-install-asked';
+    /*
+     * The key is versioned. Bumping it makes every phone forget it was ever
+     * asked, which is the only way to undo a silence already sitting in
+     * somebody's browser -- there is no reaching in from here to clear it.
+     * It was bumped when the iPhone behaviour below was fixed, because the old
+     * behaviour had quietly silenced the bar on the phones of everyone who
+     * pressed the button.
+     */
+    var REMEMBER = 'lb-install-asked-2';
+
+    /* Shown the steps already this visit -- forgotten when the tab closes. */
+    var THIS_VISIT = 'lb-install-shown';
     var WAIT_MS = 10000;
     var QUIET_DAYS = 60;
 
@@ -1824,6 +1835,11 @@
     try {
       var asked = parseInt(window.localStorage.getItem(REMEMBER), 10);
       if (asked && Date.now() - asked < QUIET_DAYS * 86400000) { return; }
+    } catch (e) { /* no memory available; carry on */ }
+
+    // already shown the Share steps on another page of this same visit
+    try {
+      if (window.sessionStorage.getItem(THIS_VISIT)) { return; }
     } catch (e) { /* no memory available; carry on */ }
 
     var isApple = /iphone|ipad|ipod/i.test(navigator.userAgent)
@@ -1908,9 +1924,25 @@
           return;
         }
         if (isApple) {
+          /*
+           * Not remembered, and that is the point.
+           *
+           * On Android the button hands over to a real install dialog, so
+           * whatever happens next the person has been properly asked and the
+           * bar has no business coming back. On an iPhone it does nothing of
+           * the sort -- it only shows them where the Share button is. They may
+           * never follow through, and silencing the offer for two months
+           * because they once glanced at the instructions is the wrong reading
+           * of that tap.
+           *
+           * So it is only quiet for the rest of this visit. Come back tomorrow
+           * and it asks again; tap the x and it takes the hint properly; add
+           * the site and it stops on its own, because a page opened from the
+           * home screen reports itself as standalone and never gets this far.
+           */
           showAppleSteps(words);
           go.remove();
-          remember();
+          try { window.sessionStorage.setItem(THIS_VISIT, '1'); } catch (e) {}
           return;
         }
         /*
@@ -1921,7 +1953,9 @@
         sub.textContent = 'Open your browser’s menu and choose '
           + '“Add to home screen” or “Install”.';
         go.remove();
-        remember();
+        // Pointing at a menu is not an answer either -- quiet for this visit
+        // only, the same as the iPhone branch above.
+        try { window.sessionStorage.setItem(THIS_VISIT, '1'); } catch (e) {}
       });
 
       shut.addEventListener('click', close);

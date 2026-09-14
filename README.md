@@ -742,10 +742,25 @@ perfectly good answer.
 ### It stays out of the way
 
 It does not appear at all if the site is already running from somebody's home
-screen, if the screen is wider than 780px, or if they have said no in the last
-**60 days** (remembered in that browser's own storage, so it never leaves their
-phone). It waits if the menu or a photo is open, and gives up after a minute of
-waiting. Once per visit, never twice.
+screen, or if the screen is wider than 780px. It waits if the menu or a photo is
+open, and gives up after a minute of waiting.
+
+**Tapping the x means no for 60 days.** That is the only thing that buys a long
+silence, and it is remembered in that browser's own storage, so it never leaves
+their phone.
+
+**Tapping the button does not**, on an iPhone. It only showed them where the
+Share button is, and they may never have followed through -- silencing the offer
+for two months on the strength of a glance at the instructions is the wrong
+reading of that tap. So it goes quiet for the rest of that visit only, and asks
+again tomorrow. It stops for good once they actually add the site, because a
+page opened from the home screen never gets that far. On Android the button
+*does* buy the long silence, because there it hands over to a real install
+dialog and the person has genuinely been asked.
+
+If a change here ever needs to reach phones that have already gone quiet, there
+is no reaching in to clear their storage -- bump the number on the `REMEMBER`
+key in `app.js` and every browser forgets it was asked.
 
 ### The button installs it. Except on iPhone, where it cannot.
 
