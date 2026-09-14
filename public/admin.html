@@ -122,7 +122,12 @@
   .note { margin: 8px 0 0; font-size: 14px; }
   .note.private { color: #d9c7ff; }
 
-  .acts { margin: 12px 0 0; gap: 8px; }
+  /* Five actions on a card now, so they are made smaller to sit in two rows
+     rather than three, and Delete is pushed to the far edge -- away from the
+     four buttons that can all be undone. */
+  .acts { margin: 12px 0 0; gap: 6px; }
+  .acts button, .acts .btn { font-size: 13px; padding: 7px 11px; }
+  .acts .danger { margin-left: auto; }
 
   .msg { padding: 14px; border-radius: 10px; font-size: 14px; margin: 0 0 14px; }
   .msg.bad { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn); }
@@ -418,6 +423,18 @@
       acts.appendChild(see);
     }
 
+    /*
+     * Taking a gig off the website and deleting it are two different things,
+     * and they want two different buttons. A date that falls through is off
+     * the website that minute but the band still want the address, the
+     * contact and what they were owed; deleting it to achieve the first
+     * throws away the second.
+     */
+    var swap = el('button', null,
+      event.onSite ? 'Take off the site' : 'Put on the site');
+    swap.addEventListener('click', function () { setOnSite(event, !event.onSite, swap); });
+    acts.appendChild(swap);
+
     var del = el('button', 'danger', 'Delete');
     del.addEventListener('click', function () { remove(event); });
     acts.appendChild(del);
@@ -571,10 +588,65 @@
       .then(function () { $('saveBtn').disabled = false; });
   }
 
+  /*
+   * On or off the website, without opening the form.
+   *
+   * Only one direction asks first. Taking something off the site undoes itself
+   * -- press the other button and it is back. Putting a private booking on the
+   * site cannot be undone in the same way, because by then somebody may have
+   * seen it, so that way round is confirmed and the confirmation says whose
+   * booking it is.
+   */
+  function setOnSite(event, wanted, button) {
+    if (wanted) {
+      var name = event.occasion || event.venue || 'this booking';
+      if (!window.confirm('Put ' + name + ' on the public website for anyone to see?')) {
+        return;
+      }
+    }
+
+    button.disabled = true;
+
+    // The whole row goes back, with the one field changed, so nothing the form
+    // does not know about is lost on the way through.
+    var changed = {};
+    Object.keys(event).forEach(function (k) { changed[k] = event[k]; });
+    changed.onSite = wanted;
+
+    api('/api/admin/events', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changed),
+    })
+      .then(function (body) {
+        events = events.map(function (e) {
+          return e.id === body.event.id ? body.event : e;
+        });
+        draw();
+        var what = body.event.occasion || body.event.venue || 'That';
+        say('diaryMsg', wanted
+          ? what + ' is live on the website now.'
+          : what + ' is off the website. It is still here in Backstage.', 'ok');
+      })
+      .catch(function (err) {
+        button.disabled = false;
+        say('diaryMsg', err.message, 'bad');
+      });
+  }
+
   function remove(event) {
     var what = [event.occasion || event.venue, prettyDate(event.date)]
       .filter(Boolean).join(', ');
-    if (!window.confirm('Delete ' + what + '? This cannot be undone.')) { return; }
+
+    // Worth saying which of the two this is, since there is now a button that
+    // only does the smaller one.
+    var warning = event.onSite
+      ? 'Delete ' + what + '?\n\nThis takes it off the website AND removes it '
+        + 'from Backstage for good. To only take it off the website, use '
+        + '"Take off the site" instead.'
+      : 'Delete ' + what + '?\n\nThis cannot be undone.';
+
+    if (!window.confirm(warning)) { return; }
 
     api('/api/admin/events?id=' + encodeURIComponent(event.id), { method: 'DELETE' })
       .then(function () {

@@ -603,6 +603,15 @@ and none of that ever reaches the website.
 It is built for a phone, because that is where it gets read: in a van, or in a
 car park half an hour before a soundcheck.
 
+### It all works from a phone, anywhere
+
+Nothing is stored on the device. Backstage is a page that talks to endpoints,
+the bookings live in Cloudflare KV, and the public gig list is served from that
+same store -- so a date added on Darren's phone in a car park is on the website
+before he has put it back in his pocket, and Andrew sees it on his the next time
+he opens Backstage. There is no syncing, no app to update, and no "publish"
+step to forget.
+
 ### Getting to it
 
 There is no "Members" button in the menu, because the website is for the public
@@ -643,7 +652,19 @@ cursor.
   turned on. That way round on purpose: putting a private
   party on the website by accident is the one mistake here that cannot be
   taken back.
-- **Change or delete** anything.
+- **Change anything**, or take a gig off the website without losing it.
+  *Take off the site* and *Delete* are deliberately two different buttons: a
+  date that falls through is off the website that minute, but the band still
+  want the address, the contact and what they were owed. Deleting it to achieve
+  the first throws away the second. A gig that is off the site sits in Backstage
+  tagged Private with a *Put on the site* button, and everything about it --
+  time, info page, ticket link -- survives the round trip.
+
+  Only one of those two directions asks first. Taking something off the site
+  undoes itself. Putting a private booking *on* the site cannot be undone in the
+  same way, because by then somebody may have seen it, so that way round is
+  confirmed by name. Delete asks too, and says which of the two it is about to
+  do.
 - **Add to calendar** on any row, including the private ones -- and a private
   booking's calendar entry carries the address, the arrival time, the contact
   and the fee, which a public gig's does not.
