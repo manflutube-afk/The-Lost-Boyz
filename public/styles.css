@@ -3176,126 +3176,100 @@ body.nav-open { overflow: hidden; }
 .crowd__who b { color: var(--bone); font-size: .9rem; }
 .crowd__who span { color: var(--muted); }
 
-/* ---- the stars ---- */
+/* ---- the rating, in microphones ---- */
 
-.crowd__stars {
+.crowd__mics {
+  display: flex;
+  gap: .12rem;
   margin: 0;
-  font-size: 1.05rem;
-  letter-spacing: .12em;
-  color: #f2c14e;
-  line-height: 1;
 }
 
+.crowd__mics i {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: url("/images/mic-on.png") center / contain no-repeat;
+}
+.crowd__mics i.off { background-image: url("/images/mic-off.png"); opacity: .45; }
+
 /*
- * The five stars on the form.
+ * The five on the form.
  *
- * Radios, drawn as stars: real form controls, so they work by keyboard, read
- * correctly to a screen reader and submit with the form. The input itself is
- * taken out of the flow rather than display:none, because a hidden input
- * cannot be focused and the focus ring is the only thing telling a keyboard
- * user where they are.
+ * Radios, drawn as microphones: real controls, so they work by keyboard, read
+ * correctly to a screen reader and submit with the form. The input is moved
+ * out of sight rather than display:none, because a hidden input cannot take
+ * focus and the focus ring is the only thing telling a keyboard user where
+ * they are.
  */
-.stars__row {
+.mics__row {
   display: flex;
-  gap: .15rem;
-  /* The markup runs five down to one; this puts it back the right way round on
+  gap: .25rem;
+  /* The markup runs five down to one; this puts it the right way round on
      screen. See the note in the HTML for why it is written backwards. */
   flex-direction: row-reverse;
   justify-content: flex-end;
+  margin: 0 0 1rem;
 }
 
-.stars__row input {
+.mics__row input {
   position: absolute;
   opacity: 0;
   width: 1px;
   height: 1px;
 }
 
-.stars__row label {
-  /* the number is for screen readers and search engines; a star is drawn over it */
+.mics__row label {
+  /* the number is there for a screen reader; a microphone is drawn over it */
   font-size: 0;
   cursor: pointer;
-  padding: .1rem .05rem;
-  line-height: 1;
+  width: 2.6rem;
+  height: 2.6rem;
+  background: url("/images/mic-off.png") center / contain no-repeat;
+  opacity: .4;
+  transition: opacity .12s ease, transform .12s ease;
+  border-radius: 6px;
 }
 
-.stars__row label::before {
-  content: "☆";
-  font-size: 1.9rem;
-  color: var(--muted);
-  transition: color .12s ease, transform .12s ease;
-  display: inline-block;
+/* this mic and every one before it, which after the flip means to its left */
+.mics__row input:checked ~ label,
+.mics__row label:hover,
+.mics__row label:hover ~ label {
+  background-image: url("/images/mic-on.png");
+  opacity: 1;
 }
 
-/* this star and every one before it, which after the flip means to its right */
-.stars__row input:checked ~ label::before,
-.stars__row label:hover::before,
-.stars__row label:hover ~ label::before {
-  content: "★";
-  color: #f2c14e;
-}
+.mics__row label:hover { transform: translateY(-2px) scale(1.05); }
 
-.stars__row label:hover::before { transform: scale(1.12); }
-
-.stars__row input:focus-visible + label::before {
+.mics__row input:focus-visible + label {
   outline: 2px solid var(--violet-hi);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stars__row label::before { transition: none; }
-  .stars__row label:hover::before { transform: none; }
+  .mics__row label { transition: none; }
+  .mics__row label:hover { transform: none; }
 }
 
-fieldset.stars { border: 0; padding: 0; margin: 0 0 1rem; }
-fieldset.stars legend { padding: 0; margin: 0 0 .35rem; font-size: .9rem; }
-
-.crowd__none {
-  margin: 2rem 0 0;
-  color: var(--muted);
-  font-style: italic;
+fieldset.rating {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.1rem;
+  margin: 0 0 1rem;
+  background: rgba(21, 12, 34, .5);
 }
-
-/* ---- the form, folded away until it is wanted ---- */
-
-.crowd__ask { margin: 2rem 0 0; }
-
-.crowd__open {
-  /* a <summary> styled as a button; the marker would sit inside it otherwise */
-  list-style: none;
-  cursor: pointer;
-  display: inline-block;
+fieldset.rating legend {
+  padding: 0 .4rem;
+  margin: 0;
+  font-size: .92rem;
+  color: var(--bone);
 }
-.crowd__open::-webkit-details-marker { display: none; }
+.rating__words { display: block; margin: 0 0 .35rem; }
 
-.crowd__form {
-  margin: 1.4rem 0 0;
-  max-width: 560px;
-}
-
-.crowd__form .field__note {
-  margin: .35rem 0 0;
-  font-size: .78rem;
-  line-height: 1.5;
+/* the line that says a photo or a clip needs none of the above */
+.crowd__or {
+  margin: 0 0 1rem;
+  font-size: .86rem;
   color: var(--muted);
 }
-
-.crowd__form .opt { color: var(--muted); font-weight: 400; }
-
-.crowd__form input[type="file"] {
-  width: 100%;
-  padding: .6rem;
-  font-size: .9rem;
-  color: var(--text);
-  background: var(--panel);
-  border: 1px dashed var(--line);
-  border-radius: 10px;
-}
-
-/* A crowd photo in the gallery strip is still a gallery tile; it is marked
-   only so it can be told apart if it ever needs different treatment. */
-.shot--crowd { position: relative; }
 
 /* ---- clips from the crowd, on Reelz ---- */
 

@@ -1004,19 +1004,35 @@ them on a phone, but it is why a clip can look fine in Backstage on an iPhone
 and refuse to play for somebody on Android. Fixing that needs a transcoder, and
 there is no transcoder here.
 
-### Stars, and sending nothing else
+### Mics, not stars
 
-A rating out of five is optional, and so is everything else except a name and
-which gig it was. Somebody can leave five stars and no words, or a photograph
-and nothing else, or all of it. The only thing refused is a submission that is
-entirely empty.
+The rating is out of five **microphones**, drawn from the artwork the band
+supplied -- one gold, one dark, cut off their black ground by `npm run images`
+and saved as `mic-on.png` and `mic-off.png`.
 
-The stars on the form are five radio buttons drawn as stars -- real controls, so
-they work by keyboard, read properly to a screen reader and submit with the
-form. They are written into the HTML backwards, five down to one, and flipped by
-the stylesheet: CSS can style the siblings after an element but not before it,
-and "fill this star and every one to its left" needs exactly that. There is a
-note in the markup saying so, because it looks like a mistake otherwise.
+The cut is worth a note. The background could not be keyed out by colour,
+because the dark mic's own body is black too. What separates them is the white
+sticker outline around each one, so the build floods inwards from the edges of
+the picture and stops wherever that outline is met; whatever the flood never
+reaches -- the inside of the mic, black body and all -- is kept.
+
+**A review needs a rating.** Words with no mic count are refused, on the form and
+again on the server. A wall of reviews with a number on some and nothing on
+others reads as broken, and there is nothing sensible to draw for the missing
+ones: five empty mics says one mic, and no mics at all leaves a hole. Somebody
+who has written a paragraph can pick a number.
+
+**A photo or a clip on its own needs neither**, which is the other half of the
+rule. Those are a different kind of thing and sit outside the review box on the
+form. The only submission refused outright is one that is entirely empty.
+
+The five on the form are radio buttons with a microphone drawn over each --
+real controls, so they work by keyboard, read properly to a screen reader and
+submit with the form. They are written into the HTML backwards, five down to
+one, and flipped by the stylesheet: CSS can style the siblings after an element
+but not before it, and "fill this mic and every one to its left" needs exactly
+that. There is a note in the markup saying so, because it looks like a mistake
+otherwise.
 
 ---
 

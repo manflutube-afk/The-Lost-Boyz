@@ -2071,19 +2071,21 @@
         card.appendChild(shot);
       }
 
-      if (item.stars) {
+      if (item.mics) {
         var rated = document.createElement('p');
-        rated.className = 'crowd__stars';
+        rated.className = 'crowd__mics';
         /*
-         * The stars are decoration; the label is what a screen reader reads
-         * out. Five star characters one after another are no use to anybody
+         * The mics are pictures; the label is what a screen reader reads out.
+         * Five images announced one after another are no use to anybody
          * listening to them.
          */
-        rated.setAttribute('aria-label', item.stars + ' out of 5');
-        var drawn = document.createElement('span');
-        drawn.setAttribute('aria-hidden', 'true');
-        drawn.textContent = '★'.repeat(item.stars) + '☆'.repeat(5 - item.stars);
-        rated.appendChild(drawn);
+        rated.setAttribute('aria-label', item.mics + ' out of 5 mics');
+        for (var m = 1; m <= 5; m++) {
+          var mic = document.createElement('i');
+          if (m > item.mics) { mic.className = 'off'; }
+          mic.setAttribute('aria-hidden', 'true');
+          rated.appendChild(mic);
+        }
         card.appendChild(rated);
       }
 
@@ -2120,7 +2122,7 @@
 
       // something to read or look at; a bare video plays on Reelz instead
       var withWords = crowd.filter(function (c) {
-        return c.words || c.stars || c.photo;
+        return c.words || c.mics || c.photo;
       });
 
       if (!withWords.length) {
@@ -2345,6 +2347,20 @@
         return;
       }
 
+      /*
+       * The server refuses words with no rating; this says so before anything
+       * is sent, and puts them back at the mics rather than making them find
+       * the reason themselves.
+       */
+      var rated = form.querySelector('input[name="mics"]:checked');
+      if (form.elements.words.value.trim() && !rated) {
+        say('How many mics would you give the night? Pick one to go with what '
+          + 'you have written.', 'bad');
+        var firstMic = document.getElementById('mic5');
+        if (firstMic) { firstMic.focus(); }
+        return;
+      }
+
       say(clip ? 'Sending. The video may take a minute...' : 'Sending...', 'busy');
       send.disabled = true;
 
@@ -2359,8 +2375,8 @@
         body.append(key, form.elements[key].value);
       });
 
-      var picked = form.querySelector('input[name="stars"]:checked');
-      if (picked) { body.append('stars', picked.value); }
+      var picked = form.querySelector('input[name="mics"]:checked');
+      if (picked) { body.append('mics', picked.value); }
 
       if (clip) { body.append('video', clip, clip.name); }
 

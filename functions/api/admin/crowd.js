@@ -95,7 +95,7 @@ async function sendOn(env, item, title, notes) {
     ['Which gig', item.where],
     ['When', item.when],
     ['Their words', item.words],
-    ['Rating', item.stars ? item.stars + ' out of 5' : ''],
+    ['Rating', item.mics ? item.mics + ' out of 5 mics' : ''],
   ].filter(([, value]) => value);
 
   const html =

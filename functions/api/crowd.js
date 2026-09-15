@@ -123,7 +123,7 @@ export async function onRequestPost(context) {
     where: field('where'),
     when: field('when'),
     words: field('words'),
-    stars: field('stars'),
+    mics: field('mics'),
   });
 
   if (!item.name) {
@@ -159,10 +159,28 @@ export async function onRequestPost(context) {
   }
   if (clip) { item.video = true; item.videoType = clip.kind; }
 
-  if (!item.words && !item.stars && !item.photo && !item.video) {
+  if (!item.words && !item.mics && !item.photo && !item.video) {
     return json({
       ok: false,
       error: 'Give it a rating, say something, or add a photo or a video.',
+    }, 400);
+  }
+
+  /*
+   * Words without a rating are turned away, on purpose.
+   *
+   * A wall of reviews with a mic count on some and nothing on others reads as
+   * broken, and there is no sensible thing to draw for the missing ones -- five
+   * empty mics says one star, and no mics at all leaves a hole. Somebody who
+   * has bothered to write a paragraph can pick a number.
+   *
+   * A photograph or a clip on its own is a different thing entirely and needs
+   * neither, which is why this only applies when there are words.
+   */
+  if (item.words && !item.mics) {
+    return json({
+      ok: false,
+      error: 'How many mics would you give the night? Pick one to go with what you have written.',
     }, 400);
   }
 
@@ -184,7 +202,7 @@ export async function onRequestPost(context) {
         town: item.town,
         photo: item.photo,
         video: item.video,
-        stars: item.stars,
+        mics: item.mics,
         state: 'pending',
       },
     });

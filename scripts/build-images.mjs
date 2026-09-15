@@ -582,6 +582,84 @@ for (const size of [192, 512]) {
 }
 
 /*
+ * The two microphones, cut off their black ground.
+ *
+ * The band supplied both in one picture: a dark one for an empty rating and a
+ * gold one for a filled one, side by side on black. The background cannot be
+ * keyed out by colour, because the dark mic's own body is black as well. What
+ * separates them is the white sticker outline around each one, so the ground
+ * is removed by flooding inwards from the edges of the picture and stopping
+ * wherever that outline is met. Whatever the flood never reaches -- the inside
+ * of the mic, black body and all -- is left alone.
+ */
+const MIC_SRC = `${SRC}/mic revew.png`;
+
+async function floodOutBackground(buf, nearBlack = 60) {
+  const { data, info } = await sharp(buf).ensureAlpha().raw()
+    .toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+
+  const background = new Uint8Array(w * h);
+  const queue = new Int32Array(w * h);
+  let head = 0;
+  let tail = 0;
+
+  const consider = (x, y) => {
+    if (x < 0 || y < 0 || x >= w || y >= h) { return; }
+    const i = y * w + x;
+    if (background[i]) { return; }
+    const at = i * 4;
+    if (Math.max(data[at], data[at + 1], data[at + 2]) > nearBlack) { return; }
+    background[i] = 1;
+    queue[tail++] = i;
+  };
+
+  for (let x = 0; x < w; x++) { consider(x, 0); consider(x, h - 1); }
+  for (let y = 0; y < h; y++) { consider(0, y); consider(w - 1, y); }
+
+  while (head < tail) {
+    const i = queue[head++];
+    const x = i % w;
+    const y = (i / w) | 0;
+    consider(x + 1, y); consider(x - 1, y);
+    consider(x, y + 1); consider(x, y - 1);
+  }
+
+  for (let i = 0; i < w * h; i++) {
+    if (background[i]) { data[i * 4 + 3] = 0; }
+  }
+
+  return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
+}
+
+if (existsSync(MIC_SRC)) {
+  const micWhole = await sharp(MIC_SRC).metadata();
+  // the gap between the two runs from about 838 to 983 across a 1774px picture
+  const micSplit = Math.round(micWhole.width * 0.513);
+
+  for (const [name, left, width] of [
+    ['mic-off', 0, micSplit],
+    ['mic-on', micSplit, micWhole.width - micSplit],
+  ]) {
+    const half = await sharp(MIC_SRC)
+      .extract({ left, top: 0, width, height: micWhole.height })
+      .png().toBuffer();
+
+    const cut = await floodOutBackground(half);
+
+    // 220 tall is twice what the form draws, so it stays sharp on a phone
+    await sharp(cut).trim({ threshold: 1 })
+      .resize({ height: 220 })
+      .png({ compressionLevel: 9 })
+      .toFile(`${OUT}/${name}.png`);
+  }
+
+  console.log('mics: mic-off and mic-on, cut off their black ground');
+} else {
+  console.log('mics: source-images/mic revew.png not there, skipping');
+}
+
+/*
  * A maskable icon, for the Android home screen.
  *
  * When a site is installed, Android cuts the icon to whatever shape the

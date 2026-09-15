@@ -191,7 +191,9 @@
                height: auto; border-radius: 8px; border: 1px solid var(--line); }
   .sub__video { display: block; margin: 10px 0 0; width: 100%; max-width: 280px;
                 border-radius: 8px; border: 1px solid var(--line); background: #000; }
-  .sub__stars { margin: 8px 0 0; font-size: 16px; letter-spacing: .1em; color: #f2c14e; }
+  .sub__mics { display: flex; gap: 3px; margin: 8px 0 0; }
+  .sub__mics i { width: 20px; height: 20px; background: url("/images/mic-on.png") center / contain no-repeat; }
+  .sub__mics i.off { background-image: url("/images/mic-off.png"); opacity: .45; }
   .sub .row { margin: 12px 0 0; }
   .yes { background: #1d5c46; border-color: #1d5c46; font-weight: 600; }
   .yes:hover { background: #24765a; }
@@ -855,14 +857,15 @@
         item.at ? 'sent ' + prettyDate(String(item.at).slice(0, 10)) : '']
         .filter(Boolean).join(' · ')));
 
-    if (item.stars) {
-      var stars = el('div', 'sub__stars');
-      stars.setAttribute('aria-label', item.stars + ' out of 5');
-      var drawn = el('span', null,
-        '★'.repeat(item.stars) + '☆'.repeat(5 - item.stars));
-      drawn.setAttribute('aria-hidden', 'true');
-      stars.appendChild(drawn);
-      card.appendChild(stars);
+    if (item.mics) {
+      var mics = el('div', 'sub__mics');
+      mics.setAttribute('aria-label', item.mics + ' out of 5 mics');
+      for (var m = 1; m <= 5; m++) {
+        var one = el('i', m > item.mics ? 'off' : null);
+        one.setAttribute('aria-hidden', 'true');
+        mics.appendChild(one);
+      }
+      card.appendChild(mics);
     }
 
     if (item.words) { card.appendChild(el('blockquote', 'sub__words', item.words)); }
