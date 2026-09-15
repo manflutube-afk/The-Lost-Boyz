@@ -291,6 +291,30 @@
 
 </main>
 
+<dialog id="sendSheet">
+  <form class="sheet" id="sendForm" method="dialog">
+    <h3>Approve &amp; send to Kernow Pages</h3>
+    <p class="hint" id="sendWhat"></p>
+    <div id="sendMsg"></div>
+
+    <label><span>Title</span>
+      <input type="text" name="title" maxlength="120"
+             placeholder="Sharon's shot from the Ship, July"></label>
+
+    <label><span>Anything to pass on</span>
+      <textarea name="notes" maxlength="2000"
+                placeholder="Good one for the gallery. Crop the bloke on the left out?"></textarea></label>
+
+    <p class="hint">Puts it on the website and emails it over with the photo
+      attached, so it can go into the project properly.</p>
+
+    <div class="row spread">
+      <button type="button" id="sendCancel">Cancel</button>
+      <button type="button" class="yes" id="sendGo">Send it</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="sheet">
   <form class="sheet" id="form" method="dialog">
     <h3 id="sheetTitle">Add a booking</h3>
@@ -826,7 +850,8 @@
 
     card.appendChild(el('div', 'sub__who', item.name || 'Someone'));
     card.appendChild(el('div', 'sub__meta',
-      [item.town, item.at ? prettyDate(String(item.at).slice(0, 10)) : '']
+      [item.town, item.where, item.when,
+        item.at ? 'sent ' + prettyDate(String(item.at).slice(0, 10)) : '']
         .filter(Boolean).join(' · ')));
 
     if (item.words) { card.appendChild(el('blockquote', 'sub__words', item.words)); }
@@ -854,6 +879,10 @@
       yes.addEventListener('click', function () { decide(item, 'yes', card); });
       acts.appendChild(yes);
 
+      var onward = el('button', null, 'Yes, and send to Kernow Pages');
+      onward.addEventListener('click', function () { askToSend(item); });
+      acts.appendChild(onward);
+
       var no = el('button', 'danger', 'No, bin it');
       no.addEventListener('click', function () {
         if (!window.confirm('Bin this one? The message and the photo are deleted for good.')) {
@@ -878,6 +907,73 @@
 
     card.appendChild(acts);
     return card;
+  }
+
+  /*
+   * Approve it and post it on in one go.
+   *
+   * A separate dialog rather than another confirm(), because a title and a few
+   * notes are the whole value of it -- "IMG_4821 from someone" is not much use
+   * a fortnight later, and this is the one moment the band remember which night
+   * it was.
+   */
+  var sending = null;
+
+  function askToSend(item) {
+    sending = item;
+    var sheet = $('sendSheet');
+    var form = $('sendForm');
+    form.reset();
+    say('sendMsg', '');
+
+    $('sendWhat').textContent = [item.name, item.where, item.when]
+      .filter(Boolean).join(' · ');
+
+    // a sensible title to start from, which is usually most of the way there
+    form.elements.title.value = [item.where, item.when].filter(Boolean).join(', ');
+
+    sheet.showModal();
+  }
+
+  function doSend() {
+    if (!sending) { return; }
+    var form = $('sendForm');
+    var go = $('sendGo');
+
+    go.disabled = true;
+    say('sendMsg', 'Sending...', 'quiet');
+
+    api('/api/admin/crowd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: sending.id,
+        decision: 'yes',
+        send: true,
+        title: form.elements.title.value,
+        notes: form.elements.notes.value,
+      }),
+    })
+      .then(function (body) {
+        $('sendSheet').close();
+        crowdLoaded = false;
+        loadCrowd();
+
+        /*
+         * The approval and the email are two things, and the second can fail on
+         * its own. Saying only "done" would leave somebody waiting for an email
+         * that is not coming, so which of the two happened is spelled out.
+         */
+        if (body.post && body.post.sent) {
+          say('crowdMsg', 'Up it goes, and it is on its way to '
+            + body.post.to + '.', 'ok');
+        } else {
+          say('crowdMsg', 'It is on the website. The email did not go: '
+            + ((body.post && body.post.why) || 'no reason given') + '.', 'bad');
+        }
+      })
+      .catch(function (err) { say('sendMsg', err.message, 'bad'); })
+      .then(function () { go.disabled = false; });
   }
 
   function decide(item, answer, card) {
@@ -1067,6 +1163,8 @@
     $(t.tab).addEventListener('click', function () { showTab(t.name); });
   });
   $('addBtn').addEventListener('click', function () { open(null); });
+  $('sendCancel').addEventListener('click', function () { $('sendSheet').close(); });
+  $('sendGo').addEventListener('click', doSend);
   $('cancelBtn').addEventListener('click', function () { sheet.close(); });
   $('saveBtn').addEventListener('click', save);
   /* A radio group is a list of elements, not one element, so the listener goes

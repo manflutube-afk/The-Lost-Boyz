@@ -333,6 +333,19 @@
         </div>
 
         <div class="field">
+          <label for="crowdWhere">Which gig was it?</label>
+          <input id="crowdWhere" name="where" type="text" maxlength="120" required
+                 placeholder="The Ship Inn, Lerryn">
+          <p class="field__note">The pub or the do, so the boyz know which night you mean.</p>
+        </div>
+
+        <div class="field">
+          <label for="crowdWhen">Roughly when <span class="opt">(optional)</span></label>
+          <input id="crowdWhen" name="when" type="text" maxlength="40"
+                 placeholder="Saturday just gone, or July">
+        </div>
+
+        <div class="field">
           <label for="crowdWords">How was it?</label>
           <textarea id="crowdWords" name="words" rows="4" maxlength="1200"
                     placeholder="Saw the boyz at the Ship on Saturday..."></textarea>
@@ -647,6 +660,6 @@
 }
 </script>
 
-<script src="/app.js?v=28ee0c33" defer></script>
+<script src="/app.js?v=6535b61c" defer></script>
 </body>
 </html>

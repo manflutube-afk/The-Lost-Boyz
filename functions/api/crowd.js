@@ -92,6 +92,12 @@ export async function onRequestPost(context) {
   if (!item.name) {
     return json({ ok: false, error: 'Put your name in so the boyz know who to thank.' }, 400);
   }
+  if (!item.where) {
+    return json({
+      ok: false,
+      error: 'Which gig was it? A photo with no idea where it was taken is hard to do anything with.',
+    }, 400);
+  }
 
   /* A photograph, if one came. Checked by its actual bytes rather than by what
      the sender said it was, and stored under its own key so the submission

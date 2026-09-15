@@ -905,6 +905,37 @@ On a yes: the words appear in that section, the photograph is added to the end
 of the gallery, and a clip is listed on Reelz under "Clips from the crowd". On a
 no, the message and the photograph are deleted for good.
 
+### Approve, and send it on to whoever keeps the project
+
+Each waiting submission has two yes buttons. **Yes, put it up** approves it.
+**Yes, and send to Kernow Pages** approves it *and* opens a box for a title and
+any notes, then emails the lot over with the photograph attached as a real file.
+
+That second one exists because there is a difference between a photograph being
+*on the website* and a photograph being *in the project*. An approved one is
+served from storage at whatever size the sender's phone produced. One that has
+been through `source-images/` gets built at every size the site uses, gets
+proper alt text written for it, and lives in the repository with the rest.
+Approving puts it up today; sending it on is how it ends up done properly.
+
+The attachment is named after the gig rather than its id, because a folder full
+of `c_1a2b3c4d.jpg` is no use a fortnight later. The address is
+`DESIGNER_EMAIL` in `wrangler.jsonc` -- one line to change if it is ever
+somebody else.
+
+The two halves can fail separately and are reported separately. If the email
+does not go, the submission is still on the website and Backstage says so
+plainly, rather than leaving somebody waiting for a message that is not coming.
+
+### Everyone is asked which gig it was
+
+The form asks **which gig** (required) and **roughly when** (optional) as well
+as a name. A photograph with no idea where it was taken is very little use to
+anybody -- it cannot be captioned, it cannot be filed with the rest of that
+night, and whoever adds it to the gallery has to guess at the alt text. With it,
+the alt text writes itself and the title of the email is filled in before the
+band type a word.
+
 ### Nothing appears until somebody says yes, and that is structural
 
 This is worth understanding properly, because it is the part that matters on a

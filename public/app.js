@@ -2066,7 +2066,8 @@
         shot.src = '/crowd/photo/' + encodeURIComponent(item.id);
         shot.loading = 'lazy';
         shot.decoding = 'async';
-        shot.alt = 'A photo sent in by ' + item.name + '.';
+        shot.alt = 'A photo sent in by ' + item.name
+          + (item.where ? ', at ' + item.where : '') + '.';
         card.appendChild(shot);
       }
 
@@ -2085,7 +2086,8 @@
       name.textContent = item.name;
       who.appendChild(name);
 
-      var rest = [item.town, pretty(item.at)].filter(Boolean).join(' · ');
+      var rest = [item.town, item.where, item.when || pretty(item.at)]
+        .filter(Boolean).join(' · ');
       if (rest) {
         var small = document.createElement('span');
         small.textContent = rest;
@@ -2148,8 +2150,8 @@
         img.src = url;
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.alt = 'Sent in by ' + item.name
-          + (item.town ? ' from ' + item.town : '') + '.';
+        img.alt = (item.where ? 'At ' + item.where + '. ' : '')
+          + 'Sent in by ' + item.name + (item.town ? ' from ' + item.town : '') + '.';
         tile.appendChild(img);
 
         frag.appendChild(tile);
@@ -2280,6 +2282,8 @@
       var body = {
         name: form.elements.name.value,
         town: form.elements.town.value,
+        where: form.elements.where.value,
+        when: form.elements.when.value,
         words: form.elements.words.value,
         clip: form.elements.clip.value,
         website: form.elements.website.value,

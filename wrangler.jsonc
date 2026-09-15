@@ -24,6 +24,11 @@
     // where the logo in the emails is fetched from. The domain is pointed at
     // the site now, so this is the live address rather than the pages.dev one.
     "SITE_URL": "https://thelostboyz.uk",
+    // Where "Approve & send to Kernow Pages" posts a submission to, so whoever
+    // looks after the website gets the original file and can add it to
+    // source-images properly. Change this one line if that is ever somebody
+    // else; nothing else refers to the address.
+    "DESIGNER_EMAIL": "manflutube@gmail.com",
     // Views the site had before the counter existed, added to the live total.
     // Set this to a real figure from Cloudflare's analytics if there is one --
     // it is a plain number here so nobody has to touch the code to change it.
