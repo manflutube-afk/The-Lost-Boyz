@@ -28,7 +28,7 @@ const WINDOW_SECONDS = 15 * 60;
 const json = (body, status, headers) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...headers },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...headers },
   });
 
 const wantsJson = (request) =>

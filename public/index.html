@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=4e3b7fc9">
+<link rel="stylesheet" href="/styles.css?v=d1712da5">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -68,6 +68,7 @@
     <a href="/geeks-corner">Geekz</a>
     <a href="/sponsors">Sponsors</a>
     <a href="/charities">Charities</a>
+    <a href="#crowd">Crowd</a>
     <a href="#gallery">Gallery</a>
   </nav>
 </header>
@@ -299,6 +300,76 @@
 </section>
 
 <!-- ============ GALLERY ============ -->
+<!--
+  What the crowd think.
+
+  Everything below the heading is drawn by app.js from /api/crowd, which serves
+  only what the band have approved in Backstage. The form posts to the same
+  address and goes into a queue nothing public can read. There is deliberately
+  no route from that form to this list except a person saying yes.
+-->
+<section class="sec sec--crowd" id="crowd">
+  <div class="wrap">
+    <p class="eyebrow">Out there</p>
+    <h2 class="h2">What the crowd think</h2>
+    <p class="lead">If you have been to see us, tell us how it went &mdash; and send a
+      photo if you got a good one. The boyz read every one before it goes up here.</p>
+
+    <div id="crowdList" class="crowd"></div>
+
+    <details class="crowd__ask" id="crowdAsk">
+      <summary class="btn btn--solid crowd__open">Add yours</summary>
+
+      <form class="form crowd__form" id="crowdForm" novalidate>
+        <div class="field">
+          <label for="crowdName">Your name</label>
+          <input id="crowdName" name="name" type="text" maxlength="60" required
+                 autocomplete="name">
+        </div>
+
+        <div class="field">
+          <label for="crowdTown">Where you are from <span class="opt">(optional)</span></label>
+          <input id="crowdTown" name="town" type="text" maxlength="60" placeholder="Lerryn">
+        </div>
+
+        <div class="field">
+          <label for="crowdWords">How was it?</label>
+          <textarea id="crowdWords" name="words" rows="4" maxlength="1200"
+                    placeholder="Saw the boyz at the Ship on Saturday..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="crowdPhoto">A photo <span class="opt">(optional)</span></label>
+          <input id="crowdPhoto" name="photo" type="file" accept="image/*">
+          <p class="field__note" id="crowdPhotoNote">
+            Shrunk on your own phone before it is sent, which also strips off
+            where it was taken. Nothing is published until the boyz have seen it.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="crowdClip">A link to a clip <span class="opt">(optional)</span></label>
+          <input id="crowdClip" name="clip" type="url" maxlength="300"
+                 placeholder="https://www.facebook.com/...">
+          <p class="field__note">YouTube, Facebook, Instagram, TikTok or Vimeo.</p>
+        </div>
+
+        <!-- Not for people. Bots fill it in and give themselves away. -->
+        <div class="hp" aria-hidden="true">
+          <label for="crowdWebsite">Leave this empty</label>
+          <input id="crowdWebsite" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p class="form__actions">
+          <button class="btn btn--solid" type="submit" id="crowdSend">Send it to the boyz</button>
+        </p>
+
+        <p class="form__msg" id="crowdMsg" role="status" aria-live="polite"></p>
+      </form>
+    </details>
+  </div>
+</section>
+
 <section class="sec sec--gallery" id="gallery">
   <div class="wrap">
     <p class="eyebrow">Loud rooms</p>
@@ -576,6 +647,6 @@
 }
 </script>
 
-<script src="/app.js?v=32763e9f" defer></script>
+<script src="/app.js?v=28ee0c33" defer></script>
 </body>
 </html>

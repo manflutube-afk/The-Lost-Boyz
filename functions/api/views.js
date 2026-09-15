@@ -39,7 +39,7 @@ const json = (body, status) =>
   new Response(JSON.stringify(body), {
     status: status || 200,
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       // the total changes constantly, so it must never be cached
       'Cache-Control': 'no-store',
     },

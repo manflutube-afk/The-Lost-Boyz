@@ -1642,7 +1642,17 @@
   var shotsBox = document.getElementById('shots');
 
   if (lb && shotsBox) {
-    var shots = Array.prototype.slice.call(shotsBox.querySelectorAll('.shot'));
+    /*
+     * Read from the page rather than kept, because the gallery is no longer
+     * fixed at load: photographs the crowd have sent in are added to the end
+     * of it once /api/crowd has answered. A list taken once at startup would
+     * have meant those tiles opening nothing at all.
+     */
+    var shotsNow = function () {
+      return Array.prototype.slice.call(shotsBox.querySelectorAll('.shot'));
+    };
+
+    var shots = shotsNow();
     var lbImg = document.getElementById('lbImg');
     var lbCount = document.getElementById('lbCount');
     var shotIndex = 0;
@@ -1665,6 +1675,8 @@
     lbImg.addEventListener('load', sizeShot);
 
     var showShot = function (i) {
+      shots = shotsNow();
+      if (!shots.length) { return; }
       shotIndex = (i + shots.length) % shots.length;  // wraps around both ways
       var img = shots[shotIndex].querySelector('img');
       lbImg.style.width = '';   // drop the last photo's size before swapping
@@ -1694,8 +1706,16 @@
       if (lbOpener) { lbOpener.focus(); }
     };
 
-    shots.forEach(function (btn, i) {
-      btn.addEventListener('click', function () { openShot(i, btn); });
+    /*
+     * One listener on the strip rather than one per tile, so a photograph
+     * added after this ran still opens. Its position is worked out at the
+     * moment it is pressed, which is also what keeps the "3 of 27" honest.
+     */
+    shotsBox.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('.shot') : null;
+      if (!btn || !shotsBox.contains(btn)) { return; }
+      shots = shotsNow();
+      openShot(shots.indexOf(btn), btn);
     });
 
     document.getElementById('lbClose').addEventListener('click', closeShot);
@@ -2003,6 +2023,296 @@
     }
 
     window.setTimeout(whenFree, WAIT_MS);
+  })();
+
+  /* ---------- what the crowd think ---------- */
+
+  /*
+   * Three things, all fed by one call to /api/crowd, which serves only what the
+   * band have approved in Backstage:
+   *
+   *   - the reviews, in their own section
+   *   - the photographs, added to the end of the gallery
+   *   - the clips, added to the Reelz page
+   *
+   * And the form that sends a new one in, which posts to the same address and
+   * lands in a queue nothing public can read. There is no path from that form
+   * to any of the three above except one of the band saying yes.
+   */
+  (function () {
+    var list = document.getElementById('crowdList');
+    var form = document.getElementById('crowdForm');
+    var shotsStrip = document.getElementById('shots');
+    var clipsBox = document.getElementById('crowdClips');
+
+    // nothing on this page needs any of it
+    if (!list && !form && !shotsStrip && !clipsBox) { return; }
+
+    var pretty = function (iso) {
+      var d = new Date(iso);
+      if (isNaN(d)) { return ''; }
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    };
+
+    /* ---- drawing what came back ---- */
+
+    function reviewCard(item) {
+      var card = document.createElement('figure');
+      card.className = 'crowd__card';
+
+      if (item.photo) {
+        var shot = document.createElement('img');
+        shot.className = 'crowd__shot';
+        shot.src = '/crowd/photo/' + encodeURIComponent(item.id);
+        shot.loading = 'lazy';
+        shot.decoding = 'async';
+        shot.alt = 'A photo sent in by ' + item.name + '.';
+        card.appendChild(shot);
+      }
+
+      if (item.words) {
+        var quote = document.createElement('blockquote');
+        quote.className = 'crowd__words';
+        // textContent, always: this was typed by somebody the band do not know
+        quote.textContent = item.words;
+        card.appendChild(quote);
+      }
+
+      var who = document.createElement('figcaption');
+      who.className = 'crowd__who';
+
+      var name = document.createElement('b');
+      name.textContent = item.name;
+      who.appendChild(name);
+
+      var rest = [item.town, pretty(item.at)].filter(Boolean).join(' · ');
+      if (rest) {
+        var small = document.createElement('span');
+        small.textContent = rest;
+        who.appendChild(small);
+      }
+      card.appendChild(who);
+
+      if (item.clip) {
+        var link = document.createElement('a');
+        link.className = 'crowd__clip';
+        link.href = item.clip;
+        link.target = '_blank';
+        // noopener for the obvious reason; nofollow because this is a link a
+        // stranger chose, and the band's site should not be voting for it
+        link.rel = 'noopener nofollow ugc';
+        link.textContent = 'Watch their clip';
+        card.appendChild(link);
+      }
+
+      return card;
+    }
+
+    function drawReviews(crowd) {
+      if (!list) { return; }
+      list.replaceChildren();
+
+      var withWords = crowd.filter(function (c) { return c.words || c.clip; });
+
+      if (!withWords.length) {
+        var none = document.createElement('p');
+        none.className = 'crowd__none';
+        none.textContent = 'Nobody has said anything yet. Go on, be the first.';
+        list.appendChild(none);
+        return;
+      }
+
+      var frag = document.createDocumentFragment();
+      withWords.forEach(function (item) { frag.appendChild(reviewCard(item)); });
+      list.appendChild(frag);
+    }
+
+    /*
+     * Photographs go on the end of the gallery, as ordinary tiles. The viewer
+     * reads the strip when something is pressed rather than at load, so these
+     * open and swipe exactly like the band's own.
+     */
+    function addToGallery(crowd) {
+      if (!shotsStrip) { return; }
+
+      var frag = document.createDocumentFragment();
+      crowd.filter(function (c) { return c.photo; }).forEach(function (item) {
+        var url = '/crowd/photo/' + encodeURIComponent(item.id);
+
+        var tile = document.createElement('button');
+        tile.className = 'shot shot--crowd';
+        tile.type = 'button';
+        tile.dataset.full = url;
+
+        var img = document.createElement('img');
+        img.src = url;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.alt = 'Sent in by ' + item.name
+          + (item.town ? ' from ' + item.town : '') + '.';
+        tile.appendChild(img);
+
+        frag.appendChild(tile);
+      });
+      shotsStrip.appendChild(frag);
+    }
+
+    /* Clips are links out, not files we hold, so they sit in their own row on
+       Reelz under the band's own videos rather than pretending to be one. */
+    function addClips(crowd) {
+      if (!clipsBox) { return; }
+
+      var clips = crowd.filter(function (c) { return c.clip; });
+      var section = document.getElementById('crowdClipsSec');
+
+      if (!clips.length) {
+        if (section) { section.hidden = true; }
+        return;
+      }
+      if (section) { section.hidden = false; }
+
+      var frag = document.createDocumentFragment();
+      clips.forEach(function (item) {
+        var link = document.createElement('a');
+        link.className = 'btn crowd__cliplink';
+        link.href = item.clip;
+        link.target = '_blank';
+        link.rel = 'noopener nofollow ugc';
+        link.textContent = item.name + (item.town ? ' · ' + item.town : '');
+        frag.appendChild(link);
+      });
+      clipsBox.replaceChildren(frag);
+    }
+
+    fetch('/api/crowd', { cache: 'no-cache' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !Array.isArray(data.crowd)) { return; }
+        drawReviews(data.crowd);
+        addToGallery(data.crowd);
+        addClips(data.crowd);
+      })
+      .catch(function () {
+        // A section that will not load is left empty rather than shouting
+        // about it. The rest of the page is unaffected either way.
+        if (list && !list.childNodes.length) { drawReviews([]); }
+      });
+
+    /* ---- sending one in ---- */
+
+    if (!form) { return; }
+
+    var msg = document.getElementById('crowdMsg');
+    var send = document.getElementById('crowdSend');
+    var fileInput = document.getElementById('crowdPhoto');
+    var fileNote = document.getElementById('crowdPhotoNote');
+
+    var say = function (text, kind) {
+      msg.textContent = text || '';
+      msg.className = 'form__msg' + (kind ? ' is-' + kind : '');
+    };
+
+    /*
+     * Shrink the photograph here, in the sender's own browser, before it goes
+     * anywhere.
+     *
+     * Two reasons, and the second is the important one. A photo straight off a
+     * phone is four or five megabytes, which is a slow upload on pub wifi and a
+     * lot to keep. And redrawing it through a canvas throws away the EXIF --
+     * which on a phone photo routinely carries the exact spot it was taken.
+     * Somebody sending the band a snap should not be handing over their
+     * location, and the band should not be storing it.
+     *
+     * JPEG rather than WebP: every phone that can take a photo can write one,
+     * and the difference in size at this quality is not worth the risk of an
+     * older browser producing nothing at all.
+     */
+    var LONGEST = 1600;
+
+    function shrink(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = function () { reject(new Error('Could not read that file.')); };
+        reader.onload = function () {
+          var img = new Image();
+          img.onerror = function () { reject(new Error('That did not look like a photo.')); };
+          img.onload = function () {
+            var scale = Math.min(1, LONGEST / Math.max(img.width, img.height));
+            var w = Math.max(1, Math.round(img.width * scale));
+            var h = Math.max(1, Math.round(img.height * scale));
+
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+            try {
+              resolve(canvas.toDataURL('image/jpeg', 0.82));
+            } catch (e) {
+              reject(new Error('Could not use that photo.'));
+            }
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (fileInput && fileNote) {
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) { return; }
+        fileNote.textContent = 'Getting ' + file.name + ' ready...';
+        shrink(file).then(function () {
+          fileNote.textContent = 'Ready. It will be sent shrunk, with the '
+            + 'location stripped off.';
+        }).catch(function () {
+          fileNote.textContent = 'That one would not open. Try a different photo.';
+        });
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      say('Sending...', 'busy');
+      send.disabled = true;
+
+      var body = {
+        name: form.elements.name.value,
+        town: form.elements.town.value,
+        words: form.elements.words.value,
+        clip: form.elements.clip.value,
+        website: form.elements.website.value,
+      };
+
+      var file = fileInput && fileInput.files && fileInput.files[0];
+
+      (file ? shrink(file) : Promise.resolve(''))
+        .then(function (photo) {
+          if (photo) { body.photo = photo; }
+          return fetch('/api/crowd', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        })
+        .then(function (r) {
+          return r.json().then(function (data) { return { ok: r.ok, data: data }; });
+        })
+        .then(function (res) {
+          if (!res.ok || res.data.ok === false) {
+            throw new Error(res.data.error || 'That did not send.');
+          }
+          form.reset();
+          if (fileNote) {
+            fileNote.textContent = 'Shrunk on your own phone before it is sent, '
+              + 'which also strips off where it was taken.';
+          }
+          say(res.data.message || 'Thank you. One of the boyz will have a read.', 'ok');
+        })
+        .catch(function (err) { say(err.message, 'bad'); })
+        .then(function () { send.disabled = false; });
+    });
   })();
 
   /*

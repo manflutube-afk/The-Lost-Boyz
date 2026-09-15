@@ -19,7 +19,7 @@ import { recentDays, dayKey, ranked } from '../../../lib/stats.js';
 const json = (body, status) =>
   new Response(JSON.stringify(body), {
     status: status || 200,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store, private' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store, private' },
   });
 
 /* Roll a set of daily records into one set of totals. */

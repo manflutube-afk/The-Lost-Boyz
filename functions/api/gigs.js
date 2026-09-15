@@ -30,13 +30,13 @@ export async function onRequestGet(context) {
   } catch (e) {
     return new Response(JSON.stringify({ gigs: [], error: 'unavailable' }), {
       status: 502,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
     });
   }
 
   return new Response(JSON.stringify({ gigs }), {
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'public, max-age=60',
     },
   });

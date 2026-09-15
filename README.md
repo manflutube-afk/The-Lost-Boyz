@@ -895,6 +895,78 @@ disturb anything else in Backstage.
 
 ---
 
+## What the crowd think
+
+People who have been to a gig can send in a few words, a photograph, or a link
+to a clip. It sits on the home page above the gallery, and there is a **Crowd**
+tab in Backstage where the band say yes or no to each one.
+
+On a yes: the words appear in that section, the photograph is added to the end
+of the gallery, and a clip is listed on Reelz under "Clips from the crowd". On a
+no, the message and the photograph are deleted for good.
+
+### Nothing appears until somebody says yes, and that is structural
+
+This is worth understanding properly, because it is the part that matters on a
+site like this one.
+
+A submission is written to a queue that only the signed-in endpoints can read.
+The public endpoint, `/api/crowd`, reads a *different* record -- `crowd:live` --
+which nothing but an approval ever writes to. The public side does not read the
+queue and filter it; it has no way of reaching the queue at all.
+
+That is a stronger guarantee than a `pending` flag everybody remembers to check.
+A flag can be got wrong in one place a year from now. This cannot: there is no
+code path from the form to the page except a person in Backstage pressing Yes.
+
+Photographs are the same. `/crowd/photo/<id>` checks whether that id is in the
+approved list and, if it is not, answers exactly as it would for an id that does
+not exist -- so the queue cannot be probed either. An unapproved photo is
+readable only with the admin cookie, and is served `no-store` so no copy of it
+can outlive a rejection.
+
+### Photographs are shrunk on the sender's phone
+
+Before a photo is uploaded it is redrawn through a canvas at 1600px, which does
+two things. It turns four megabytes into about three hundred kilobytes, and it
+**throws away the EXIF** -- which on a phone photo routinely carries the exact
+spot it was taken. Somebody sending a snap from a pub should not be handing over
+their location, and the band should not be storing it.
+
+The bytes are checked again on the server by their actual file signature rather
+than by what the sender said they were, because anything the browser does can be
+skipped by whoever is not using a browser.
+
+### What keeps the rubbish down
+
+- A honeypot field no person ever sees. A submission that fills it in gets a
+  cheerful 200 and goes nowhere, so a bot learns nothing from failing.
+- Six submissions an hour from one address. Generous for a pub full of people
+  on the same wifi, useless to anybody scripting it.
+- Clip links are only accepted for YouTube, Facebook, Instagram, TikTok and
+  Vimeo. Anything else is dropped rather than rejected, so the rest of the
+  message still arrives.
+- Approved links carry `rel="nofollow ugc"`, so the band's site is not voting
+  for a page a stranger chose.
+- Everything is rendered with `textContent`, never as markup.
+
+### Video: what this does not do
+
+Somebody can send a **link** to a clip. They cannot upload a video file, and
+that is a limitation of what is available rather than a decision:
+
+- Reelz plays files built from `source-images/` by `npm run videos` at deploy
+  time. There is no runtime way to add one.
+- **R2**, Cloudflare's file storage, is not enabled on the account. It has a
+  free tier that would comfortably hold this, but switching it on is a step in
+  the Cloudflare dashboard that needs doing by hand.
+
+If R2 is ever enabled, uploads become straightforward and none of the approval
+machinery above would change -- a video would simply be another thing in the
+queue. Until then, a link is the honest offer, and the form says so.
+
+---
+
 ## SEO
 
 The site is set up for search engines:

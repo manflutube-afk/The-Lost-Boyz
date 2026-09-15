@@ -179,6 +179,22 @@
 
   a { color: #b98cff; }
 
+  /* ---- the crowd queue ---- */
+  .sub { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+         padding: 14px; margin: 0 0 10px; }
+  .sub.waiting { border-left: 3px solid #d9a441; }
+  .sub__who { font-weight: 600; }
+  .sub__meta { font-size: 13px; color: var(--dim); margin: 2px 0 0; }
+  .sub__words { margin: 10px 0 0; font-size: 14px; white-space: pre-line;
+                overflow-wrap: anywhere; }
+  .sub__shot { display: block; margin: 10px 0 0; width: 100%; max-width: 280px;
+               height: auto; border-radius: 8px; border: 1px solid var(--line); }
+  .sub__clip { display: inline-block; margin: 10px 0 0; font-size: 13px;
+               overflow-wrap: anywhere; }
+  .sub .row { margin: 12px 0 0; }
+  .yes { background: #1d5c46; border-color: #1d5c46; font-weight: 600; }
+  .yes:hover { background: #24765a; }
+
   /* ---- visitors ---- */
   .big { display: flex; gap: 10px; margin: 0 0 14px; flex-wrap: wrap; }
   .big div { flex: 1 1 130px; background: var(--card); border: 1px solid var(--line);
@@ -230,6 +246,7 @@
 <div class="tabs" role="tablist">
   <button class="tab" id="tabDiary" role="tab" aria-selected="true" aria-controls="panelDiary">Diary</button>
   <button class="tab" id="tabEnq" role="tab" aria-selected="false" aria-controls="panelEnq">Enquiries</button>
+  <button class="tab" id="tabCrowd" role="tab" aria-selected="false" aria-controls="panelCrowd">Crowd</button>
   <button class="tab" id="tabStats" role="tab" aria-selected="false" aria-controls="panelStats">Visitors</button>
 </div>
 
@@ -247,6 +264,18 @@
   <section class="panel" id="panelEnq" role="tabpanel" aria-labelledby="tabEnq" hidden>
     <div id="enqMsg"></div>
     <div id="enqList"></div>
+  </section>
+
+  <section class="panel" id="panelCrowd" role="tabpanel" aria-labelledby="tabCrowd" hidden>
+    <div id="crowdMsg"></div>
+    <div id="crowdWaiting"></div>
+    <div id="crowdLive"></div>
+    <p class="fineprint">
+      Nothing here is on the website until you press Yes. Photos go into the
+      gallery, clips go onto Reelz, and the words go into &ldquo;What the crowd
+      think&rdquo;. Pressing No deletes the message and the photo with it, for
+      good.
+    </p>
   </section>
 
   <section class="panel" id="panelStats" role="tabpanel" aria-labelledby="tabStats" hidden>
@@ -788,6 +817,120 @@
       .catch(function (err) { say('enqMsg', err.message, 'bad'); });
   }
 
+  /* ---------- what the crowd sent in ---------- */
+
+  var crowdLoaded = false;
+
+  function submission(item, waiting) {
+    var card = el('article', 'sub' + (waiting ? ' waiting' : ''));
+
+    card.appendChild(el('div', 'sub__who', item.name || 'Someone'));
+    card.appendChild(el('div', 'sub__meta',
+      [item.town, item.at ? prettyDate(String(item.at).slice(0, 10)) : '']
+        .filter(Boolean).join(' · ')));
+
+    if (item.words) { card.appendChild(el('blockquote', 'sub__words', item.words)); }
+
+    if (item.photo) {
+      var img = el('img', 'sub__shot');
+      img.src = '/crowd/photo/' + encodeURIComponent(item.id);
+      img.alt = 'The photo ' + (item.name || 'they') + ' sent in';
+      img.loading = 'lazy';
+      card.appendChild(img);
+    }
+
+    if (item.clip) {
+      var clip = el('a', 'sub__clip', item.clip);
+      clip.href = item.clip;
+      clip.target = '_blank';
+      clip.rel = 'noopener nofollow';
+      card.appendChild(clip);
+    }
+
+    var acts = el('div', 'row');
+
+    if (waiting) {
+      var yes = el('button', 'yes', 'Yes, put it up');
+      yes.addEventListener('click', function () { decide(item, 'yes', card); });
+      acts.appendChild(yes);
+
+      var no = el('button', 'danger', 'No, bin it');
+      no.addEventListener('click', function () {
+        if (!window.confirm('Bin this one? The message and the photo are deleted for good.')) {
+          return;
+        }
+        decide(item, 'no', card);
+      });
+      acts.appendChild(no);
+    } else {
+      var off = el('button', 'danger', 'Take off the site');
+      off.addEventListener('click', function () {
+        if (!window.confirm('Take this off the website? It is deleted for good.')) { return; }
+        api('/api/admin/crowd?id=' + encodeURIComponent(item.id), { method: 'DELETE' })
+          .then(function () {
+            card.remove();
+            say('crowdMsg', 'Taken off the website.', 'ok');
+          })
+          .catch(function (err) { say('crowdMsg', err.message, 'bad'); });
+      });
+      acts.appendChild(off);
+    }
+
+    card.appendChild(acts);
+    return card;
+  }
+
+  function decide(item, answer, card) {
+    api('/api/admin/crowd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: item.id, decision: answer }),
+    })
+      .then(function () {
+        /*
+         * Reloaded rather than nudged about on the page, because a yes moves
+         * it from one list to the other and the wording under each matters.
+         * It is one call and this is not a list anybody scrolls for long.
+         */
+        crowdLoaded = false;
+        loadCrowd();
+        say('crowdMsg', answer === 'yes'
+          ? 'Up it goes. It is on the website now.'
+          : 'Binned.', 'ok');
+      })
+      .catch(function (err) { say('crowdMsg', err.message, 'bad'); });
+  }
+
+  function loadCrowd() {
+    say('crowdMsg', 'Looking...', 'quiet');
+    api('/api/admin/crowd')
+      .then(function (body) {
+        crowdLoaded = true;
+        var waiting = $('crowdWaiting');
+        var live = $('crowdLive');
+        waiting.replaceChildren();
+        live.replaceChildren();
+
+        if (body.waiting.length) {
+          waiting.appendChild(el('h2', null,
+            'Waiting for you (' + body.waiting.length + ')'));
+          body.waiting.forEach(function (i) {
+            waiting.appendChild(submission(i, true));
+          });
+          say('crowdMsg', '');
+        } else {
+          say('crowdMsg', 'Nothing waiting. Anything sent in turns up here first.',
+            'quiet');
+        }
+
+        if (body.live.length) {
+          live.appendChild(el('h2', null, 'On the website (' + body.live.length + ')'));
+          body.live.forEach(function (i) { live.appendChild(submission(i, false)); });
+        }
+      })
+      .catch(function (err) { say('crowdMsg', err.message, 'bad'); });
+  }
+
   /* ---------- visitors ---------- */
 
   var COUNTRIES = {
@@ -902,6 +1045,7 @@
   var TABS = [
     { name: 'diary', tab: 'tabDiary', panel: 'panelDiary' },
     { name: 'enq', tab: 'tabEnq', panel: 'panelEnq' },
+    { name: 'crowd', tab: 'tabCrowd', panel: 'panelCrowd' },
     { name: 'stats', tab: 'tabStats', panel: 'panelStats' },
   ];
 
@@ -913,6 +1057,7 @@
     });
     // fetched the first time each is opened, not on every switch
     if (which === 'enq' && !enquiriesLoaded) { loadEnquiries(); }
+    if (which === 'crowd' && !crowdLoaded) { loadCrowd(); }
     if (which === 'stats' && !statsLoaded) { loadStats(); }
   }
 

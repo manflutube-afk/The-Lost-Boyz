@@ -3109,3 +3109,127 @@ body.nav-open { overflow: hidden; }
   .install { transition: opacity .2s ease; transform: none; }
   .install.is-up { transform: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   What the crowd think
+
+   Words and photographs sent in by people who came to a gig. Every one of them
+   has been read by the band before it reaches this stylesheet's attention --
+   see functions/api/crowd.js for why that is a property of the plumbing rather
+   than a promise.
+--------------------------------------------------------------------------- */
+.sec--crowd { background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%); }
+
+.crowd {
+  display: grid;
+  gap: 1rem;
+  margin: 2rem 0 0;
+}
+
+@media (min-width: 720px) {
+  .crowd { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1040px) {
+  .crowd { grid-template-columns: repeat(3, 1fr); }
+}
+
+.crowd__card {
+  margin: 0;
+  padding: 1.1rem 1.2rem 1.2rem;
+  background: rgba(21, 12, 34, .72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+.crowd__shot {
+  width: 100%;
+  height: auto;
+  /* Photos come in at whatever shape a phone took them, so they are given a
+     consistent window rather than being allowed to set the card's height. */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.crowd__words {
+  margin: 0;
+  font-size: .96rem;
+  line-height: 1.65;
+  color: var(--text);
+  /* somebody's paragraphs are their paragraphs */
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.crowd__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .1rem .5rem;
+  margin-top: auto;
+  font-size: .82rem;
+}
+.crowd__who b { color: var(--bone); font-size: .9rem; }
+.crowd__who span { color: var(--muted); }
+
+.crowd__clip { font-size: .84rem; color: var(--violet-hi); }
+
+.crowd__none {
+  margin: 2rem 0 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ---- the form, folded away until it is wanted ---- */
+
+.crowd__ask { margin: 2rem 0 0; }
+
+.crowd__open {
+  /* a <summary> styled as a button; the marker would sit inside it otherwise */
+  list-style: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.crowd__open::-webkit-details-marker { display: none; }
+
+.crowd__form {
+  margin: 1.4rem 0 0;
+  max-width: 560px;
+}
+
+.crowd__form .field__note {
+  margin: .35rem 0 0;
+  font-size: .78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.crowd__form .opt { color: var(--muted); font-weight: 400; }
+
+.crowd__form input[type="file"] {
+  width: 100%;
+  padding: .6rem;
+  font-size: .9rem;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+/* A crowd photo in the gallery strip is still a gallery tile; it is marked
+   only so it can be told apart if it ever needs different treatment. */
+.shot--crowd { position: relative; }
+
+/* ---- the clips row on Reelz ---- */
+
+.crowd__clips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin: 1.2rem 0 0;
+}
+.crowd__cliplink { font-size: .86rem; }

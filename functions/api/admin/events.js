@@ -21,7 +21,7 @@ import { readAll, writeAll, seedFromFile, tidy, isDate } from '../../../lib/diar
 const json = (body, status) =>
   new Response(JSON.stringify(body), {
     status: status || 200,
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store, private' },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store, private' },
   });
 
 const notYou = () => json({ ok: false, error: 'Sign in first.' }, 401);
