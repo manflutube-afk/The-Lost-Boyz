@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Geekz — the gear The Lost Boyz play</title>
-<meta name="description" content="The guitars, amps, drums and pedals behind The Lost Boyz — for anyone who wants to know what makes the noise.">
+<meta name="description" content="The rig behind The Lost Boyz: the Bose PA, the Guild twelve-string, the two PRS guitars named Kyle and Timmy, the Helix, and the talk box and foot rest Darren built himself.">
 <meta name="theme-color" content="#07040c">
 <link rel="canonical" href="https://thelostboyz.uk/geeks-corner">
 
@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="The Lost Boyz">
 <meta property="og:locale" content="en_GB">
 <meta property="og:title" content="Geekz — the gear The Lost Boyz play">
-<meta property="og:description" content="The guitars, amps, drums and pedals behind The Lost Boyz — for anyone who wants to know what makes the noise.">
+<meta property="og:description" content="The rig behind The Lost Boyz: the Bose PA, the Guild twelve-string, the two PRS guitars named Kyle and Timmy, the Helix, and the talk box and foot rest Darren built himself.">
 <meta property="og:image" content="https://thelostboyz.uk/images/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=797bf79c">
+<link rel="stylesheet" href="/styles.css?v=ba2f78b5">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -75,22 +75,260 @@
 
 <main id="main">
   <section class="sec sec--page">
-    <div class="wrap">
-      <p class="eyebrow">For the ones who ask</p>
+    <!-- narrow, because this is a long read: a thousand pixels of body text is
+         a lot of eye travel per line. The photographs sit inside that measure. -->
+    <div class="wrap wrap--narrow">
+      <p class="eyebrow">Behind the sound</p>
       <h1 class="h2">Geekz</h1>
-      <p class="lead">Somebody at every gig wants to know what the guitar is, or what is in the
-        pedalboard, or what those drums are. This is for them.</p>
+      <p class="lead">The Lost Boyz get a lot of questions about their sound and how the
+        equipment works, so here is the secret behind the scenes.</p>
 
       <!--
-        The gear list is still with the band. Until it arrives this page says
-        so, plainly, rather than showing an empty shell — the renderer and
-        /data/gear.json are both still in place, so filling the file in is all
-        it takes to bring the list back.
+        The warning is a <section> with role="alert" rather than a paragraph in
+        a coloured box, because it is the one thing on this page that has to be
+        read before anything below it. Somebody who skims this page and then
+        opens up an amplifier can be killed by it.
       -->
-      <div class="dreckly">
-        <p class="dreckly__word">Coming<br>Dreckly</p>
-        <p class="dreckly__sub">Every guitar, amp, pedal, skin and cymbal &mdash; the lot.
-          Darren and Andrew are writing the list.</p>
+      <section class="warn" role="alert" aria-labelledby="warnTitle">
+        <h2 class="warn__title" id="warnTitle">Read this first</h2>
+        <p><strong>Do not undertake any modification or build project unless you know
+          what you are doing.</strong> Doing so could result in severe damage to the
+          equipment, or in serious harm to you. Some equipment can store extremely high
+          voltages even after it has been disconnected from the mains.</p>
+        <p>This page is for general interest. <strong>It is not a how-to guide.</strong>
+          The Lost Boyz accept no responsibility for anyone who tries to replicate what
+          they see here.</p>
+      </section>
+
+      <h2 class="h3 gear__h">Live sound</h2>
+
+      <p>The sound system is a Bose L1 Pro16 tower connected to a Bose TS8 mixing desk.
+        Every device and instrument plugs into the TS8 and the mix is set from there.
+        Also from the TS8 there are two Mackie SRM450 powered speakers doing front of
+        house. Sound comes from the left, the right and the middle of the stage, which
+        gives the boyz a stereo kind of sound.</p>
+
+      <p>The Lost Boyz use backing tracks, as there is obviously only Andrew and Darren
+        in the band. Backing tracks are only used for the electric sets though, not the
+        acoustic part &mdash; they like to play the acoustic set as a duo. More on that
+        further down.</p>
+
+      <h2 class="h3 gear__h">Acoustic guitars, and amplification</h2>
+
+      <figure class="gear__shot gear__shot--tall">
+        <img src="/images/gear/guitars-640.webp" width="640" height="1573"
+             loading="lazy" decoding="async"
+             alt="Darren's Guild twelve-string acoustic on a stand against a grey wall, the Guild name across the headstock and all twelve tuners in view.">
+        <figcaption>The Guild F-2512E. Twelve strings, and the first half of every night.</figcaption>
+      </figure>
+
+      <p>Darren's guitar of choice for the acoustic set is the Guild F-2512E twelve-string
+        electro-acoustic, with a D'Addario feedback destroyer covering the sound hole to
+        keep out any unwanted noise, and D'Addario 10&ndash;46 strings.</p>
+
+      <p>That goes into the Line 6 Helix, where he uses only some subtle effects &mdash;
+        chorus, delay, reverb and a graphic EQ on some of the songs to thicken up the
+        mix. From the Helix the signal goes straight to a Marshall AS50R 50w acoustic
+        guitar amplifier. The amp is then connected to the Bose TS8 through the DI
+        output on the back, so the mix can be controlled from the desk and the amp
+        itself works as a stage monitor for Darren.</p>
+
+      <h2 class="h3 gear__h">Electric guitars &mdash; Kyle and Timmy</h2>
+
+      <p>Darren plays two heavily modified Paul Reed Smith Tremonti signature guitars with
+        D'Addario 9&ndash;46 strings. Both are exactly the same, and they are named Timmy
+        and Kyle in honour of the lost boys. The electrics plug straight into the Helix,
+        and from there the signal goes straight to the Bose TS8.</p>
+
+      <div class="gear__pair">
+        <figure class="gear__shot gear__shot--tall">
+          <img src="/images/gear/guitars-2-640.webp" width="640" height="1654"
+               loading="lazy" decoding="async"
+               alt="Kyle: a black PRS Tremonti signature on a stand, bird inlays down the fingerboard and the name Kyle Endean on the headstock.">
+          <figcaption>Kyle. Darren's main guitar.</figcaption>
+        </figure>
+
+        <figure class="gear__shot">
+          <img src="/images/gear/guitars-4-640.webp" width="640" height="715"
+               loading="lazy" decoding="async"
+               alt="The headstock close up: black vinyl, Kyle Endean in white script, a holographic Lost Boyz sticker below it and Hipshot locking tuners either side.">
+          <figcaption>Black vinyl over the headstock, and the name on top.</figcaption>
+        </figure>
+      </div>
+
+      <p>Darren does his own work on the guitars. At present these are the modifications
+        he has made:</p>
+
+      <dl class="mods">
+        <div><dt>Bridge</dt><dd>Factory block removed and replaced with a brass block.</dd></div>
+        <div><dt>Saddles</dt><dd>Graph Tech String Saver high performance saddles.</dd></div>
+        <div><dt>Nut</dt><dd>Graph Tech Black TUSQ.</dd></div>
+        <div><dt>Tuners</dt><dd>Hipshot Grip-Lock.</dd></div>
+        <div><dt>Graphics</dt><dd>Sheet black vinyl over both headstocks, then custom name
+          vinyls made with the two boys' names on them, to rebrand both guitars with the
+          Lost Boyz names.</dd></div>
+      </dl>
+
+      <figure class="gear__shot">
+        <img src="/images/gear/guitars-3-640.webp" width="640" height="853"
+             loading="lazy" decoding="async"
+             alt="Behind the bridge of Kyle: the name Kyle Endean in white script beside a holographic winged Lost Boyz sticker, with the brass-blocked tremolo and String Saver saddles alongside.">
+        <figcaption>Behind the bridge &mdash; the name, and the sticker.</figcaption>
+      </figure>
+
+      <p>You will see the names of the boys on the headstock and behind the bridge of each
+        guitar. Kyle is Darren's main guitar and Timmy is the backup. There is a Lost Boyz
+        sticker behind the bridge too.</p>
+
+      <p>On the back of each guitar there is a white sticker on the headstock quoting
+        &ldquo;NEVER GIVE UP&rdquo;, and a sticker on the back scratch plate that says
+        SODS sweet chilli sauce &mdash; a tribute to someone who is very special to
+        Darren.</p>
+
+      <h3 class="gear__sub">Future plans</h3>
+
+      <p>Darren plans to replace the frets with stainless steel ones, though not until he
+        has worn the current ones out. And while he is happy with the pickups as they
+        are, he is always researching how to improve the tone, so that could be on the
+        cards as well.</p>
+
+      <h2 class="h3 gear__h">On the floor</h2>
+
+      <figure class="gear__shot gear__shot--wide">
+        <img src="/images/gear/whats-on-the-floor-jack-in-a-box-helix-talk-box-640.webp"
+             width="640" height="414" loading="lazy" decoding="async"
+             alt="The three pieces laid out on a wooden floor: the checker-plate topped Jack in a Box on the left, the Line 6 Helix on its board with two red Boss RC-5 loopers beside it, and the wooden talk box on the right.">
+        <figcaption>Everything that lives at Darren's feet: the Jack in a Box, the Helix
+          and the two loopers, and the talk box.</figcaption>
+      </figure>
+
+      <h3 class="gear__sub">The pedalboard</h3>
+
+      <p>It gets a bit more tricky here.</p>
+
+      <h3 class="gear__sub">The Line 6 Helix</h3>
+
+      <p>This is the brain of the whole rig, and the master controller.</p>
+
+      <p>In the first set Darren uses specific programs to control the acoustic guitar and
+        amp, so at that point the Helix is a bog standard pedalboard, so to speak. Once
+        the acoustic set is finished he switches off the Marshall acoustic amp and mutes
+        that channel at the TS8. The settings on the Helix are then changed over to the
+        electric set.</p>
+
+      <p>The Helix has multiple outputs: one goes to the acoustic amp, one to the TS8, and
+        one to Darren's custom built talk box.</p>
+
+      <p>For each song Darren programs the Helix by assigning a different switch to each
+        part of the song &mdash; intro, verse, chorus, solo and so on. Doing it that way,
+        the Helix becomes whichever amplifier and whichever pedals Darren wants to add or
+        take away at that moment, and sends the signal wherever it needs to go. It is a
+        lot of hours of programming, but it avoids pedalboard tap dancing.</p>
+
+      <h3 class="gear__sub">Looper 1</h3>
+
+      <p>The Helix connects to a Boss RC-5 looper over MIDI, and that is where all the
+        backing tracks are stored. Each time Darren changes song on the Helix, the looper
+        changes track as well, so when he presses it with his foot the right backing track
+        begins to play.</p>
+
+      <p>The RC-5 has two outputs. Output 1 goes to the TS8, which is what the crowd hear.
+        Output 2 goes to Andrew's in-ear monitoring at the drum kit.</p>
+
+      <p>Andrew has his own custom mix going to his in-ears so that he can hear a click
+        track, and that is what lets him keep time with the pre-recorded backing. Without
+        it The Lost Boyz would not work, because there would be no beat &mdash; the drums
+        are played live rather than pre-recorded like the rest of the backing. This was
+        the first obstacle the boys hit when they formed. Generally a band plays in time
+        to a drummer; in The Lost Boyz' case Andrew has to play in time with a band, so
+        technically the whole thing is the wrong way round.</p>
+
+      <h3 class="gear__sub">Looper 2</h3>
+
+      <p>Again this is a Boss RC-5. It is connected to Looper 1 over MIDI and starts
+        automatically when Looper 1 does. Looper 2 has the click tracks for all the songs
+        on it, but Darren has converted them in the studio to a kick drum beat, and that
+        goes to his custom made foot rest &mdash; the one he calls the Jack in a Box.</p>
+
+      <h2 class="h3 gear__h">The Jack in a Box</h2>
+
+      <p>Sometimes, on the more difficult guitar solos, Darren finds it easier to be in a
+        more sat down position, and that is where the foot rest idea came from. He can put
+        his foot on it and rest the guitar on his left leg &mdash; in a live situation he
+        cannot actually sit down.</p>
+
+      <p>So what makes the Jack in a Box unlike any other foot rest?</p>
+
+      <figure class="gear__shot gear__shot--tall">
+        <img src="/images/gear/inside-of-jack-in-a-box-640.webp" width="640" height="853"
+             loading="lazy" decoding="async"
+             alt="Inside the foot rest: a power supply and a small subwoofer amplifier bolted to the roof of the plywood box, wired down to a round tactile transducer bolted to the checker plate at the bottom.">
+        <figcaption>Inside: the amplifier up top, the transducer bolted to the plate you
+          stand on.</figcaption>
+      </figure>
+
+      <p>Because the drums are electronic you lose the feel when playing live, so Darren
+        has installed a 100w subwoofer amplifier and a tactile transducer inside the foot
+        rest. The subwoofer amp is connected to Looper 2, so when he is playing he can put
+        his foot on the rest and literally feel the beat of the music &mdash; a metronome
+        you can feel instead of hear.</p>
+
+      <p>Sod, Darren's cousin's husband and a close friend, was given the job of building
+        the foot rest while Darren did the electronic side.</p>
+
+      <h2 class="h3 gear__h">The talk box</h2>
+
+      <p>Darren was struggling to find a talk box powerful enough to do what he wanted, so
+        he went to his physics teacher from school and long-time friend Dave for some help,
+        knowing Dave had made one successfully in the past.</p>
+
+      <p>There are four parts to it. First an amplifier to power it. Then the harder thing
+        to find: the driver, which had to be full range to stop it blowing &mdash; a
+        compression driver of the sort found in fairground speakers. Darren's dad Mike was
+        given the task of helping make a reducer, to bring the throat of the driver down to
+        a size that suited the pipe. Finally a box was needed to hold it all together, so
+        Mike made that too.</p>
+
+      <div class="gear__pair">
+        <figure class="gear__shot gear__shot--wide">
+          <img src="/images/gear/talk-box-640.webp" width="640" height="480"
+               loading="lazy" decoding="async"
+               alt="An Orange Micro Terror 20w amplifier head sitting inside the timber frame of the talk box, its power switch taped over.">
+          <figcaption>The amplifier that drives it.</figcaption>
+        </figure>
+
+        <figure class="gear__shot">
+          <img src="/images/gear/talk-box-2-640.webp" width="640" height="853"
+               loading="lazy" decoding="async"
+               alt="The other half of the talk box: a compression driver with a turned brass reducer screwed into its throat, wired up beside the amplifier inside the wooden frame.">
+          <figcaption>The compression driver, and Mike's brass reducer on the throat.</figcaption>
+        </figure>
+      </div>
+
+      <p>The talk box is then connected to some garden hose adapters and a fishpond hose,
+        which takes the sound up to Darren's second microphone. That is why Darren has two
+        mics &mdash; one of them is purely for the talk box. Like everything else, it is
+        turned on and off from the Helix.</p>
+
+      <h2 class="h3 gear__h">This is Sod and Mike</h2>
+
+      <p class="gear__whoblurb">The guys behind the scenes. If woodwork is needed, these
+        are the guys.</p>
+
+      <div class="gear__folk">
+        <figure class="gear__who">
+          <img src="/images/people/sod-480.webp" width="360" height="480"
+               loading="lazy" decoding="async"
+               alt="Sod outside on a summer evening in a black t-shirt, the cannon and a flag behind him.">
+          <figcaption><b>Sod</b><span>Built the Jack in a Box</span></figcaption>
+        </figure>
+
+        <figure class="gear__who">
+          <img src="/images/people/mike-480.webp" width="360" height="480"
+               loading="lazy" decoding="async"
+               alt="Mike in a Lost Boyz t-shirt at an outdoor gig, a can in one hand.">
+          <figcaption><b>Mike</b><span>Darren's dad. Made the talk box, and its reducer</span></figcaption>
+        </figure>
       </div>
 
       <p class="backlink"><a class="btn" href="/">Back to the site</a></p>
@@ -117,7 +355,7 @@
   "@type": "WebPage",
   "name": "Geekz — the gear The Lost Boyz play",
   "url": "https://thelostboyz.uk/geeks-corner",
-  "description": "The guitars, amps, drums and pedals behind The Lost Boyz. Coming dreckly.",
+  "description": "The rig behind The Lost Boyz: the Bose PA, the Guild twelve-string, the two PRS guitars named Kyle and Timmy, the Helix, and the talk box and foot rest Darren built himself.",
   "isPartOf": {
     "@type": "WebSite",
     "name": "The Lost Boyz",

@@ -339,10 +339,34 @@ videos counted for Facebook's search ranking, not this site's.
 Owning the files makes all of that go away, and the code is a third of the size.
 
 
-### Adding gear to Geekz
+### Geekz, and the gear
 
-The page is at `/geeks-corner`, listed in the nav as **Gear** — the full name
-would not fit alongside eight other items. Edit `public/data/gear.json`:
+The page is at `/geeks-corner` and is now a **written piece** rather than a
+list: the band's own account of the PA, the guitars, the pedalboard, and the
+talk box and foot rest Darren built. The words and photographs came from
+Darren, and the copy lives in `public/geeks-corner.html` like any other page.
+
+The photographs come from `source-images/Gear/`. Drop one in, run
+`npm run images`, and it comes out at `/images/gear/<name>-{640,1200}.webp` with
+the name slugged from the filename. Nothing is cropped — a guitar on a stand
+and a pedalboard on the floor are opposite shapes, and squaring them off would
+cut away the thing being photographed. The tall ones are held to 300px wide in
+the stylesheet so they do not become a screen and a half of scrolling.
+
+**The warning at the top is not decoration.** Somebody who skims that page and
+then opens up an amplifier can be killed by what is still stored in it after it
+is unplugged. It is marked up as an alert so a screen reader announces it, and
+it sits above everything else on purpose. Do not quietly move it or tone it
+down.
+
+#### The gear list, which is now dormant
+
+`public/data/gear.json` and its renderer are still in the project but **nothing
+draws them any more**, because the page that used to show the list is the piece
+above instead. The renderer is guarded, so it simply does nothing and breaks
+nothing. If a plain list of kit is ever wanted alongside the writing, put a
+`<div id="gear">` back on the page and fill the file in — that is all it takes.
+The format is:
 
 ```json
 {

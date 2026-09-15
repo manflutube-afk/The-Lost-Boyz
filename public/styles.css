@@ -3292,3 +3292,172 @@ fieldset.rating legend {
   font-size: .82rem;
   color: var(--muted);
 }
+
+/* ---------------------------------------------------------------------------
+   Geekz: the rig, written up
+
+   A long read with photographs down the middle of it. Everything here is sized
+   for reading rather than for filling the screen -- the measure is capped, the
+   images sit inside that measure, and nothing is cropped, because a guitar on a
+   stand and a pedalboard on the floor are opposite shapes and squaring them off
+   would cut away the thing being photographed.
+--------------------------------------------------------------------------- */
+
+/*
+ * The warning.
+ *
+ * Deliberately the loudest thing on the page. Somebody who skims this and then
+ * opens up an amplifier can be killed by what is still stored inside it, so it
+ * is not a grey aside at the bottom -- it is red, it is at the top, and it is
+ * marked up as an alert so a screen reader announces it rather than leaving it
+ * to be found.
+ */
+.warn {
+  margin: 2rem 0 2.5rem;
+  padding: 1.1rem 1.25rem;
+  background: #2a0d16;
+  border: 1px solid #7d2540;
+  border-left: 4px solid #e2557a;
+  border-radius: var(--radius);
+}
+
+.warn__title {
+  margin: 0 0 .6rem;
+  font-family: var(--f-display);
+  font-size: 1rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #ffc9d6;
+}
+
+.warn p {
+  margin: 0 0 .7rem;
+  font-size: .92rem;
+  line-height: 1.6;
+  color: #f3d7de;
+}
+.warn p:last-child { margin-bottom: 0; }
+.warn strong { color: #fff; }
+
+/* ---- headings through the piece ---- */
+
+.gear__h {
+  margin: 2.8rem 0 1rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.gear__sub {
+  margin: 2rem 0 .7rem;
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  letter-spacing: .04em;
+  color: var(--violet-hi);
+}
+
+/* ---- the photographs ---- */
+
+.gear__shot {
+  margin: 1.6rem 0;
+}
+
+.gear__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+/* A guitar stood up is very tall indeed. Left to itself it would be a screen
+   and a half of scrolling on a phone, so it is held to something readable and
+   centred in the space it leaves. */
+.gear__shot--tall img {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.gear__shot figcaption {
+  margin: .6rem 0 0;
+  font-size: .82rem;
+  line-height: 1.5;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Two photographs that belong together, side by side once there is room. */
+.gear__pair {
+  display: grid;
+  gap: 1.2rem;
+  margin: 1.6rem 0;
+}
+.gear__pair .gear__shot { margin: 0; }
+
+@media (min-width: 700px) {
+  .gear__pair { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+/* ---- the list of modifications ---- */
+
+.mods {
+  margin: 1.4rem 0 1.8rem;
+  padding: .3rem 1.1rem;
+  background: rgba(21, 12, 34, .6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.mods > div {
+  display: grid;
+  gap: .1rem .9rem;
+  padding: .8rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.mods > div:last-child { border-bottom: 0; }
+
+.mods dt {
+  font-family: var(--f-display);
+  font-size: .78rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--violet-hi);
+}
+.mods dd { margin: 0; font-size: .95rem; line-height: 1.6; color: var(--text); }
+
+@media (min-width: 620px) {
+  .mods > div { grid-template-columns: 9rem 1fr; align-items: baseline; }
+}
+
+/* ---- Sod and Mike ---- */
+
+.gear__whoblurb { color: var(--muted); }
+
+.gear__folk {
+  display: grid;
+  gap: 1.2rem;
+  margin: 1.6rem 0 0;
+}
+
+@media (min-width: 560px) {
+  .gear__folk { grid-template-columns: 1fr 1fr; }
+}
+
+.gear__who { margin: 0; }
+
+.gear__who img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.gear__who figcaption {
+  margin: .7rem 0 0;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+.gear__who b { display: block; color: var(--bone); font-size: 1rem; }
+.gear__who span { color: var(--muted); font-size: .82rem; }

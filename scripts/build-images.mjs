@@ -472,6 +472,48 @@ if (existsSync(PEOPLE_SRC)) {
 }
 
 /*
+ * The gear photographs for Geekz.
+ *
+ * Drop a photo into source-images/Gear/ and it comes out as
+ * /images/gear/<name>-{640,1200}.webp. Nothing is cropped -- some of these are
+ * tall (a guitar on a stand) and some are wide (the pedalboard on the floor),
+ * and squaring them off would cut the very thing the photograph is of.
+ *
+ * .rotate() first, because a phone writes the orientation into the EXIF rather
+ * than the pixels, and resizing throws that away -- without it a picture taken
+ * in portrait comes out on its side.
+ */
+const GEAR_SRC = `${SRC}/Gear`;
+const GEAR_OUT = `${OUT}/gear`;
+
+if (existsSync(GEAR_SRC)) {
+  const { readdirSync } = await import('node:fs');
+  mkdirSync(GEAR_OUT, { recursive: true });
+
+  const files = readdirSync(GEAR_SRC).filter((f) => /\.(png|jpe?g|webp|tiff?)$/i.test(f));
+
+  for (const file of files) {
+    // "What's on the floor Jack in a box. Helix. Talk box.jpeg" -> whats-on-the-floor-jack-in-a-box-helix-talk-box
+    const name = file.replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    for (const w of [640, 1200]) {
+      await sharp(`${GEAR_SRC}/${file}`)
+        .rotate()
+        .resize({ width: w, withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toFile(`${GEAR_OUT}/${name}-${w}.webp`);
+    }
+    console.log(`gear: ${file} -> gear/${name}-{640,1200}.webp`);
+  }
+
+  if (!files.length) { console.log('gear: none to do'); }
+}
+
+/*
  * Favicons, home-screen icons and the social sharing card.
  *
  * All three are built from the cut-out logo rather than the original file, so
