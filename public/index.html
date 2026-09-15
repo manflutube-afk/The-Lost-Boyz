@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=d1712da5">
+<link rel="stylesheet" href="/styles.css?v=89eade12">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -312,8 +312,9 @@
   <div class="wrap">
     <p class="eyebrow">Out there</p>
     <h2 class="h2">What the crowd think</h2>
-    <p class="lead">If you have been to see us, tell us how it went &mdash; and send a
-      photo if you got a good one. The boyz read every one before it goes up here.</p>
+    <p class="lead">If you have been to see us, give us a rating, tell us how it went,
+      or just send a photo or a clip &mdash; whichever you fancy, they are all optional
+      on their own. The boyz read every one before it goes up here.</p>
 
     <div id="crowdList" class="crowd"></div>
 
@@ -345,8 +346,34 @@
                  placeholder="Saturday just gone, or July">
         </div>
 
+        <fieldset class="field stars" id="crowdStars">
+          <legend>How was it? <span class="opt">(optional)</span></legend>
+          <!--
+            Five radios, drawn as stars. Radios rather than a slider or a row of
+            buttons because this is exactly what a radio group is, and because
+            it then works by keyboard, reads correctly to a screen reader and
+            submits with the form without a line of JavaScript.
+          -->
+          <!--
+            Five to one, on purpose, and then flipped back by the stylesheet.
+
+            CSS can style the siblings that come after an element but not the
+            ones before it, and "fill this star and every one to its left" needs
+            exactly that. Writing them backwards and reversing the row visually
+            makes the ones to the left of a star its later siblings, so the fill
+            works with a plain ~ selector and no JavaScript at all.
+          -->
+          <div class="stars__row">
+            <input type="radio" name="stars" id="star5" value="5"><label for="star5" title="Five stars">5</label>
+            <input type="radio" name="stars" id="star4" value="4"><label for="star4" title="Four stars">4</label>
+            <input type="radio" name="stars" id="star3" value="3"><label for="star3" title="Three stars">3</label>
+            <input type="radio" name="stars" id="star2" value="2"><label for="star2" title="Two stars">2</label>
+            <input type="radio" name="stars" id="star1" value="1"><label for="star1" title="One star">1</label>
+          </div>
+        </fieldset>
+
         <div class="field">
-          <label for="crowdWords">How was it?</label>
+          <label for="crowdWords">Anything you want to say <span class="opt">(optional)</span></label>
           <textarea id="crowdWords" name="words" rows="4" maxlength="1200"
                     placeholder="Saw the boyz at the Ship on Saturday..."></textarea>
         </div>
@@ -361,10 +388,13 @@
         </div>
 
         <div class="field">
-          <label for="crowdClip">A link to a clip <span class="opt">(optional)</span></label>
-          <input id="crowdClip" name="clip" type="url" maxlength="300"
-                 placeholder="https://www.facebook.com/...">
-          <p class="field__note">YouTube, Facebook, Instagram, TikTok or Vimeo.</p>
+          <label for="crowdVideo">A video <span class="opt">(optional)</span></label>
+          <input id="crowdVideo" name="video" type="file" accept="video/*">
+          <p class="field__note" id="crowdVideoNote">
+            Straight off your phone, no link needed. Keep it to ten or fifteen
+            seconds &mdash; anything over 20MB will not go through, and every phone
+            can trim a clip before sending it.
+          </p>
         </div>
 
         <!-- Not for people. Bots fill it in and give themselves away. -->
@@ -660,6 +690,6 @@
 }
 </script>
 
-<script src="/app.js?v=6535b61c" defer></script>
+<script src="/app.js?v=5fa929e5" defer></script>
 </body>
 </html>

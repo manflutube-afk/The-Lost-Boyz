@@ -13,10 +13,17 @@
  * The POST writes to the queue and nowhere else. Sending something in has no
  * effect a visitor can see beyond a thank you, which is the honest answer --
  * it has been sent, and one of the band will look at it.
+ *
+ * Why multipart rather than JSON
+ * ------------------------------
+ * Because of the video. A file sent as JSON has to be base64, which makes it a
+ * third bigger again and means holding the whole thing as a string before it
+ * can be turned back into bytes. Multipart is what forms have always done with
+ * files: the browser builds it, the runtime parses it, and the bytes arrive as
+ * bytes. Photographs come the same way now, for consistency.
  */
 import {
-  LIMITS, KEYS, tidy, forPublic, readLive,
-  bytesFromDataUrl, imageKind,
+  LIMITS, KEYS, tidy, forPublic, readLive, imageKind, videoKind,
 } from '../../lib/crowd.js';
 
 const json = (body, status, headers) =>
@@ -62,6 +69,27 @@ export async function onRequestGet(context) {
   return json({ crowd }, 200, { 'Cache-Control': 'public, max-age=60' });
 }
 
+/*
+ * Read one uploaded file and be sure it is what it says it is.
+ *
+ * Size first, because reading the bytes of something enormous only to find out
+ * it is too big is the wrong way round. Then the signature, taken from the
+ * file's own first bytes rather than the type the browser attached to it --
+ * that field is only ever a claim, and a claim from a stranger.
+ */
+async function fileFrom(form, field, cap, recognise) {
+  const file = form.get(field);
+  if (!file || typeof file.arrayBuffer !== 'function' || !file.size) { return null; }
+
+  if (file.size > cap) { return { tooBig: true, size: file.size }; }
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const kind = recognise(bytes);
+  if (!kind) { return { wrongKind: true }; }
+
+  return { bytes, kind };
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -69,16 +97,18 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'Not able to take messages just now.' }, 503);
   }
 
-  let body;
+  let form;
   try {
-    body = await request.json();
+    form = await request.formData();
   } catch (e) {
     return json({ ok: false, error: 'Could not read that.' }, 400);
   }
 
+  const field = (name) => String(form.get(name) == null ? '' : form.get(name));
+
   // A field no person ever sees, and so no person ever fills in. Bots do.
   // Answered cheerfully so whoever sent it learns nothing from failing.
-  if (String(body.website || '').trim()) { return json({ ok: true }, 200); }
+  if (field('website').trim()) { return json({ ok: true }, 200); }
 
   if (await tooMany(env, request)) {
     return json({
@@ -87,7 +117,14 @@ export async function onRequestPost(context) {
     }, 429);
   }
 
-  const item = tidy(body);
+  const item = tidy({
+    name: field('name'),
+    town: field('town'),
+    where: field('where'),
+    when: field('when'),
+    words: field('words'),
+    stars: field('stars'),
+  });
 
   if (!item.name) {
     return json({ ok: false, error: 'Put your name in so the boyz know who to thank.' }, 400);
@@ -99,31 +136,33 @@ export async function onRequestPost(context) {
     }, 400);
   }
 
-  /* A photograph, if one came. Checked by its actual bytes rather than by what
-     the sender said it was, and stored under its own key so the submission
-     record stays small and cheap to list. */
-  let picture = null;
-  if (body.photo) {
-    const bytes = bytesFromDataUrl(body.photo);
-    if (!bytes) {
-      return json({
-        ok: false,
-        error: 'That photo would not go through. Try a smaller one.',
-      }, 400);
-    }
-    const kind = imageKind(bytes);
-    if (!kind) {
-      return json({ ok: false, error: 'That did not look like a photo.' }, 400);
-    }
-    picture = { bytes, kind };
-    item.photo = true;
-    item.photoType = kind;
+  const picture = await fileFrom(form, 'photo', LIMITS.photoBytes, imageKind);
+  if (picture && picture.tooBig) {
+    return json({ ok: false, error: 'That photo would not go through. Try a smaller one.' }, 400);
   }
+  if (picture && picture.wrongKind) {
+    return json({ ok: false, error: 'That did not look like a photo.' }, 400);
+  }
+  if (picture) { item.photo = true; item.photoType = picture.kind; }
 
-  if (!item.words && !item.clip && !item.photo) {
+  const clip = await fileFrom(form, 'video', LIMITS.videoBytes, videoKind);
+  if (clip && clip.tooBig) {
     return json({
       ok: false,
-      error: 'Say something, add a photo, or paste a link to a clip.',
+      error: 'That video is too big — ' + Math.round(clip.size / 1e6)
+        + 'MB, and the most that will go through is ' + Math.round(LIMITS.videoBytes / 1e6)
+        + 'MB. Trim it to ten or fifteen seconds on your phone and send that.',
+    }, 413);
+  }
+  if (clip && clip.wrongKind) {
+    return json({ ok: false, error: 'That did not look like a video.' }, 400);
+  }
+  if (clip) { item.video = true; item.videoType = clip.kind; }
+
+  if (!item.words && !item.stars && !item.photo && !item.video) {
+    return json({
+      ok: false,
+      error: 'Give it a rating, say something, or add a photo or a video.',
     }, 400);
   }
 
@@ -133,13 +172,19 @@ export async function onRequestPost(context) {
         metadata: { type: picture.kind },
       });
     }
+    if (clip) {
+      await env.DIARY.put(KEYS.vid(item.id), clip.bytes, {
+        metadata: { type: clip.kind, size: clip.bytes.length },
+      });
+    }
     await env.DIARY.put(KEYS.one(item.id), JSON.stringify(item), {
       metadata: {
         at: item.at,
         name: item.name,
         town: item.town,
         photo: item.photo,
-        clip: !!item.clip,
+        video: item.video,
+        stars: item.stars,
         state: 'pending',
       },
     });

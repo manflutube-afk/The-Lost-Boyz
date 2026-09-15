@@ -189,8 +189,9 @@
                 overflow-wrap: anywhere; }
   .sub__shot { display: block; margin: 10px 0 0; width: 100%; max-width: 280px;
                height: auto; border-radius: 8px; border: 1px solid var(--line); }
-  .sub__clip { display: inline-block; margin: 10px 0 0; font-size: 13px;
-               overflow-wrap: anywhere; }
+  .sub__video { display: block; margin: 10px 0 0; width: 100%; max-width: 280px;
+                border-radius: 8px; border: 1px solid var(--line); background: #000; }
+  .sub__stars { margin: 8px 0 0; font-size: 16px; letter-spacing: .1em; color: #f2c14e; }
   .sub .row { margin: 12px 0 0; }
   .yes { background: #1d5c46; border-color: #1d5c46; font-weight: 600; }
   .yes:hover { background: #24765a; }
@@ -854,6 +855,16 @@
         item.at ? 'sent ' + prettyDate(String(item.at).slice(0, 10)) : '']
         .filter(Boolean).join(' · ')));
 
+    if (item.stars) {
+      var stars = el('div', 'sub__stars');
+      stars.setAttribute('aria-label', item.stars + ' out of 5');
+      var drawn = el('span', null,
+        '★'.repeat(item.stars) + '☆'.repeat(5 - item.stars));
+      drawn.setAttribute('aria-hidden', 'true');
+      stars.appendChild(drawn);
+      card.appendChild(stars);
+    }
+
     if (item.words) { card.appendChild(el('blockquote', 'sub__words', item.words)); }
 
     if (item.photo) {
@@ -864,12 +875,18 @@
       card.appendChild(img);
     }
 
-    if (item.clip) {
-      var clip = el('a', 'sub__clip', item.clip);
-      clip.href = item.clip;
-      clip.target = '_blank';
-      clip.rel = 'noopener nofollow';
-      card.appendChild(clip);
+    if (item.video) {
+      /*
+       * The band watch it here before deciding, which is the whole point --
+       * approving a clip you have not seen is not approving anything. Nothing
+       * loads until it is pressed, so a queue of ten does not fetch ten videos.
+       */
+      var vid = el('video', 'sub__video');
+      vid.src = '/crowd/video/' + encodeURIComponent(item.id) + '#t=0.1';
+      vid.controls = true;
+      vid.preload = 'none';
+      vid.setAttribute('playsinline', '');
+      card.appendChild(vid);
     }
 
     var acts = el('div', 'row');

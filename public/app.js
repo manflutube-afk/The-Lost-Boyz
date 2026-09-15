@@ -2071,6 +2071,22 @@
         card.appendChild(shot);
       }
 
+      if (item.stars) {
+        var rated = document.createElement('p');
+        rated.className = 'crowd__stars';
+        /*
+         * The stars are decoration; the label is what a screen reader reads
+         * out. Five star characters one after another are no use to anybody
+         * listening to them.
+         */
+        rated.setAttribute('aria-label', item.stars + ' out of 5');
+        var drawn = document.createElement('span');
+        drawn.setAttribute('aria-hidden', 'true');
+        drawn.textContent = '★'.repeat(item.stars) + '☆'.repeat(5 - item.stars);
+        rated.appendChild(drawn);
+        card.appendChild(rated);
+      }
+
       if (item.words) {
         var quote = document.createElement('blockquote');
         quote.className = 'crowd__words';
@@ -2095,18 +2111,6 @@
       }
       card.appendChild(who);
 
-      if (item.clip) {
-        var link = document.createElement('a');
-        link.className = 'crowd__clip';
-        link.href = item.clip;
-        link.target = '_blank';
-        // noopener for the obvious reason; nofollow because this is a link a
-        // stranger chose, and the band's site should not be voting for it
-        link.rel = 'noopener nofollow ugc';
-        link.textContent = 'Watch their clip';
-        card.appendChild(link);
-      }
-
       return card;
     }
 
@@ -2114,7 +2118,10 @@
       if (!list) { return; }
       list.replaceChildren();
 
-      var withWords = crowd.filter(function (c) { return c.words || c.clip; });
+      // something to read or look at; a bare video plays on Reelz instead
+      var withWords = crowd.filter(function (c) {
+        return c.words || c.stars || c.photo;
+      });
 
       if (!withWords.length) {
         var none = document.createElement('p');
@@ -2159,12 +2166,22 @@
       shotsStrip.appendChild(frag);
     }
 
-    /* Clips are links out, not files we hold, so they sit in their own row on
-       Reelz under the band's own videos rather than pretending to be one. */
+    /*
+     * Clips people filmed themselves, shown on Reelz under the band's own.
+     *
+     * Real video elements, using the same classes as the band's reels so they
+     * look and behave identically -- but preload="none", so not a byte of
+     * anybody's footage is fetched until somebody presses play. A wall of
+     * autoloading phone video would be a slow page and a large bill.
+     *
+     * No poster frame: the band's reels have one built for them at deploy
+     * time and these have nothing of the sort, so the browser is asked for the
+     * first frame instead, which is what #t=0.1 does.
+     */
     function addClips(crowd) {
       if (!clipsBox) { return; }
 
-      var clips = crowd.filter(function (c) { return c.clip; });
+      var clips = crowd.filter(function (c) { return c.video; });
       var section = document.getElementById('crowdClipsSec');
 
       if (!clips.length) {
@@ -2174,15 +2191,33 @@
       if (section) { section.hidden = false; }
 
       var frag = document.createDocumentFragment();
+
       clips.forEach(function (item) {
-        var link = document.createElement('a');
-        link.className = 'btn crowd__cliplink';
-        link.href = item.clip;
-        link.target = '_blank';
-        link.rel = 'noopener nofollow ugc';
-        link.textContent = item.name + (item.town ? ' · ' + item.town : '');
-        frag.appendChild(link);
+        var fig = document.createElement('figure');
+        fig.className = 'reel crowd__reel';
+
+        var shell = document.createElement('div');
+        shell.className = 'reel__shell';
+
+        var video = document.createElement('video');
+        video.className = 'reel__video';
+        video.setAttribute('playsinline', '');
+        video.preload = 'none';
+        video.controls = true;
+        video.src = '/crowd/video/' + encodeURIComponent(item.id) + '#t=0.1';
+
+        shell.appendChild(video);
+        fig.appendChild(shell);
+
+        var who = document.createElement('figcaption');
+        who.className = 'crowd__reelwho';
+        who.textContent = [item.name, item.where, item.when]
+          .filter(Boolean).join(' · ');
+        fig.appendChild(who);
+
+        frag.appendChild(fig);
       });
+
       clipsBox.replaceChildren(frag);
     }
 
@@ -2248,8 +2283,16 @@
             canvas.height = h;
             canvas.getContext('2d').drawImage(img, 0, 0, w, h);
 
+            /*
+             * A blob rather than a data URL, now this goes into a FormData.
+             * The same canvas, so the EXIF is still thrown away on the way
+             * through; it simply is not turned into a string and back again.
+             */
             try {
-              resolve(canvas.toDataURL('image/jpeg', 0.82));
+              canvas.toBlob(function (blob) {
+                if (blob) { resolve(blob); }
+                else { reject(new Error('Could not use that photo.')); }
+              }, 'image/jpeg', 0.82);
             } catch (e) {
               reject(new Error('Could not use that photo.'));
             }
@@ -2274,31 +2317,61 @@
       });
     }
 
+    var videoInput = document.getElementById('crowdVideo');
+    var videoNote = document.getElementById('crowdVideoNote');
+
+    /* Twenty megabytes, matching what the server will take. Checked here too,
+       so somebody on pub wifi is told before they spend two minutes on it. */
+    var VIDEO_CAP = 20000000;
+
+    if (videoInput && videoNote) {
+      videoInput.addEventListener('change', function () {
+        var file = videoInput.files && videoInput.files[0];
+        if (!file) { return; }
+        var mb = Math.round(file.size / 1e6);
+        videoNote.textContent = file.size > VIDEO_CAP
+          ? 'That one is ' + mb + 'MB, which is too big to go through. Trim it to '
+            + 'ten or fifteen seconds on your phone and pick it again.'
+          : 'Ready, ' + mb + 'MB. It goes exactly as it came off your phone.';
+      });
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      say('Sending...', 'busy');
+
+      var clip = videoInput && videoInput.files && videoInput.files[0];
+      if (clip && clip.size > VIDEO_CAP) {
+        say('That video is too big. Trim it down and try again.', 'bad');
+        return;
+      }
+
+      say(clip ? 'Sending. The video may take a minute...' : 'Sending...', 'busy');
       send.disabled = true;
 
-      var body = {
-        name: form.elements.name.value,
-        town: form.elements.town.value,
-        where: form.elements.where.value,
-        when: form.elements.when.value,
-        words: form.elements.words.value,
-        clip: form.elements.clip.value,
-        website: form.elements.website.value,
-      };
+      /*
+       * FormData, not JSON. A file in JSON has to be base64, which makes it a
+       * third bigger again and means building the whole thing as a string
+       * first -- for a twenty megabyte clip on a phone that is a real cost.
+       * This is what forms have always done with files.
+       */
+      var body = new FormData();
+      ['name', 'town', 'where', 'when', 'words', 'website'].forEach(function (key) {
+        body.append(key, form.elements[key].value);
+      });
+
+      var picked = form.querySelector('input[name="stars"]:checked');
+      if (picked) { body.append('stars', picked.value); }
+
+      if (clip) { body.append('video', clip, clip.name); }
 
       var file = fileInput && fileInput.files && fileInput.files[0];
 
-      (file ? shrink(file) : Promise.resolve(''))
+      (file ? shrink(file) : Promise.resolve(null))
         .then(function (photo) {
-          if (photo) { body.photo = photo; }
-          return fetch('/api/crowd', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-          });
+          if (photo) { body.append('photo', photo, 'photo.jpg'); }
+          /* No Content-Type set on purpose: the browser adds it along with the
+             boundary, and setting it by hand breaks the parse at the far end. */
+          return fetch('/api/crowd', { method: 'POST', body: body });
         })
         .then(function (r) {
           return r.json().then(function (data) { return { ok: r.ok, data: data }; });
@@ -2311,6 +2384,10 @@
           if (fileNote) {
             fileNote.textContent = 'Shrunk on your own phone before it is sent, '
               + 'which also strips off where it was taken.';
+          }
+          if (videoNote) {
+            videoNote.textContent = 'Straight off your phone, no link needed. '
+              + 'Keep it to ten or fifteen seconds.';
           }
           say(res.data.message || 'Thank you. One of the boyz will have a read.', 'ok');
         })

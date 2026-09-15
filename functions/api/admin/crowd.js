@@ -22,7 +22,7 @@
  * it up today; sending it on is how it ends up done properly.
  */
 import { isSignedIn, sameOrigin } from '../../../lib/admin-auth.js';
-import { KEYS, forPublic, readLive, writeLive } from '../../../lib/crowd.js';
+import { KEYS, forPublic, forBand, readLive, writeLive } from '../../../lib/crowd.js';
 
 const json = (body, status) =>
   new Response(JSON.stringify(body), {
@@ -64,8 +64,14 @@ function base64(bytes) {
   return btoa(binary);
 }
 
-const extensionFor = (type) =>
-  type === 'image/png' ? 'png' : (type === 'image/webp' ? 'webp' : 'jpg');
+const extensionFor = (type) => ({
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/jpeg': 'jpg',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'video/webm': 'webm',
+}[type] || 'bin');
 
 /*
  * Pass a submission on to whoever adds things to the project.
@@ -89,7 +95,7 @@ async function sendOn(env, item, title, notes) {
     ['Which gig', item.where],
     ['When', item.when],
     ['Their words', item.words],
-    ['Clip', item.clip],
+    ['Rating', item.stars ? item.stars + ' out of 5' : ''],
   ].filter(([, value]) => value);
 
   const html =
@@ -111,6 +117,10 @@ async function sendOn(env, item, title, notes) {
         + 'attached. It has already been shrunk to 1600px and had its location '
         + 'data stripped, so it is not the original off their phone.</p>'
       : '')
+    + (item.video
+      ? '<p style="margin:12px 0 0;color:#6b6478;font-size:13px">The video is '
+        + 'attached, exactly as it came off their device.</p>'
+      : '')
     + '<p style="margin:18px 0 0;color:#6b6478;font-size:13px">Approved in '
     + 'Backstage, so it is already on the website.</p></div>';
 
@@ -120,6 +130,7 @@ async function sendOn(env, item, title, notes) {
     ...rows.map(([label, value]) => label + ': ' + value),
     '',
     item.photo ? 'The photo is attached, shrunk and with its location stripped.' : '',
+    item.video ? 'The video is attached, exactly as it came off their device.' : '',
     'Approved in Backstage, so it is already on the website.',
   ].filter(Boolean).join('\n');
 
@@ -131,18 +142,33 @@ async function sendOn(env, item, title, notes) {
     text,
   };
 
-  if (item.photo) {
-    const found = await env.DIARY.getWithMetadata(KEYS.pic(item.id), { type: 'arrayBuffer' });
-    if (found && found.value) {
-      const type = (found.metadata && found.metadata.type) || 'image/jpeg';
-      const stem = (item.where || item.name || 'photo')
-        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
-      payload.attachments = [{
-        filename: (stem || 'photo') + '-' + item.id.slice(2, 8) + '.' + extensionFor(type),
-        content: base64(found.value),
-      }];
-    }
+  /*
+   * The files go as attachments, so they can be dragged straight into
+   * source-images without signing in to anything, and they are named after the
+   * gig rather than c_1a2b3c4d -- a folder full of those would be useless in a
+   * fortnight.
+   */
+  const stem = (item.where || item.name || 'clip')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50)
+    || 'clip';
+
+  const attachments = [];
+
+  for (const [wanted, key, fallback] of [
+    [item.photo, KEYS.pic(item.id), 'image/jpeg'],
+    [item.video, KEYS.vid(item.id), 'video/mp4'],
+  ]) {
+    if (!wanted) { continue; }
+    const found = await env.DIARY.getWithMetadata(key, { type: 'arrayBuffer' });
+    if (!found || !found.value) { continue; }
+    const type = (found.metadata && found.metadata.type) || fallback;
+    attachments.push({
+      filename: stem + '-' + item.id.slice(2, 8) + '.' + extensionFor(type),
+      content: base64(found.value),
+    });
   }
+
+  if (attachments.length) { payload.attachments = attachments; }
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -186,8 +212,9 @@ export async function onRequestGet(context) {
     ok: true,
     waiting: waiting
       .filter((item) => item && !approvedIds.has(item.id))
+      .map(forBand)
       .sort((a, b) => String(b.at).localeCompare(String(a.at))),
-    live: live.slice().sort((a, b) => String(b.at).localeCompare(String(a.at))),
+    live: live.map(forBand).sort((a, b) => String(b.at).localeCompare(String(a.at))),
   });
 }
 
@@ -217,6 +244,7 @@ export async function onRequestPost(context) {
      * would only mean deciding about it again next week.
      */
     await env.DIARY.delete(KEYS.pic(id)).catch(() => {});
+    await env.DIARY.delete(KEYS.vid(id)).catch(() => {});
     await env.DIARY.delete(KEYS.one(id));
     return json({ ok: true, decision: 'no' });
   }
@@ -278,6 +306,7 @@ export async function onRequestDelete(context) {
   // the band deciding it should not be there, and leaving the pieces lying
   // around would put it back in the queue to be approved all over again.
   await env.DIARY.delete(KEYS.pic(id)).catch(() => {});
+  await env.DIARY.delete(KEYS.vid(id)).catch(() => {});
   await env.DIARY.delete(KEYS.one(id)).catch(() => {});
 
   return json({ ok: true, removed: live.length !== left.length });

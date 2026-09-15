@@ -3176,7 +3176,80 @@ body.nav-open { overflow: hidden; }
 .crowd__who b { color: var(--bone); font-size: .9rem; }
 .crowd__who span { color: var(--muted); }
 
-.crowd__clip { font-size: .84rem; color: var(--violet-hi); }
+/* ---- the stars ---- */
+
+.crowd__stars {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: .12em;
+  color: #f2c14e;
+  line-height: 1;
+}
+
+/*
+ * The five stars on the form.
+ *
+ * Radios, drawn as stars: real form controls, so they work by keyboard, read
+ * correctly to a screen reader and submit with the form. The input itself is
+ * taken out of the flow rather than display:none, because a hidden input
+ * cannot be focused and the focus ring is the only thing telling a keyboard
+ * user where they are.
+ */
+.stars__row {
+  display: flex;
+  gap: .15rem;
+  /* The markup runs five down to one; this puts it back the right way round on
+     screen. See the note in the HTML for why it is written backwards. */
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.stars__row input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.stars__row label {
+  /* the number is for screen readers and search engines; a star is drawn over it */
+  font-size: 0;
+  cursor: pointer;
+  padding: .1rem .05rem;
+  line-height: 1;
+}
+
+.stars__row label::before {
+  content: "☆";
+  font-size: 1.9rem;
+  color: var(--muted);
+  transition: color .12s ease, transform .12s ease;
+  display: inline-block;
+}
+
+/* this star and every one before it, which after the flip means to its right */
+.stars__row input:checked ~ label::before,
+.stars__row label:hover::before,
+.stars__row label:hover ~ label::before {
+  content: "★";
+  color: #f2c14e;
+}
+
+.stars__row label:hover::before { transform: scale(1.12); }
+
+.stars__row input:focus-visible + label::before {
+  outline: 2px solid var(--violet-hi);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars__row label::before { transition: none; }
+  .stars__row label:hover::before { transform: none; }
+}
+
+fieldset.stars { border: 0; padding: 0; margin: 0 0 1rem; }
+fieldset.stars legend { padding: 0; margin: 0 0 .35rem; font-size: .9rem; }
 
 .crowd__none {
   margin: 2rem 0 0;
@@ -3224,12 +3297,24 @@ body.nav-open { overflow: hidden; }
    only so it can be told apart if it ever needs different treatment. */
 .shot--crowd { position: relative; }
 
-/* ---- the clips row on Reelz ---- */
+/* ---- clips from the crowd, on Reelz ---- */
+
+.crowd__clipsec { margin: 3rem 0 0; }
 
 .crowd__clips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .6rem;
-  margin: 1.2rem 0 0;
+  display: grid;
+  gap: 1.2rem;
+  margin: 1.4rem 0 0;
 }
-.crowd__cliplink { font-size: .86rem; }
+@media (min-width: 720px) {
+  .crowd__clips { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1040px) {
+  .crowd__clips { grid-template-columns: repeat(3, 1fr); }
+}
+
+.crowd__reelwho {
+  margin: .5rem 0 0;
+  font-size: .82rem;
+  color: var(--muted);
+}

@@ -974,27 +974,49 @@ skipped by whoever is not using a browser.
   cheerful 200 and goes nowhere, so a bot learns nothing from failing.
 - Six submissions an hour from one address. Generous for a pub full of people
   on the same wifi, useless to anybody scripting it.
-- Clip links are only accepted for YouTube, Facebook, Instagram, TikTok and
-  Vimeo. Anything else is dropped rather than rejected, so the rest of the
-  message still arrives.
-- Approved links carry `rel="nofollow ugc"`, so the band's site is not voting
-  for a page a stranger chose.
+- Photographs and videos are checked by their own first bytes, not by what the
+  sender's phone called them. A text file renamed `.mp4` is turned away.
 - Everything is rendered with `textContent`, never as markup.
 
-### Video: what this does not do
+### Video, and the twenty megabyte ceiling
 
-Somebody can send a **link** to a clip. They cannot upload a video file, and
-that is a limitation of what is available rather than a decision:
+People upload the footage itself, straight off their phone. There are no links
+to Facebook or anywhere else -- the file is what arrives, and an approved one
+plays on Reelz from this site, next to the band's own reels.
 
-- Reelz plays files built from `source-images/` by `npm run videos` at deploy
-  time. There is no runtime way to add one.
-- **R2**, Cloudflare's file storage, is not enabled on the account. It has a
-  free tier that would comfortably hold this, but switching it on is a step in
-  the Cloudflare dashboard that needs doing by hand.
+**The limit is 20MB, and that is a hard edge rather than a preference.** Video
+is kept in KV, a KV value cannot exceed 25MB, and 20 leaves room for the record
+itself. In practice that is about fifteen seconds of 1080p, or half a minute at
+720p. The form says so, the size is checked in the browser before anything is
+sent, and the server says how far over it was if one slips through.
 
-If R2 is ever enabled, uploads become straightforward and none of the approval
-machinery above would change -- a video would simply be another thing in the
-queue. Until then, a link is the honest offer, and the form says so.
+The reason it is in KV at all is that **R2 -- Cloudflare's actual file storage
+-- is not switched on for this account**. It has a free tier that would hold far
+more than this site will ever need, but enabling it is a step in the Cloudflare
+dashboard that has to be done by hand. When it is, the ceiling goes and almost
+nothing else changes: the queue, the approval, the serving and the emailing all
+work the same.
+
+One thing worth knowing either way: an iPhone set to "High Efficiency" records
+HEVC inside a `.mov`, which plays on Apple devices and often nowhere else. Those
+files are accepted, because they are genuine footage and the band are looking at
+them on a phone, but it is why a clip can look fine in Backstage on an iPhone
+and refuse to play for somebody on Android. Fixing that needs a transcoder, and
+there is no transcoder here.
+
+### Stars, and sending nothing else
+
+A rating out of five is optional, and so is everything else except a name and
+which gig it was. Somebody can leave five stars and no words, or a photograph
+and nothing else, or all of it. The only thing refused is a submission that is
+entirely empty.
+
+The stars on the form are five radio buttons drawn as stars -- real controls, so
+they work by keyboard, read properly to a screen reader and submit with the
+form. They are written into the HTML backwards, five down to one, and flipped by
+the stylesheet: CSS can style the siblings after an element but not before it,
+and "fill this star and every one to its left" needs exactly that. There is a
+note in the markup saying so, because it looks like a mistake otherwise.
 
 ---
 
