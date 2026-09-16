@@ -132,9 +132,18 @@ function bandEmail(kind, fields, replyTo, siteUrl) {
     rowsHtml(fields, '#6b6478', '#111') + '</table>' +
     '<p style="margin:20px 0 0;color:#6b6478;font-size:13px">Sent from the website. ' +
     'Reply straight to this email to answer them.</p>' +
-    '<p style="margin:14px 0 0;color:#6b6478;font-size:13px">It is kept in ' +
-    '<a href="' + backstage + '" style="color:#7b3ff2">Backstage</a> as well, ' +
-    'under Enquiries.</p>';
+    /*
+     * The same button the crowd notification carries, so every email the band
+     * get from this site ends the same way and there is one place to go
+     * whatever has come in.
+     */
+    '<p style="margin:22px 0 6px">' +
+    '<a href="' + backstage + '" style="display:inline-block;background:#7b3ff2;' +
+    'color:#fff;text-decoration:none;padding:13px 22px;border-radius:10px;' +
+    'font-weight:600">Open Backstage</a></p>' +
+    '<p style="margin:0;color:#6b6478;font-size:13px">It is waiting there too, ' +
+    'under Enquiries — so it can be found again in six months without digging ' +
+    'through a mailbox.</p>';
 
   return {
     subject: heading + ' from ' + replyTo,
@@ -145,7 +154,9 @@ function bandEmail(kind, fields, replyTo, siteUrl) {
       ...fields.filter(([, v]) => v).map(([label, value]) => label + ': ' + value),
       '',
       'Sent from the website. Reply to this email to answer them.',
-      'It is kept in Backstage as well, under Enquiries: ' + backstage,
+      '',
+      'It is waiting in Backstage too, under Enquiries:',
+      backstage,
     ]),
   };
 }

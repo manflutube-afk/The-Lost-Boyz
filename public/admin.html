@@ -271,9 +271,6 @@
 
   <section class="panel" id="panelCrowd" role="tabpanel" aria-labelledby="tabCrowd" hidden>
     <div id="crowdMsg"></div>
-    <p class="row spread" id="crowdNudgeRow" hidden>
-      <button id="crowdNudge">Email the boyz about these</button>
-    </p>
     <div id="crowdWaiting"></div>
     <div id="crowdLive"></div>
     <p class="fineprint">
@@ -1020,28 +1017,6 @@
       .catch(function (err) { say('crowdMsg', err.message, 'bad'); });
   }
 
-  /*
-   * Send the "check your Backstage" email by hand.
-   *
-   * The nudge goes out on its own when something arrives, so this is for the
-   * odd times that does not cover: putting it back in front of the other one,
-   * or anything that came in before the notifier existed.
-   */
-  function nudge() {
-    var button = $('crowdNudge');
-    button.disabled = true;
-    say('crowdMsg', 'Sending...', 'quiet');
-
-    api('/api/admin/notify', { method: 'POST' })
-      .then(function (body) {
-        say('crowdMsg', 'Sent. The boyz have been told there '
-          + (body.waiting === 1 ? 'is 1 thing' : 'are ' + body.waiting + ' things')
-          + ' waiting.', 'ok');
-      })
-      .catch(function (err) { say('crowdMsg', err.message, 'bad'); })
-      .then(function () { button.disabled = false; });
-  }
-
   function loadCrowd() {
     say('crowdMsg', 'Looking...', 'quiet');
     api('/api/admin/crowd')
@@ -1051,8 +1026,6 @@
         var live = $('crowdLive');
         waiting.replaceChildren();
         live.replaceChildren();
-
-        $('crowdNudgeRow').hidden = !body.waiting.length;
 
         if (body.waiting.length) {
           waiting.appendChild(el('h2', null,
@@ -1212,7 +1185,6 @@
   $('addBtn').addEventListener('click', function () { open(null); });
   $('sendCancel').addEventListener('click', function () { $('sendSheet').close(); });
   $('sendGo').addEventListener('click', doSend);
-  $('crowdNudge').addEventListener('click', nudge);
   $('cancelBtn').addEventListener('click', function () { sheet.close(); });
   $('saveBtn').addEventListener('click', save);
   /* A radio group is a list of elements, not one element, so the listener goes

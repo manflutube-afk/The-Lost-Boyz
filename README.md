@@ -982,11 +982,20 @@ It is sent with `waitUntil`, after the reply has gone back, so nobody on pub
 wifi watches a spinner while a mail provider is talked to — and a failure there
 cannot turn a submission that was safely stored into an error on their phone.
 
-**Booking and sponsor enquiries work the other way round**, on purpose. Those
-carry the whole message, because an enquiry is somebody asking to book the band
-and the answer is a reply; there is nothing to approve and no reason to send
-them looking elsewhere. They now carry a link to Backstage at the bottom, where
-a copy is kept under Enquiries.
+**Booking and sponsor enquiries carry the whole message**, and that difference is
+on purpose. An enquiry is somebody asking to book the band and the answer is a
+reply -- the email has reply-to set to the enquirer, so hitting reply answers
+them. There is nothing to approve and no reason to send the band looking
+elsewhere for it.
+
+They end with the same **Open Backstage** button as the crowd notification, so
+every email this site sends the band ends the same way and there is one place to
+go whatever has arrived. A copy is kept there under Enquiries.
+
+**One email per thing, either way.** An enquiry sends its own email and nothing
+else; a crowd submission sends the nudge and nothing else. The band are never
+told about the same event twice. Nothing is sent by hand — there is no button
+for it, and no endpoint behind one.
 
 ### Nothing appears until somebody says yes, and that is structural
 
