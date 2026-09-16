@@ -960,6 +960,34 @@ night, and whoever adds it to the gallery has to guess at the alt text. With it,
 the alt text writes itself and the title of the email is filled in before the
 band type a word.
 
+### The band get told, without being shown
+
+When something arrives, an email goes to `BAND_EMAIL` saying **"Check your
+Backstage"**, with a button straight to `/admin`.
+
+**It deliberately contains none of what was sent** -- not the words, not the
+sender's name, not the gig they said it was. That is the whole point of the
+queue, and an email would go straight round it: something vile arrives, and a
+notification carrying it puts the sender's own words in the band's inbox, past
+the approval and in front of exactly the two people the queue exists to protect.
+So the email says only what a machine knows -- that something came in, whether
+it was a review, a photo or a video, and how many are waiting.
+
+**One every quarter of an hour at most.** After a gig ten people might send a
+photo within the hour, and ten emails is a nuisance; a nuisance gets filtered,
+and then the notification stops working at all. The count of what is waiting
+means a quiet gap is never a missed message.
+
+It is sent with `waitUntil`, after the reply has gone back, so nobody on pub
+wifi watches a spinner while a mail provider is talked to — and a failure there
+cannot turn a submission that was safely stored into an error on their phone.
+
+**Booking and sponsor enquiries work the other way round**, on purpose. Those
+carry the whole message, because an enquiry is somebody asking to book the band
+and the answer is a reply; there is nothing to approve and no reason to send
+them looking elsewhere. They now carry a link to Backstage at the bottom, where
+a copy is kept under Enquiries.
+
 ### Nothing appears until somebody says yes, and that is structural
 
 This is worth understanding properly, because it is the part that matters on a

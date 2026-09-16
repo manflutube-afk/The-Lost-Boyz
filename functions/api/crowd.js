@@ -25,6 +25,7 @@
 import {
   LIMITS, KEYS, tidy, forPublic, readLive, imageKind, videoKind,
 } from '../../lib/crowd.js';
+import { tellTheBand } from '../../lib/notify.js';
 
 const json = (body, status, headers) =>
   new Response(JSON.stringify(body), {
@@ -211,6 +212,30 @@ export async function onRequestPost(context) {
       ok: false,
       error: 'That did not send. Please try again in a moment.',
     }, 502);
+  }
+
+  /*
+   * Nudge the band, after the answer has gone back rather than before it.
+   *
+   * waitUntil lets the reply leave immediately and the email go afterwards, so
+   * somebody on pub wifi is not left watching a spinner while a mail provider
+   * is talked to. It also means a failure there cannot turn a submission that
+   * was safely stored into an error on their phone.
+   *
+   * The description is built here from flags this endpoint set itself. Nothing
+   * the sender typed goes into it -- see lib/notify.js for why that matters.
+   */
+  const bits = [];
+  if (item.words || item.mics) { bits.push('a review'); }
+  if (item.photo) { bits.push('a photo'); }
+  if (item.video) { bits.push('a video'); }
+
+  const what = bits.length > 1
+    ? bits.slice(0, -1).join(', ') + ' and ' + bits[bits.length - 1]
+    : (bits[0] || 'something');
+
+  if (context.waitUntil) {
+    context.waitUntil(tellTheBand(env, what).catch(() => {}));
   }
 
   /*

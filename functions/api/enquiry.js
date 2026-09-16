@@ -110,16 +110,31 @@ function textOf(lines) {
   return lines.filter(Boolean).join('\n');
 }
 
-/* The band's copy of the enquiry: every field, in the order it was asked. */
+/*
+ * The band's copy of the enquiry: every field, in the order it was asked.
+ *
+ * This one carries the whole message, because an enquiry is somebody asking to
+ * book the band and the answer is a reply -- there is nothing to approve and no
+ * reason to make them go and look somewhere else for it. The Backstage link at
+ * the bottom is a convenience, not the point: a copy is kept there too, so it
+ * can be found again in six months without digging through a mailbox.
+ *
+ * That is the opposite of how a crowd submission is handled, and deliberately
+ * so. See lib/notify.js.
+ */
 function bandEmail(kind, fields, replyTo, siteUrl) {
   const heading = kind === 'sponsor' ? 'Sponsor enquiry' : 'Booking enquiry';
+  const backstage = siteUrl + '/admin';
 
   const inner =
     '<h1 style="margin:0 0 16px;font-size:20px;letter-spacing:.02em">' + heading + '</h1>' +
     '<table role="presentation" style="border-collapse:collapse">' +
     rowsHtml(fields, '#6b6478', '#111') + '</table>' +
     '<p style="margin:20px 0 0;color:#6b6478;font-size:13px">Sent from the website. ' +
-    'Reply straight to this email to answer them.</p>';
+    'Reply straight to this email to answer them.</p>' +
+    '<p style="margin:14px 0 0;color:#6b6478;font-size:13px">It is kept in ' +
+    '<a href="' + backstage + '" style="color:#7b3ff2">Backstage</a> as well, ' +
+    'under Enquiries.</p>';
 
   return {
     subject: heading + ' from ' + replyTo,
@@ -130,6 +145,7 @@ function bandEmail(kind, fields, replyTo, siteUrl) {
       ...fields.filter(([, v]) => v).map(([label, value]) => label + ': ' + value),
       '',
       'Sent from the website. Reply to this email to answer them.',
+      'It is kept in Backstage as well, under Enquiries: ' + backstage,
     ]),
   };
 }
