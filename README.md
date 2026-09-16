@@ -960,6 +960,25 @@ night, and whoever adds it to the gallery has to guess at the alt text. With it,
 the alt text writes itself and the title of the email is filled in before the
 band type a word.
 
+### What the sender sees afterwards
+
+A dialog, not a line of green text. It thanks them by name and then answers the
+one question somebody actually has at that moment: **where does my photo go?**
+
+It lists only what they actually sent — words go to What the crowd think, a
+photo to the Gallery, a video to Reelz under Clips from the crowd — so nobody
+who sent a photograph is told about a video they never sent. A **Rock on**
+button closes it and folds the form away.
+
+It says the boyz will have a read and it will be on the site *shortly*, which is
+true. It does not say it is up, because it is not: one of them has to say yes
+first, and a thank-you that lied about that would have somebody refreshing the
+gallery all evening looking for a photo that is still in a queue.
+
+It is a real `<dialog>`, so the browser handles the focus trap, the Escape key
+and the stacking. A browser too old for `showModal` falls back to the line under
+the button, which still says the same thing.
+
 ### The band get told, without being shown
 
 When something arrives, an email goes to `BAND_EMAIL` saying **"Check your

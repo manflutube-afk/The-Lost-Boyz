@@ -2338,6 +2338,64 @@
       });
     }
 
+    /*
+     * The thank you.
+     *
+     * Worth more than a line of green text, because this is the one moment the
+     * sender has a question: where does my photo actually go? So it answers
+     * that, from what they actually sent -- and it is honest that it is not up
+     * yet, because it is not. One of the band has to say yes first.
+     */
+    var thanks = document.getElementById('crowdThanks');
+
+    var WHERE = {
+      review: 'Your words will turn up here, in What the crowd think.',
+      photo: 'Your photo goes in the Gallery, with the band’s own.',
+      video: 'Your video goes on Reelz, under Clips from the crowd.',
+    };
+
+    function sayThanks(sent, name) {
+      // No <dialog> in this browser: the line under the button still says it.
+      if (!thanks || typeof thanks.showModal !== 'function') {
+        say('Thank you. One of the boyz will have a read.', 'ok');
+        return;
+      }
+
+      document.getElementById('taTitle').textContent =
+        name ? 'Thank you, ' + name : 'Thank you';
+
+      var list = document.getElementById('taWhere');
+      list.replaceChildren();
+      ['review', 'photo', 'video'].forEach(function (kind) {
+        if (!sent[kind]) { return; }
+        var li = document.createElement('li');
+        li.className = 'ta__' + kind;
+        li.textContent = WHERE[kind];
+        list.appendChild(li);
+      });
+
+      thanks.showModal();
+      // the button is the only thing to do here, so start on it
+      var go = document.getElementById('taClose');
+      if (go) { go.focus(); }
+    }
+
+    if (thanks) {
+      var shut = function () {
+        thanks.close();
+        // fold the form away again: they have finished with it
+        var ask = document.getElementById('crowdAsk');
+        if (ask) { ask.open = false; }
+      };
+      var closeBtn = document.getElementById('taClose');
+      if (closeBtn) { closeBtn.addEventListener('click', shut); }
+      // and tidy up the same way if it is dismissed with Escape
+      thanks.addEventListener('close', function () {
+        var ask = document.getElementById('crowdAsk');
+        if (ask) { ask.open = false; }
+      });
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -2396,6 +2454,17 @@
           if (!res.ok || res.data.ok === false) {
             throw new Error(res.data.error || 'That did not send.');
           }
+          /*
+           * Noted before the form is emptied, because resetting it is what
+           * makes these fields unreadable a line later.
+           */
+          var wasSent = {
+            review: !!(form.elements.words.value.trim() || picked),
+            photo: !!file,
+            video: !!clip,
+          };
+          var theirName = form.elements.name.value.trim();
+
           form.reset();
           if (fileNote) {
             fileNote.textContent = 'Shrunk on your own phone before it is sent, '
@@ -2405,7 +2474,8 @@
             videoNote.textContent = 'Straight off your phone, no link needed. '
               + 'Keep it to ten or fifteen seconds.';
           }
-          say(res.data.message || 'Thank you. One of the boyz will have a read.', 'ok');
+          say('');
+          sayThanks(wasSent, theirName);
         })
         .catch(function (err) { say(err.message, 'bad'); })
         .then(function () { send.disabled = false; });

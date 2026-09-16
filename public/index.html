@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=ba2f78b5">
+<link rel="stylesheet" href="/styles.css?v=acc25fd7">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -425,6 +425,35 @@
         <p class="form__msg" id="crowdMsg" role="status" aria-live="polite"></p>
       </form>
     </details>
+
+    <!--
+      The thank you.
+      
+      A real <dialog>, so the browser handles the focus trap and Escape for us,
+      and so it sits above everything without a stack of z-index guesswork. It
+      is written here rather than built from strings in app.js because it is
+      markup, and because a screen reader should find a heading and a button
+      rather than a paragraph that appeared out of nowhere.
+
+      What it says about where things go is filled in by app.js from what was
+      actually sent -- telling somebody who sent a photo that their video will
+      be on Reelz would be daft.
+    -->
+    <dialog class="ta" id="crowdThanks" aria-labelledby="taTitle">
+      <div class="ta__inner">
+        <img class="ta__mark" src="/images/logo-320.webp" width="320" height="243"
+             alt="" loading="lazy" decoding="async">
+
+        <h2 class="ta__title" id="taTitle">Thank you</h2>
+
+        <p class="ta__lead">The boyz will have a read, and you should see it on the
+          site shortly.</p>
+
+        <ul class="ta__where" id="taWhere"></ul>
+
+        <button class="btn btn--solid ta__go" id="taClose" type="button">Rock on</button>
+      </div>
+    </dialog>
   </div>
 </section>
 
@@ -705,6 +734,6 @@
 }
 </script>
 
-<script src="/app.js?v=843c22cf" defer></script>
+<script src="/app.js?v=498ccf96" defer></script>
 </body>
 </html>
