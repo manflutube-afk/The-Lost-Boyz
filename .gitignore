@@ -25,3 +25,7 @@ source-images/*.mp4
 # Keep your own backup of them.
 source-images/g*.jpeg
 source-images/g*.JPEG
+
+# Cookie jars and scratch files from local testing. One curl jar with a dev
+# admin session in it was committed by accident once already.
+*.tmp

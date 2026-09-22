@@ -129,6 +129,24 @@
   .acts button, .acts .btn { font-size: 13px; padding: 7px 11px; }
   .acts .danger { margin-left: auto; }
 
+  /*
+   * Show been and gone.
+   *
+   * This was a <summary> with a heading inside it, and it read as a heading --
+   * there was nothing to say it could be pressed, so the older dates were
+   * effectively hidden behind a word nobody knew to click. It is a plain
+   * button now, the full width of the column so it cannot be mistaken for a
+   * label, with the arrow saying which way it will go.
+   */
+  .showgone {
+    display: block; width: 100%; margin: 26px 0 12px;
+    padding: 13px 14px; text-align: center; color: var(--dim);
+    background: var(--card); border-style: dashed;
+  }
+  .showgone:hover { color: var(--ink); background: var(--card-2); }
+  .showgone .caret { display: inline-block; margin-left: 6px; }
+  .showgone[aria-expanded="true"] { margin-bottom: 10px; }
+
   .msg { padding: 14px; border-radius: 10px; font-size: 14px; margin: 0 0 14px; }
   .msg.bad { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn); }
   .msg.ok { background: #0d2a20; border: 1px solid #1d5c46; color: var(--good); }
@@ -444,6 +462,21 @@
   }
 
   /*
+   * Has this one been and gone?
+   *
+   * The server says so, because it works it out with the same rule the website
+   * uses to decide what to list -- four hours after the start. Comparing dates
+   * here instead would have a Sunday afternoon gig, gone from the site by six,
+   * still described as being on it until midnight.
+   *
+   * The date comparison is kept as a fallback for a reply from before the flag
+   * existed, so an open tab never starts calling things wrong.
+   */
+  function hasGone(event) {
+    return typeof event.gone === 'boolean' ? event.gone : isPast(event.date);
+  }
+
+  /*
    * Every call goes through here so that one thing is handled in one place: a
    * session that has quietly lapsed. The answer to that is to reload, because
    * the middleware will then hand back the sign-in page.
@@ -464,15 +497,35 @@
   /* ---------- the diary ---------- */
 
   function gigCard(event) {
+    var gone = hasGone(event);
+
     var card = el('article', 'gig'
       + (event.onSite ? '' : ' is-private')
-      + (isPast(event.date) ? ' is-past' : ''));
+      + (gone ? ' is-past' : ''));
 
     var when = el('div', 'when');
     when.appendChild(el('b', null, prettyDate(event.date)));
     if (event.time) { when.appendChild(el('span', 'time', event.time)); }
-    when.appendChild(el('span', 'tag ' + (event.onSite ? 'on' : 'off'),
-      event.onSite ? 'On the website' : 'Private'));
+
+    /*
+     * What the tag says has to be true at the moment it is read.
+     *
+     * A gig that has been played is not on the website any more -- it comes
+     * off four hours after it starts -- so saying "On the website" on it was
+     * telling the band something that had stopped being the case. It is kept
+     * here for their records, and the tag now says exactly that.
+     *
+     * A private booking keeps saying Private, which is still true and still
+     * worth knowing: it says what kind of night it was, not where it is
+     * showing.
+     */
+    if (gone && event.onSite) {
+      when.appendChild(el('span', 'tag', 'For your information only'));
+    } else {
+      when.appendChild(el('span', 'tag ' + (event.onSite ? 'on' : 'off'),
+        event.onSite ? 'On the website' : 'Private'));
+    }
+
     card.appendChild(when);
 
     var place = [event.venue, event.town].filter(Boolean).join(', ');
@@ -516,14 +569,27 @@
     cal.href = '/calendar?id=' + encodeURIComponent(event.id);
     acts.appendChild(cal);
 
-    // Only on the ones that are actually on the website, so the link never
-    // promises a page that is not there.
-    if (event.onSite) {
+    /*
+     * Only on the ones that are actually on the website, so the link never
+     * promises a page that is not there.
+     *
+     * A gig that has been played is no longer in Live Dates, so "See it on the
+     * site" would land on a list it has dropped out of. Its own page is still
+     * up at the same address though -- that is a record of the night and stays
+     * -- so where there is one, it is offered under a name that is true.
+     */
+    if (event.onSite && !gone) {
       var see = el('a', 'btn', 'See it on the site');
       see.href = event.infoUrl || '/#live';
       see.target = '_blank';
       see.rel = 'noopener';
       acts.appendChild(see);
+    } else if (event.onSite && event.infoUrl) {
+      var page = el('a', 'btn', 'See its page');
+      page.href = event.infoUrl;
+      page.target = '_blank';
+      page.rel = 'noopener';
+      acts.appendChild(page);
     }
 
     /*
@@ -532,11 +598,18 @@
      * the website that minute but the band still want the address, the
      * contact and what they were owed; deleting it to achieve the first
      * throws away the second.
+     *
+     * Not on one that has been and gone. It is already off the website by
+     * then, so a button offering to take it off would do nothing, and sitting
+     * under a tag that says the booking is for their information only it would
+     * read as a contradiction.
      */
-    var swap = el('button', null,
-      event.onSite ? 'Take off the site' : 'Put on the site');
-    swap.addEventListener('click', function () { setOnSite(event, !event.onSite, swap); });
-    acts.appendChild(swap);
+    if (!gone) {
+      var swap = el('button', null,
+        event.onSite ? 'Take off the site' : 'Put on the site');
+      swap.addEventListener('click', function () { setOnSite(event, !event.onSite, swap); });
+      acts.appendChild(swap);
+    }
 
     var del = el('button', 'danger', 'Delete');
     del.addEventListener('click', function () { remove(event); });
@@ -545,6 +618,10 @@
     card.appendChild(acts);
     return card;
   }
+
+  /* Kept out here so saving a booking does not fold the older ones away
+     again under whoever was reading them. */
+  var goneOpen = false;
 
   function draw() {
     var list = $('diaryList');
@@ -572,12 +649,37 @@
     }
 
     if (gone.length) {
-      var head = el('details');
-      var summary = el('summary');
-      summary.appendChild(el('h2', null, 'Been and gone (' + gone.length + ')'));
-      head.appendChild(summary);
-      gone.forEach(function (e) { head.appendChild(gigCard(e)); });
-      list.appendChild(head);
+      var older = el('div');
+      older.id = 'goneList';
+      older.hidden = !goneOpen;
+      gone.forEach(function (e) { older.appendChild(gigCard(e)); });
+
+      /*
+       * A real button, said plainly, the full width of the column. What was
+       * here before was a <summary> with a heading in it: it looked exactly
+       * like the "Coming up" heading above it, so there was nothing to tell
+       * anybody that pressing it would do something.
+       */
+      var show = el('button', 'showgone');
+      show.type = 'button';
+      show.setAttribute('aria-controls', 'goneList');
+
+      function label() {
+        show.textContent = (goneOpen ? 'Hide' : 'Show') + ' been and gone ('
+          + gone.length + ')';
+        show.appendChild(el('span', 'caret', goneOpen ? '▲' : '▼'));
+        show.setAttribute('aria-expanded', goneOpen ? 'true' : 'false');
+      }
+      label();
+
+      show.addEventListener('click', function () {
+        goneOpen = !goneOpen;
+        older.hidden = !goneOpen;
+        label();
+      });
+
+      list.appendChild(show);
+      list.appendChild(older);
     }
   }
 

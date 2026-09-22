@@ -17,6 +17,21 @@
  */
 import { isSignedIn, sameOrigin } from '../../../lib/admin-auth.js';
 import { readAll, writeAll, seedFromFile, tidy, isDate } from '../../../lib/diary.js';
+import { isOver } from '../../../lib/when.js';
+
+/*
+ * Every booking goes out carrying whether it has been and gone, worked out
+ * with the very rule the website uses to decide what to list -- four hours
+ * after the start, or 4am for one whose time is still TBC.
+ *
+ * It is done here rather than in the page because the page comparing dates on
+ * its own would drift: a Sunday afternoon gig is off the website by six and
+ * Backstage would still have said "on the website" until midnight, which is
+ * precisely the sort of thing that has to be true if the band are to trust it.
+ * It is added on the way out only -- tidy() names every field it stores, so
+ * this never finds its way back into the diary.
+ */
+const mark = (event) => ({ ...event, gone: isOver(event) });
 
 const json = (body, status) =>
   new Response(JSON.stringify(body), {
@@ -70,7 +85,7 @@ export async function onRequestGet(context) {
     }
   }
 
-  return json({ ok: true, events, imported });
+  return json({ ok: true, events: events.map(mark), imported });
 }
 
 export async function onRequestPost(context) {
@@ -98,7 +113,7 @@ export async function onRequestPost(context) {
   events.push(event);
   await writeAll(env, events);
 
-  return json({ ok: true, event });
+  return json({ ok: true, event: mark(event) });
 }
 
 export async function onRequestPut(context) {
@@ -134,7 +149,7 @@ export async function onRequestPut(context) {
   events[at] = event;
   await writeAll(env, events);
 
-  return json({ ok: true, event });
+  return json({ ok: true, event: mark(event) });
 }
 
 export async function onRequestDelete(context) {

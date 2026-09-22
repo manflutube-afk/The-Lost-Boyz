@@ -671,8 +671,21 @@ cursor.
 
 ### What they can do
 
-- **See what is coming up**, soonest first, with past dates tucked away at the
-  bottom under "Been and gone".
+- **See what is coming up**, soonest first. Dates that have been and gone are
+  folded away under a **Show been and gone (n)** button at the bottom of the
+  list. It is a real button, the full width of the column, with an arrow saying
+  which way it will go; it was a `<summary>` with a heading inside it and read
+  as a heading, so nobody could tell it could be pressed. Once opened it stays
+  open while the page is up, including across a save.
+
+  A booking that has been and gone is tagged **For your information only**
+  rather than "On the website", because by then it is not on the website -- it
+  came off four hours after it started. It keeps *Edit*, *Add to calendar* and
+  *Delete*; it loses *Take off the site*, which would do nothing, and its
+  "See it on the site" becomes **See its page**, since the gig's own page is
+  still up even though Live Dates has moved on. Whether a booking has been and
+  gone is decided by the server, with the rule in `lib/when.js` that the
+  website itself uses, so the two can never disagree.
 - **Add a booking, and choose there and then whether the world sees it.** The
   form asks straight out: *Private -- just the two of you*, or *Live on the
   website*. Pick the second and it is in Live Dates the moment Save is pressed;
