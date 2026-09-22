@@ -1,5 +1,5 @@
 {
-  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Every gig should also get its own page on the site, with infoUrl pointing at it - see Adding a gig in the README. If the start time is not settled yet, write TBC rather than leaving it out. A gig disappears from the site four hours after it starts - so an 8pm is gone by midnight - and a gig whose time still says TBC holds its place all day and goes at 4am. Nothing is deleted; it only stops being listed. The list sorts itself soonest-first, so you can just add to the bottom.",
+  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Every gig should also get its own page on the site, with infoUrl pointing at it - see Adding a gig in the README. If the start time is not settled yet you can write TBC, but you can also just leave it out - a gig with no time shows as TBC on its own. A gig disappears from the site four hours after it starts - so an 8pm is gone by midnight - and a gig whose time still says TBC holds its place all day and goes at 4am. Nothing is deleted; it only stops being listed. The list sorts itself soonest-first, so you can just add to the bottom.",
   "_example": {
     "date": "2026-10-17",
     "venue": "The Dolphin Inn",

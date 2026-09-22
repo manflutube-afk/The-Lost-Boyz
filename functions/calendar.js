@@ -165,15 +165,15 @@ export async function onRequestGet(context) {
       + (gig.venue ? ' at ' + gig.venue : '');
 
   /*
-   * A gig whose time is not settled yet carries "TBC" rather than a blank, so
-   * the site can say so plainly. Writing "Starts TBC" into somebody's calendar
-   * reads like a typo; saying it in full does not. Anything readTime could not
-   * make sense of is treated the same way, since that is exactly the case where
-   * no hour is going into the entry either.
+   * A gig whose time is not settled yet says so in full. Writing "Starts TBC"
+   * into somebody's calendar reads like a typo; "Start time to be confirmed"
+   * does not. That covers a time left empty and a time written as TBC and
+   * anything else readTime could not make sense of -- all three are the same
+   * situation, and in all three no hour is going into the entry either.
    */
   const lines0 = [
     gig.note || '',
-    gig.time ? (at ? 'Starts ' + gig.time : 'Start time to be confirmed') : '',
+    at ? 'Starts ' + gig.time : 'Start time to be confirmed',
   ];
 
   // Everything below this point is for the band alone and is only reached by a

@@ -582,7 +582,9 @@ Linking the button straight out to the venue's own website instead is not the wa
 do it, even as a stopgap.
 
 **When you do not know something yet, write `TBC`.** A start time that has not been
-settled goes in as `"time": "TBC"` rather than being left out. The card then reads
+settled shows as TBC whether it is written that way or simply left empty — a
+booking added in Backstage with the time box blank says TBC on the website by
+itself, so there is nothing to remember. The card then reads
 "Par · TBC", the page says "time TBC", and Add to calendar puts the gig in as an
 all-day entry with "Start time to be confirmed" in the notes. That tells the reader
 the band know about it and the answer is coming, which an empty line does not — and

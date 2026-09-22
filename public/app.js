@@ -2648,7 +2648,13 @@
 
       var meta = document.createElement('div');
       meta.className = 'gig__meta';
-      meta.textContent = [g.town, g.time].filter(Boolean).join(' · ');
+      /*
+       * A gig with no time on it yet says TBC rather than showing nothing at
+       * all. A blank reads as something forgotten; TBC says the band know
+       * about the night and the hour is still to come. It is also not a guess
+       * -- writing 8pm because the other pub nights start at eight would be.
+       */
+      meta.textContent = [g.town, g.time || 'TBC'].filter(Boolean).join(' · ');
 
       /*
        * Venue, town and note live in one wrapper rather than being three

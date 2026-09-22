@@ -505,7 +505,11 @@
 
     var when = el('div', 'when');
     when.appendChild(el('b', null, prettyDate(event.date)));
-    if (event.time) { when.appendChild(el('span', 'time', event.time)); }
+    /* TBC when nothing is set, the same as the website says, so the band can
+       see at a glance which ones are still waiting on a time. The edit form is
+       left empty rather than prefilled with it -- TBC is what it is called
+       before an answer, not an answer to type over. */
+    when.appendChild(el('span', 'time', event.time || 'TBC'));
 
     /*
      * What the tag says has to be true at the moment it is read.
