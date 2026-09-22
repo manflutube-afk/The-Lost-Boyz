@@ -590,9 +590,27 @@ it is a great deal better than guessing an hour nobody has confirmed. Fill the r
 time in later and everything picks it up.
 
 Only `date` (as `YYYY-MM-DD`) and `venue` are required. The site sorts the list
-soonest-first and hides anything already in the past, so you can just keep adding
+soonest-first and hides anything already played, so you can just keep adding
 to the bottom and never have to tidy up. With an empty list the section shows a
 "no dates in the diary" message instead.
+
+**When a gig comes off the site.** Four hours after it starts, so an 8pm is gone
+by midnight and the list is never headed by a night that has already happened.
+A gig whose time still says TBC has no start to count from, so it holds its place
+for the whole of its day and goes at 4am the next morning. If `durationHours` is
+set to more than four, that wins — a gig stays listed for as long as the band
+say they are playing, because pulling a listing while they are still on stage
+would be the worse mistake. Nothing is deleted by any of this: the booking stays
+in Backstage, and the gig's own page stays on the site at the same address. It
+simply stops being listed.
+
+The rule lives in `lib/when.js` and runs on the server, so a finished gig is
+gone from `/api/gigs` itself rather than merely hidden by the page. The same
+rule is repeated in the gig block of `public/app.js`, because the list can also
+come from the cached `gigs.json` fallback and because a phone left open all
+night should not still be showing last night's gig. **Change one and you must
+change the other.** Both work in Cornwall time whatever the clocks are doing
+and wherever the visitor is.
 
 Commit and push after editing — Pages redeploys on its own.
 

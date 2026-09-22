@@ -2498,6 +2498,90 @@
   var box = document.getElementById('gigs');
   if (!box) { return; }
 
+  /*
+   * A gig comes off the site four hours after it starts -- the 8pm on the
+   * 19th is gone by midnight, because by then it has been played and it is
+   * only sitting above the nights that have not.
+   *
+   * The same rule runs on the server, in lib/when.js, and /api/gigs has
+   * already dropped the ones that are over before this ever sees them. This
+   * is here because the list can also come from the cached copy of
+   * /data/gigs.json when the diary is unreachable, and because a phone left
+   * open overnight should not still be showing last night's gig in the
+   * morning. Two places, one rule: if you change it, change both.
+   */
+  var GRACE_MS = 4 * 3600000;
+
+  /*
+   * Gig times are Cornwall wall-clock: "8pm" means 8pm as the pub reads it,
+   * whatever the clocks are doing and wherever the person looking at this
+   * happens to be. Comparing that against a phone set to Sydney without
+   * converting would empty the list the best part of a day early, so the
+   * London time is turned into the instant it actually happens first.
+   */
+  function londonOffsetMinutes(atMs) {
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/London', hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(new Date(atMs));
+
+      var got = {};
+      parts.forEach(function (part) { got[part.type] = part.value; });
+
+      var asIfUtc = Date.UTC(+got.year, +got.month - 1, +got.day,
+        +got.hour % 24, +got.minute, +got.second);
+      return (asIfUtc - atMs) / 60000;
+    } catch (e) {
+      // A browser without named time zones. Treating the gig as UTC is at
+      // worst an hour out in summer, which is well inside the four hours.
+      return 0;
+    }
+  }
+
+  function londonToInstant(y, m, d, hh, mm) {
+    var naive = Date.UTC(y, m - 1, d, hh, mm);
+    var ms = naive - londonOffsetMinutes(naive) * 60000;
+    return naive - londonOffsetMinutes(ms) * 60000;
+  }
+
+  /* "8pm", "7.30pm", "Doors 7pm" -- written for people, so read loosely. */
+  function readTime(value) {
+    if (!value) { return null; }
+    var m = String(value).toLowerCase().match(/(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?/);
+    if (!m) { return null; }
+
+    var hour = parseInt(m[1], 10);
+    var mins = m[2] ? parseInt(m[2], 10) : 0;
+    var half = m[3];
+
+    if (half === 'pm' && hour < 12) { hour += 12; }
+    if (half === 'am' && hour === 12) { hour = 0; }
+    if (!half && hour <= 11) { hour += 12; }
+
+    if (hour > 23 || mins > 59) { return null; }
+    return { hour: hour, mins: mins };
+  }
+
+  /* The instant this one should disappear, or null if the date is unusable --
+     which means leave it alone rather than quietly hide it. */
+  function goesAt(gig) {
+    var parts = String((gig && gig.date) || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!parts) { return null; }
+
+    var y = +parts[1], m = +parts[2], d = +parts[3];
+    var at = readTime(gig.time);
+
+    // TBC: no start to count from, so it keeps its whole day and goes at 4am.
+    if (!at) { return londonToInstant(y, m, d + 1, 0, 0) + GRACE_MS; }
+
+    // A longer set written into the diary wins: never pull a listing while
+    // they are still on stage.
+    var hours = Math.max(4, Number(gig.durationHours) || 0);
+    return londonToInstant(y, m, d, at.hour, at.mins) + hours * 3600000;
+  }
+
   function message(text) {
     var p = document.createElement('p');
     p.className = 'gigs__msg';
@@ -2506,16 +2590,16 @@
   }
 
   function render(gigs) {
-    // Drop anything already past, then show soonest first.
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Drop anything already played, then show soonest first.
+    var now = Date.now();
+    var thisYear = new Date().getFullYear();
 
     var upcoming = gigs
       .filter(function (g) {
-        var d = new Date(g.date);
-        return !isNaN(d) && d >= today;
+        var ends = goesAt(g);
+        return ends !== null && now < ends;
       })
-      .sort(function (a, b) { return new Date(a.date) - new Date(b.date); });
+      .sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
 
     if (!upcoming.length) {
       message('No dates in the diary right now — check back soon, or get in touch to book us.');
@@ -2525,7 +2609,13 @@
     var frag = document.createDocumentFragment();
 
     upcoming.forEach(function (g) {
-      var d = new Date(g.date);
+      /*
+       * Read as three numbers rather than handed to Date, which treats a bare
+       * "2027-02-19" as UTC midnight -- so a visitor whose phone is set behind
+       * UTC saw the card headed the 18th.
+       */
+      var on = String(g.date).split('-');
+      var d = new Date(+on[0], +on[1] - 1, +on[2]);
 
       var card = document.createElement('article');
       card.className = 'gig';
@@ -2545,7 +2635,7 @@
        * dates either side of new year in the list, a bare "16 JAN" sitting
        * under "17 OCT" reads as a date that has already gone by.
        */
-      if (d.getFullYear() !== today.getFullYear()) {
+      if (d.getFullYear() !== thisYear) {
         var yr = document.createElement('span');
         yr.className = 'gig__yr';
         yr.textContent = d.getFullYear();

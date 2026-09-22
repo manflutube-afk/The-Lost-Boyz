@@ -27,72 +27,15 @@
  */
 import { publicGigs, readAll } from '../lib/diary.js';
 import { isSignedIn } from '../lib/admin-auth.js';
+/* The same clock work that decides when a gig comes off the website, so the
+   two can never disagree about what "8pm on the 19th" means. */
+import { readTime, londonToInstant } from '../lib/when.js';
 
 /* How long to put in the calendar when the gig does not say. */
 const DEFAULT_HOURS = 3;
 
-const TZ = 'Europe/London';
-
 const text = (body, status, headers) =>
   new Response(body, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8', ...headers } });
-
-/*
- * How far Europe/London is from UTC at a given instant -- an hour in summer,
- * nothing in winter. Worked out by asking Intl to format the instant in London
- * and seeing how far the answer has moved, which is the only way to do it that
- * stays right through a clock change.
- */
-function londonOffsetMinutes(atMs) {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: TZ, hour12: false,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', second: '2-digit',
-  }).formatToParts(new Date(atMs)).reduce((all, p) => {
-    all[p.type] = p.value;
-    return all;
-  }, {});
-
-  const asIfUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day,
-    +parts.hour % 24, +parts.minute, +parts.second);
-
-  return (asIfUtc - atMs) / 60000;
-}
-
-/* A wall-clock time in London, turned into the instant it actually happens. */
-function londonToInstant(y, m, d, hh, mm) {
-  const naive = Date.UTC(y, m - 1, d, hh, mm);
-  // Two passes: the first guess can land the wrong side of a clock change,
-  // and re-reading the offset at the corrected instant settles it.
-  let ms = naive - londonOffsetMinutes(naive) * 60000;
-  ms = naive - londonOffsetMinutes(ms) * 60000;
-  return ms;
-}
-
-/*
- * The time in gigs.json is written for people -- "8pm", "7.30pm", "Doors 7pm"
- * -- so it is read loosely. If it cannot be understood, null comes back and
- * the event is written as an all-day one rather than being given a start time
- * nobody actually said.
- */
-function readTime(value) {
-  if (!value) { return null; }
-
-  const m = String(value).toLowerCase()
-    .match(/(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?/);
-  if (!m) { return null; }
-
-  let hour = parseInt(m[1], 10);
-  const mins = m[2] ? parseInt(m[2], 10) : 0;
-  const half = m[3];
-
-  if (half === 'pm' && hour < 12) { hour += 12; }
-  if (half === 'am' && hour === 12) { hour = 0; }
-  // no am/pm and a small number: an evening gig, not breakfast
-  if (!half && hour <= 11) { hour += 12; }
-
-  if (hour > 23 || mins > 59) { return null; }
-  return { hour, mins };
-}
 
 const two = (n) => String(n).padStart(2, '0');
 

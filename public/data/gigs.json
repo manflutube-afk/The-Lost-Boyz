@@ -1,5 +1,5 @@
 {
-  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Every gig should also get its own page on the site, with infoUrl pointing at it - see Adding a gig in the README. If the start time is not settled yet, write TBC rather than leaving it out. Dates in the past disappear from the site automatically, and the list sorts itself soonest-first, so you can just add to the bottom.",
+  "_readme": "Add your gigs to the list below. Each one needs a date (YYYY-MM-DD) and a venue; town, time and ticketUrl are optional. Every gig should also get its own page on the site, with infoUrl pointing at it - see Adding a gig in the README. If the start time is not settled yet, write TBC rather than leaving it out. A gig disappears from the site four hours after it starts - so an 8pm is gone by midnight - and a gig whose time still says TBC holds its place all day and goes at 4am. Nothing is deleted; it only stops being listed. The list sorts itself soonest-first, so you can just add to the bottom.",
   "_example": {
     "date": "2026-10-17",
     "venue": "The Dolphin Inn",
@@ -9,7 +9,7 @@
     "linkLabel": "optional - button text, defaults to \"Tickets\"",
     "ticketUrl": "https://example.com/tickets",
     "infoUrl": "optional - a page on this site with the full details; wins over ticketUrl",
-    "durationHours": "optional - how long to put in someone's calendar when they tap Add to calendar. Defaults to 3."
+    "durationHours": "optional - how long the gig runs. Used for the entry someone gets when they tap Add to calendar (defaults to 3), and it also keeps the gig listed for longer than the usual four hours if you are playing an all-dayer."
   },
   "gigs": [
     {
