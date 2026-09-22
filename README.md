@@ -132,7 +132,7 @@ These are placeholders. Search the project for `TODO` to find them all.
 
 | Where | What to change |
 | --- | --- |
-| `public/index.html` — Music section | The single is out, and there is one **Listen now** button. It goes to the release's HyperFollow page, which lists every service the single is on — so a new service appearing does not need a new button here. Which services that page shows, and in what order, is set in DistroKid, not in this repository. The countdown beside the title looks after itself; it reads "Out now" now the date has passed. If the date ever moves, change `data-release` on the countdown and the `<time>` above it. |
+| `public/index.html` — Music section | The single is out. **Listen now** is the main button and goes to the release's HyperFollow page, which covers Apple Music, iTunes, Spotify and iHeartRadio and remembers which one a returning visitor used. **Amazon Music** and **Tidal** have buttons of their own because they are not on that page and there is no other way to reach them from here. Anything that does appear on HyperFollow needs no button adding. Which services that page shows, and in what order, is set in DistroKid, not in this repository. The countdown beside the title looks after itself; it reads "Out now" now the date has passed. If the date ever moves, change `data-release` on the countdown and the `<time>` above it. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 | Cloudflare dashboard | Switch the enquiry emails on — see **The forms** below. Until you do, both forms fall back to opening the visitor's own email app. |
 
