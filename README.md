@@ -132,7 +132,7 @@ These are placeholders. Search the project for `TODO` to find them all.
 
 | Where | What to change |
 | --- | --- |
-| `public/index.html` — Music section | Apple Music is linked as a **pre-add** — the single is not out until 20 September. On release day change the "Pre-add the single" label to "Listen on", and add Spotify and YouTube next to it as those links arrive, deleting the line underneath that says they are to follow. The countdown beside the title looks after itself — it switches to "Out now" when the date passes. If the date ever moves, change `data-release` on the countdown and the `<time>` above it. |
+| `public/index.html` — Music section | The single is out, and there is one **Listen now** button. It goes to the release's HyperFollow page, which lists every service the single is on — so a new service appearing does not need a new button here. Which services that page shows, and in what order, is set in DistroKid, not in this repository. The countdown beside the title looks after itself; it reads "Out now" now the date has passed. If the date ever moves, change `data-release` on the countdown and the `<time>` above it. |
 | `public/data/gigs.json` | Add your live dates (see below). |
 | Cloudflare dashboard | Switch the enquiry emails on — see **The forms** below. Until you do, both forms fall back to opening the visitor's own email app. |
 
