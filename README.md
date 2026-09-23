@@ -401,6 +401,40 @@ Worth asking for the `note` on each item too. "Marshall JCM800" is a list; "the
 JCM800 he has had since he was seventeen and refuses to replace" is the reason
 anyone reads a page like this.
 
+### The Kernow Pages tip panel
+
+An amber panel above the footer on the home page, Our Story, Geekz, Sponsors and
+Charities, saying the site was built and is hosted for free and inviting a tip
+at [ko-fi.com/kernow](https://ko-fi.com/kernow). It is the one thing on the site
+that is not about the band, so it is the one thing allowed to look slightly
+different: the site's own shapes, spacing, fonts and pill, but the warm side of
+the palette instead of the violet.
+
+Amber and not a stronger red on purpose. Red already means the safety warning on
+the Geekz page, and two loud reds meaning two different things is how a warning
+stops being read.
+
+**Where it sits, and why not lower.** Above the footer, so it reads with the
+footer's own "Powered by Kernow Pages" as one band of small print about the
+website. On the home page it goes one step higher still, *above* the dedication:
+that page is meant to close on "In loving memory of Timmy and Kyle", and an ask
+for money underneath that is the wrong order.
+
+The last line points at the sponsors page, where Kernow Pages is listed — except
+on the sponsors page itself, where it says "They are listed above" rather than
+sending somebody to the page they are already reading.
+
+The mark is their own white-on-transparent logo from
+kernowpages.leodiablo.com, kept in `source-images/KernowPages/` and resized by
+`npm run images`. It is not the black one from the sponsors card recoloured:
+that mark has Cornwall knocked out of the middle, so inverting it would fill the
+county in and lose the whole idea.
+
+To change the wording, the panel is written out in full in each of the five
+pages rather than built by JavaScript, so it is there with the scripts off and
+a search engine can read it. Change one, change all five — searching for
+`sec--tip` finds them.
+
 ### Adding a sponsor
 
 The Sponsors page is at `/sponsors`. Add businesses in `public/data/sponsors.json`:

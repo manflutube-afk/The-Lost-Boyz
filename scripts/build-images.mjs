@@ -514,6 +514,29 @@ if (existsSync(GEAR_SRC)) {
 }
 
 /*
+ * The Kernow Pages mark, for the tip panel that sits above the footer.
+ *
+ * Their own white-on-transparent version, taken from kernowpages.leodiablo.com
+ * rather than recoloured from the black one on the sponsors card: the mark has
+ * Cornwall knocked out of the middle of it, so inverting the black version
+ * would have filled that in and lost the whole idea.
+ *
+ * Transparency is kept -- the panel behind it is a warm dark and the mark has
+ * to sit on it, not on a white plate the way a sponsor's logo does.
+ */
+const KP_SRC = `${SRC}/KernowPages/logo-white.png`;
+
+if (existsSync(KP_SRC)) {
+  for (const w of [240, 480]) {
+    await sharp(KP_SRC)
+      .resize({ width: w, withoutEnlargement: true })
+      .webp({ quality: 88, alphaQuality: 100 })
+      .toFile(`${OUT}/kernow-pages-white-${w}.webp`);
+  }
+  console.log('kernow pages: mark resized for the tip panel');
+}
+
+/*
  * Favicons, home-screen icons and the social sharing card.
  *
  * All three are built from the cut-out logo rather than the original file, so
