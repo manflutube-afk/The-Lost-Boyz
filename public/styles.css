@@ -2721,6 +2721,45 @@ body.nav-open { overflow: hidden; }
   .tip__btn { flex: 1 1 100%; }
 }
 
+/* ---- the Ko-fi panel, opened over the page ---- */
+
+/*
+ * Narrower than the site's other dialogs because the thing inside it is a
+ * fixed-width donation form, and stretching the box wider than its contents
+ * only puts empty panel either side of it.
+ */
+.modal--kofi { width: min(94vw, 420px); }
+
+/* Room at the top for the close button, which is the only chrome left. */
+.modal--kofi .modal__inner { padding: 2.9rem 1rem 1.1rem; }
+
+.kofi__frame {
+  /* Ko-fi's panel is about 570px tall. On a short phone held in landscape
+     that is taller than the screen, so it is capped and allowed to scroll
+     inside rather than pushing its own button off the bottom. */
+  height: min(566px, 64vh);
+  margin: 0 0 .8rem;
+  border-radius: 10px;
+  overflow: hidden;
+  /* Their panel is light, so the corner it rounds off has to be light too,
+     or a dark sliver shows through while it loads. */
+  background: #fff;
+}
+
+.kofi__frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.kofi__note {
+  margin: 0;
+  font-size: .82rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
 .ftr {
   padding: 2.5rem 0 calc(2.5rem + env(safe-area-inset-bottom));
   background: #04020a;

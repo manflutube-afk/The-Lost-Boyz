@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=1366cfb6">
+<link rel="stylesheet" href="/styles.css?v=337a4b59">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -324,10 +324,35 @@
           pages they do the same for. As little as &pound;1 helps.</p>
         <p class="tip__after">Need a hand with a site of your own? They are on the <a href="/sponsors">sponsors page</a>.</p>
       </div>
-      <a class="tip__btn" href="https://ko-fi.com/kernow" target="_blank" rel="noopener">Leave a tip</a>
+      <!-- Still a real link to Ko-fi. app.js catches the click and opens the
+           panel below instead; with the scripts off, or on a browser without
+           <dialog>, it stays a link that works. -->
+      <a class="tip__btn" data-kofi href="https://ko-fi.com/kernow"
+         target="_blank" rel="noopener">Leave a tip</a>
     </div>
   </div>
 </section>
+
+<!-- ===== The tip panel itself, from Ko-fi. =====
+     The iframe is not written here: app.js adds it the first time somebody
+     opens this, so nothing at all is fetched from Ko-fi for a visitor who
+     never asks for it. -->
+<dialog class="modal modal--kofi" id="kofiBox" aria-label="Leave Kernow Pages a tip">
+  <div class="modal__inner kofi">
+    <button class="modal__close" type="button" data-modal-close aria-label="Close">&times;</button>
+    <!--
+      No heading of our own. Ko-fi's panel opens with "Support Kernow Pages"
+      written across it, and a second heading above saying the same thing in
+      different words is noise -- and the height it costs is what put a second
+      scrollbar down the side of the first attempt. The dialog is named for a
+      screen reader on the element itself instead.
+    -->
+    <div class="kofi__frame" id="kofiFrame"></div>
+    <p class="kofi__note">Ko-fi takes the payment, not this site. The last step
+      opens in their own window, so you can see whose it is before you type a card
+      number into it.</p>
+  </div>
+</dialog>
 
 <footer class="ftr">
   <div class="wrap">
@@ -365,6 +390,6 @@
 }
 </script>
 
-<script src="/app.js?v=2d05c404" defer></script>
+<script src="/app.js?v=a7cba56c" defer></script>
 </body>
 </html>

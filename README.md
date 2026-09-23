@@ -414,6 +414,35 @@ Amber and not a stronger red on purpose. Red already means the safety warning on
 the Geekz page, and two loud reds meaning two different things is how a warning
 stops being read.
 
+**Leave a tip opens on the page, not away from it.** Pressing it opens Ko-fi's
+own panel in a dialog over the site: pick an amount, put a name and a message,
+press Tip. Nobody is sent off to another website to do it.
+
+The button is still a plain link to `ko-fi.com/kernow`, and `app.js` catches the
+click. With the scripts off, or on a browser with no `<dialog>`, it stays a link
+that works. The iframe is **not** in the page source -- it is built the first
+time somebody opens the panel, so a visitor who never presses the button never
+makes a request to Ko-fi at all. Five pages carry this; loading a third party's
+frame on every one of them for everybody, to serve the few who tip, would be the
+wrong trade.
+
+It has to be Ko-fi's embed address --
+`ko-fi.com/kernow/?hidefeed=true&widget=true&embed=true&preview=true` -- because
+the ordinary `ko-fi.com/kernow` page refuses to be framed at all; it sends
+`frame-ancestors 'self'`. If the panel ever comes up blank, that header changing
+is the first thing to check.
+
+What it cannot do is take the money on this site. The payment step is Ko-fi's and
+theirs hands over to PayPal or Stripe in a window of its own. That is right, and
+not worth defeating even if it could be: somebody typing a card number should be
+able to see whose address bar they are typing it into. The line under the panel
+says so plainly rather than letting it come as a surprise.
+
+The dialog deliberately has **no heading of its own** -- Ko-fi's panel opens with
+"Support Kernow Pages" written across it, and a second heading saying the same
+thing put the dialog over the height of a phone screen and gave it two
+scrollbars. It is named for a screen reader with `aria-label` instead.
+
 **Where it sits, and why not lower.** Above the footer, so it reads with the
 footer's own "Powered by Kernow Pages" as one band of small print about the
 website. On the home page it goes one step higher still, *above* the dedication:

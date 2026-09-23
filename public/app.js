@@ -2482,6 +2482,68 @@
     });
   })();
 
+  /* ---------- the Kernow Pages tip ---------- */
+
+  /*
+   * Keeps somebody on the site to leave a tip.
+   *
+   * The button is an ordinary link to ko-fi.com, and stays one: if the script
+   * never runs, or the browser has no <dialog>, pressing it goes to Ko-fi the
+   * old way. Only when both are there is the click taken over and Ko-fi's own
+   * panel opened over the page instead.
+   *
+   * Nothing is fetched from Ko-fi until somebody actually asks for it. The
+   * iframe is built on the first open, not written into the page -- so a
+   * visitor who never presses the button never touches Ko-fi at all, makes no
+   * request to them and picks up nothing of theirs. Five pages carry this
+   * panel; loading a third party's frame on all five, for everybody, to serve
+   * the few who tip, would be the wrong trade.
+   *
+   * What it cannot do is take the money here. The payment step is Ko-fi's, and
+   * theirs hands over to PayPal or Stripe in a window of its own -- which is
+   * right, and not worth defeating even if it could be: somebody typing card
+   * details should be able to see whose address bar they are typing into.
+   */
+  (function () {
+    var box = document.getElementById('kofiBox');
+    var holder = document.getElementById('kofiFrame');
+    var buttons = document.querySelectorAll('[data-kofi]');
+
+    if (!box || !holder || !buttons.length) { return; }
+    // no <dialog> on this browser: leave the link alone and let it go to Ko-fi
+    if (typeof box.showModal !== 'function') { return; }
+
+    var built = false;
+
+    function build() {
+      if (built) { return; }
+      built = true;
+
+      var frame = document.createElement('iframe');
+      /* Ko-fi's own embed address. The plain ko-fi.com/kernow page refuses to
+         be framed -- it sends frame-ancestors 'self' -- and this one is the
+         address they publish for putting the panel in a page. */
+      frame.src = 'https://ko-fi.com/kernow/?hidefeed=true&widget=true&embed=true&preview=true';
+      frame.title = 'Leave Kernow Pages a tip';
+      frame.setAttribute('allow', 'payment');
+      frame.setAttribute('loading', 'lazy');
+      holder.appendChild(frame);
+    }
+
+    Array.prototype.forEach.call(buttons, function (button) {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+        build();
+        box.showModal();
+      });
+    });
+
+    /* clicking the darkened area closes it, the same as the other dialogs */
+    box.addEventListener('click', function (e) {
+      if (e.target === box) { box.close(); }
+    });
+  })();
+
   /*
    * Anything new goes ABOVE this line.
    *
