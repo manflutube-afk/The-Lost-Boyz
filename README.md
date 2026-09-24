@@ -403,16 +403,20 @@ anyone reads a page like this.
 
 ### The Kernow Pages tip panel
 
-An amber panel above the footer on the home page, Our Story, Geekz, Sponsors and
+A quiet panel above the footer on the home page, Our Story, Geekz, Sponsors and
 Charities, saying the site was built and is hosted for free and inviting a tip
-at [ko-fi.com/kernow](https://ko-fi.com/kernow). It is the one thing on the site
-that is not about the band, so it is the one thing allowed to look slightly
-different: the site's own shapes, spacing, fonts and pill, but the warm side of
-the palette instead of the violet.
+at [ko-fi.com/kernow](https://ko-fi.com/kernow). The button says **Help keep
+this site going**.
 
-Amber and not a stronger red on purpose. Red already means the safety warning on
-the Geekz page, and two loud reds meaning two different things is how a warning
-stops being read.
+It is deliberately the site's own card and nothing more: the same panel tone,
+the same hairline border, the same outline pill as every other button. The first
+version was amber, with a coloured bar down its side and a solid block of a
+button, on the reasoning that a tip jar nobody notices collects nothing. That
+was wrong. It stood out well enough to pull the eye away from the band's own
+pages, which is the one thing this panel must not do -- it is a footnote about
+the website on somebody else's site. Nothing in it is now louder than the
+content above it. The mark is held at 72% opacity for the same reason: pure
+white, it was the brightest thing in the panel.
 
 **Leave a tip opens on the page, not away from it.** Pressing it opens Ko-fi's
 own panel in a dialog over the site: pick an amount, put a name and a message,

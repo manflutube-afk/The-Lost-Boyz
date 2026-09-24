@@ -2623,21 +2623,19 @@ body.nav-open { overflow: hidden; }
 /* ---------------- The Kernow Pages tip panel ---------------- */
 
 /*
- * This is the one thing on the site that is not about the band, so it is the
- * one thing allowed to look slightly different. The shape, the spacing, the
- * fonts and the pill are all the site's own -- what changes is the warm side
- * of the palette: amber against the violet everything else is built from.
+ * Quiet on purpose. This is the only thing on the site that is not about the
+ * band, so it should read as a footnote and not as an advert -- it is the
+ * site's own card: the same panel tone, the same hairline border, the same
+ * pill as every other button.
  *
- * Amber rather than a stronger red because red is already spoken for by the
- * warning on the Geekz page, and two loud reds meaning two different things
- * is how a warning stops being read.
- *
- * It sits above the footer, which already says "Powered by Kernow Pages", so
- * the two read as one band of small print about the website rather than as an
- * advert dropped into the middle of the band's own pages.
+ * An earlier version of this was amber, with a coloured bar down the side and
+ * a solid block of a button. It stood out, which was the brief at the time,
+ * and it stood out so well that it pulled the eye away from the band's own
+ * pages. Nothing here is louder than the content above it now; somebody
+ * looking for it will find it, and nobody else is interrupted by it.
  */
 .sec--tip {
-  padding: clamp(2.25rem, 7vw, 3.25rem) 0;
+  padding: clamp(1.75rem, 5vw, 2.5rem) 0;
   background: var(--ink);
   border-top: 1px solid var(--line);
 }
@@ -2646,79 +2644,55 @@ body.nav-open { overflow: hidden; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1.1rem 1.5rem;
-  padding: 1.4rem 1.5rem;
-  background: linear-gradient(135deg, #1e1509 0%, #1a1120 62%, var(--panel) 100%);
-  border: 1px solid #6a5222;
-  border-left: 4px solid #f0b429;
+  gap: .9rem 1.4rem;
+  padding: 1.15rem 1.3rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
 }
 
 .tip__mark {
   flex: 0 0 auto;
-  width: 78px;
+  width: 54px;
   height: auto;
+  /* Level with the heading rather than centred on the whole block. Centred, it
+     floated halfway down the panel beside nothing in particular; this reads as
+     a mark against a name, which is what it is. */
+  align-self: flex-start;
+  margin-top: .1rem;
+  /* their mark is pure white, which was the brightest thing in the panel and
+     the first thing the eye landed on; held back so it sits with the text */
+  opacity: .72;
 }
 
-/* 18rem before it is allowed to wrap, so the words never end up in a column
+/* 17rem before it is allowed to wrap, so the words never end up in a column
    two syllables wide between the mark and the button */
-.tip__words { flex: 1 1 18rem; min-width: 0; }
-
-.tip__eyebrow {
-  margin: 0 0 .25rem;
-  font-family: var(--f-display);
-  font-size: .72rem;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: #f0b429;
-}
+.tip__words { flex: 1 1 17rem; min-width: 0; }
 
 .tip__title {
-  margin: 0 0 .5rem;
+  margin: 0 0 .35rem;
   font-family: var(--f-display);
-  font-size: clamp(1.25rem, 3.4vw, 1.6rem);
+  font-size: 1.02rem;
   font-weight: 600;
-  letter-spacing: .02em;
+  letter-spacing: .04em;
   color: var(--bone);
 }
 
-.tip__lead { margin: 0 0 .5rem; font-size: .96rem; color: var(--text); }
+.tip__lead { margin: 0 0 .35rem; font-size: .9rem; line-height: 1.55; color: var(--text); }
 
-.tip__after { margin: 0; font-size: .88rem; color: var(--muted); }
+.tip__after { margin: 0; font-size: .84rem; color: var(--muted); }
 .tip__after a { color: var(--lilac); }
 
-.tip__btn {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: .75rem 1.5rem;
-  border: 1px solid #f0b429;
-  border-radius: 999px;
-  /* near-black on amber, which is the readable way round: white on this
-     colour is about 2:1 and would fail at any size */
-  background: #f0b429;
-  color: #1a1206;
-  font-family: var(--f-display);
-  font-size: .98rem;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: background .22s, transform .12s;
-}
+/* The button is the site's own .btn and takes its colours from it. This only
+   sets the label, which is longer than most, on one line. */
+.tip__btn { flex: 0 0 auto; white-space: nowrap; }
 
-.tip__btn:hover, .tip__btn:focus-visible { background: #ffc95a; }
-.tip__btn:active { transform: translateY(1px); }
-
-@media (max-width: 560px) {
-  /* On a phone the mark and the heading share the top line and the button
-     goes full width underneath, which is the easiest thing in the panel to
-     hit and the only thing in it that does anything. */
-  .tip { gap: .9rem 1rem; }
-  .tip__mark { width: 58px; }
-  .tip__btn { flex: 1 1 100%; }
+@media (max-width: 620px) {
+  /* On a phone the label is wider than the column, so it stops being one line
+     and the button takes the full width instead -- still the easiest thing in
+     the panel to hit, and the only thing in it that does anything. */
+  .tip__mark { width: 44px; }
+  .tip__btn { flex: 1 1 100%; white-space: normal; text-align: center; }
 }
 
 /* ---- the Ko-fi panel, opened over the page ---- */
