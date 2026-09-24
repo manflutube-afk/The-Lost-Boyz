@@ -2683,6 +2683,21 @@ body.nav-open { overflow: hidden; }
 .tip__after { margin: 0; font-size: .84rem; color: var(--muted); }
 .tip__after a { color: var(--lilac); }
 
+/*
+ * The home page's short version: the mark and the button and nothing between
+ * them, so the two are centred as a pair rather than pushed to opposite ends
+ * of a panel with a gap in the middle where the words used to be.
+ */
+.tip--bare {
+  justify-content: center;
+  gap: 1rem 1.25rem;
+  padding: 1rem 1.3rem;
+}
+
+/* Level with the heading is the right place when there is a heading. Here
+   there is nothing to be level with, so it sits with the button. */
+.tip--bare .tip__mark { align-self: center; margin-top: 0; }
+
 /* The button is the site's own .btn and takes its colours from it. This only
    sets the label, which is longer than most, on one line. */
 .tip__btn { flex: 0 0 auto; white-space: nowrap; }

@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=e2ababa0">
+<link rel="stylesheet" href="/styles.css?v=c5a8a1bf">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -565,19 +565,22 @@
 <!-- ===== Kernow Pages: the tip panel. Above the footer on every page that
      carries it, so it reads with "Powered by Kernow Pages" rather than as an
      advert in the middle of the band's own pages. ===== -->
-<section class="sec sec--tip" aria-labelledby="tipTitle">
+<!--
+  The home page carries the short version: the mark and the button, nothing
+  else. The other four pages keep the sentence explaining what Kernow Pages is
+  and where to find them. Somebody on the front page is here for the band, and
+  the footer three inches below already says who built the site.
+
+  No heading either, so the section is named on the element for a screen reader
+  rather than by text nobody sees.
+-->
+<section class="sec sec--tip" aria-label="Built and hosted by Kernow Pages">
   <div class="wrap">
-    <div class="tip">
+    <div class="tip tip--bare">
       <img class="tip__mark" src="/images/kernow-pages-white-240.webp"
              srcset="/images/kernow-pages-white-240.webp 240w, /images/kernow-pages-white-480.webp 480w"
              sizes="54px" width="240" height="224" alt="Kernow Pages"
              loading="lazy" decoding="async">
-      <div class="tip__words">
-        <h2 class="tip__title" id="tipTitle">Built and hosted by Kernow Pages</h2>
-        <p class="tip__lead">Free of charge. A tip helps keep it running &mdash; and
-          the other Cornish pages they do the same for. As little as &pound;1 helps.</p>
-        <p class="tip__after">Need a hand with a site of your own? They are on the <a href="/sponsors">sponsors page</a>.</p>
-      </div>
       <!-- Still a real link to Ko-fi. app.js catches the click and opens the
            panel below instead; with the scripts off, or on a browser without
            <dialog>, it stays a link that works. -->

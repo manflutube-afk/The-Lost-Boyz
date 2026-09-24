@@ -408,6 +408,12 @@ Charities, saying the site was built and is hosted for free and inviting a tip
 at [ko-fi.com/kernow](https://ko-fi.com/kernow). The button says **Help keep
 this site going**.
 
+**The home page carries a shorter version**: the mark and the button, and
+nothing else. The four other pages keep the sentence saying what Kernow Pages
+is and where to find them. Somebody on the front page is there for the band,
+and the footer an inch below already says who built the site. That is the
+`tip--bare` variant, and it is the only difference between the five.
+
 It is deliberately the site's own card and nothing more: the same panel tone,
 the same hairline border, the same outline pill as every other button. The first
 version was amber, with a coloured bar down its side and a solid block of a
