@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css?v=c5a8a1bf">
+<link rel="stylesheet" href="/styles.css?v=6c592aa0">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -62,6 +62,7 @@
   <nav class="nav" id="nav" aria-label="Main">
     <a href="#music">Music</a>
     <a href="/our-story">Our Story</a>
+    <a href="#news">News</a>
     <a href="#live">Live</a>
     <a href="#booking">Booking</a>
     <a href="/reelz">Reelz</a>
@@ -99,6 +100,7 @@
     <p class="hero__tag">Classic rock duo — coming to a venue near you in 2026</p>
     <div class="hero__cta">
       <a class="btn btn--solid" href="#music">The debut single</a>
+      <a class="btn" href="#news">In the news</a>
       <a class="btn" href="#booking">Book the Boyz</a>
     </div>
   </div>
@@ -238,6 +240,48 @@
 </section>
 
 <!-- ============ LIVE ============ -->
+<!-- ============ IN THE NEWS ============
+     Sits after Our Story because the story the BBC told is that one.
+
+     Neither of these can be shown on this page, and not for want of trying:
+     the BBC article answers with "x-frame-options: DENY" and
+     "frame-ancestors 'none'", and Facebook's own video plugin says the reel is
+     unavailable however the address is written. So this page says what the
+     coverage is, in our own words, and the link out is marked as a link out
+     rather than looking like something that opens here.
+
+     Their headline is quoted and credited. The rest is written here -- the
+     article is the BBC's to publish, not ours to copy.
+-->
+<section class="sec sec--news" id="news">
+  <div class="wrap">
+    <p class="eyebrow">In the news</p>
+    <h2 class="h2">What has been said about us</h2>
+
+    <ul class="news">
+      <li class="news__item">
+        <p class="news__where">BBC News
+          <time class="news__when" datetime="2026-10-20">20 October 2026</time></p>
+        <h3 class="news__head">&ldquo;Band reforms in grief after both members&rsquo; sons die in car crashes&rdquo;</h3>
+        <p class="news__blurb">The BBC came to Lerryn and told it properly: two
+          next-door neighbours, two sons lost in separate crashes, and the band
+          the pair of them started again.</p>
+        <a class="btn news__go" href="https://www.bbc.co.uk/news/articles/ck7vp79lj6ggo"
+           target="_blank" rel="noopener">Read it on BBC News<span class="news__out" aria-hidden="true">&#8599;</span><span class="sr-only"> (opens the BBC website in a new tab)</span></a>
+      </li>
+
+      <li class="news__item">
+        <p class="news__where">Facebook</p>
+        <h3 class="news__head">The clip</h3>
+        <p class="news__blurb">The filmed version of the story, shared on
+          Facebook. Facebook may ask you to sign in before it will play it.</p>
+        <a class="btn news__go" href="https://www.facebook.com/share/r/19DRNcpQ4e/"
+           target="_blank" rel="noopener">Watch it on Facebook<span class="news__out" aria-hidden="true">&#8599;</span><span class="sr-only"> (opens Facebook in a new tab)</span></a>
+      </li>
+    </ul>
+  </div>
+</section>
+
 <section class="sec sec--live" id="live">
   <div class="wrap">
     <p class="eyebrow">On the road</p>
@@ -762,6 +806,13 @@
   "sameAs": [
     "https://www.facebook.com/profile.php?id=61584241187858"
   ],
+  "subjectOf": {
+    "@type": "NewsArticle",
+    "headline": "Band reforms in grief after both members' sons die in car crashes",
+    "url": "https://www.bbc.co.uk/news/articles/ck7vp79lj6ggo",
+    "datePublished": "2026-10-20",
+    "publisher": { "@type": "Organization", "name": "BBC News" }
+  },
   "member": [
     { "@type": "Person", "name": "Darren Endean" },
     { "@type": "Person", "name": "Andrew Boraston" }

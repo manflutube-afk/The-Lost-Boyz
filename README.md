@@ -474,6 +474,42 @@ pages rather than built by JavaScript, so it is there with the scripts off and
 a search engine can read it. Change one, change all five — searching for
 `sec--tip` finds them.
 
+### In the news
+
+A section on the home page (`#news`), between Our Story and Live Dates, holding
+the press coverage. There is an **In the news** button in the hero and a **News**
+entry in the nav, both pointing at it.
+
+**Neither link can be shown inside the page, and that is not for want of
+trying.** It was asked for and it is not possible:
+
+- The BBC article answers with `x-frame-options: DENY` and
+  `frame-ancestors 'none'`. That is the BBC deliberately refusing to be put in
+  anybody's page, and there is no way round it from this end.
+- Facebook's own video plugin returns "Video unavailable" for that reel, with
+  the reel address, the share address and the watch address alike. Reels are
+  generally not embeddable, and this one also asks for a login before it will
+  play at all.
+
+So the section does the next best thing: it says what each piece is, in our own
+words, and the link out is honest about being a link out — an arrow on the
+button and "opens in a new tab" on the end of the label for a screen reader.
+Nobody presses it expecting to stay put.
+
+**The BBC's words are theirs.** Their headline is quoted, in quote marks, and
+credited to them; everything else in the card is written here. Do not paste the
+article text in — it is not ours to publish, and a summary in our own words is
+worth more to a search engine anyway.
+
+The band is also marked as `subjectOf` that article in the home page's
+structured data, which is the schema.org way of saying "this group is what that
+piece is about".
+
+**Adding another one later** is a copy of one `<li class="news__item">`: the
+outlet, an optional `<time>`, the headline, a line or two of your own, and the
+link. Two across on a wide screen, stacked on a phone, and the buttons line up
+at the foot of the cards however long the words above them run.
+
 ### Adding a sponsor
 
 The Sponsors page is at `/sponsors`. Add businesses in `public/data/sponsors.json`:

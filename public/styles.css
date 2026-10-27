@@ -572,6 +572,9 @@ body.nav-open { overflow: hidden; }
  */
 .sec--music   { background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%); }
 .sec--band    { background: var(--ink-2); }
+/* --ink-2 at both ends: Our Story finishes on it and Live Dates starts on
+   it, so slotting News between the two leaves that run undisturbed. */
+.sec--news    { background: var(--ink-2); border-top: 1px solid var(--line); }
 .sec--live    { background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%); }
 .sec--booking { background: var(--ink); }
 .sec--reelz   { background: linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%); }
@@ -2619,6 +2622,77 @@ body.nav-open { overflow: hidden; }
 }
 
 /* ---------------- Footer ---------------- */
+
+/* ---------------- In the news ---------------- */
+
+/*
+ * Cards for coverage of the band that lives on somebody else's website.
+ *
+ * Neither the BBC article nor the Facebook reel can be shown inside this page
+ * -- the BBC sends frame-ancestors 'none' and Facebook's plugin will not carry
+ * a reel -- so these do the next best thing: say what the piece is, in our own
+ * words, and make the link out honest about being a link out. The arrow and
+ * the "opens in a new tab" on the end of the label are there so nobody presses
+ * it expecting to stay put.
+ */
+.news {
+  display: grid;
+  gap: 1rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 760px) {
+  .news { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+}
+
+.news__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.3rem 1.4rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.news__where {
+  margin: 0 0 .5rem;
+  font-family: var(--f-display);
+  font-size: .76rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+/* the date, quieter than the outlet it sits beside */
+.news__when { color: var(--muted); letter-spacing: .12em; }
+.news__when::before { content: "·"; margin: 0 .45rem 0 .3rem; color: var(--violet-dim); }
+
+.news__head {
+  margin: 0 0 .6rem;
+  font-family: var(--f-display);
+  font-size: 1.14rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: .01em;
+  color: var(--bone);
+}
+
+.news__blurb {
+  /* pushes the button to the foot of the card, so two cards side by side line
+     their buttons up however long the words above them run */
+  flex: 1 1 auto;
+  margin: 0 0 1.1rem;
+  font-size: .94rem;
+  color: var(--text);
+}
+
+.news__go { align-self: flex-start; }
+
+/* the arrow that says this one leaves the site */
+.news__out { margin-left: .5rem; font-size: .9em; }
 
 /* ---------------- The Kernow Pages tip panel ---------------- */
 
